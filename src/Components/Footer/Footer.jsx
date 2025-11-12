@@ -17,16 +17,22 @@ function Footer() {
             <li><a href="/">Home</a></li>
             <li><a href="/about">About</a></li>
             <li><a href="/contact">Contact</a></li>
-            <li><a href="/start">Start Quiz</a></li>
+            <li><a href="/quiz">Start Quiz</a></li>
           </ul>
         </div>
 
         <div className="footer-right">
           <h4>Follow Us</h4>
           <div className="socials">
-            <a href="#"><FontAwesomeIcon icon={faFacebookF} /></a>
-            <a href="#"><FontAwesomeIcon icon={faTwitter} /></a>
-            <a href="#"><FontAwesomeIcon icon={faInstagram} /></a>
+            <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+              <FontAwesomeIcon icon={faFacebookF} />
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+              <FontAwesomeIcon icon={faTwitter} />
+            </a>
+            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <FontAwesomeIcon icon={faInstagram} />
+            </a>
           </div>
         </div>
       </div>

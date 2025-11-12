@@ -7,6 +7,7 @@ import Page3 from "./Components/Page3/Page3.jsx";
 import Page4 from "./Components/Page4/Page4.jsx";
 import Footer from "./Components/Footer/Footer.jsx";
 import QuizPage from "./Components/QuizPage/QuizPage.jsx";
+import Contact from "./Components/ContactUs/Contact.jsx";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             }
           />
           <Route path="/quiz" element={<QuizPage />} />
+          <Route path="/contact" element={<Contact />} />
         </Routes>
       </Router>
     </div>

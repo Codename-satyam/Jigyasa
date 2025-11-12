@@ -1,38 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "./QuizPage.css";
+import { fetchQuiz, fetchCategories } from "../../api/quizApi";
 
-const questions = [
-  {
-    question: "What is the capital of France?",
-    options: ["Berlin", "Madrid", "Paris", "Lisbon"],
-    answer: "Paris",
-  },
-  {
-    question: "Which language runs in a web browser?",
-    options: ["Java", "C", "Python", "JavaScript"],
-    answer: "JavaScript",
-  },
-  {
-    question: "Who developed React?",
-    options: ["Google", "Microsoft", "Facebook", "Twitter"],
-    answer: "Facebook",
-  },
-  {
-    question: "What does CSS stand for?",
-    options: [
-      "Colorful Style Sheets",
-      "Cascading Style Sheets",
-      "Creative Style Sheets",
-      "Computer Style Sheets",
-    ],
-    answer: "Cascading Style Sheets",
-  },
-];
-
-const LoadingPage = () => {
+// 🌀 Simple loading component
+const LoadingPage = ({ text = "Loading Quiz..." }) => {
   return (
     <div className="loading-screen pixelify-sans-font">
-      <div className="loader-text">Loading Quiz...</div>
+      <div className="loader-text">{text}</div>
       <div className="loading-bar">
         <div className="progress"></div>
       </div>
@@ -41,19 +15,48 @@ const LoadingPage = () => {
 };
 
 function QuizPage() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);
+  const [error, setError] = useState(null);
+
+  const [amount, setAmount] = useState(5);
+  const [difficulty, setDifficulty] = useState("easy");
+  const [categoryId, setCategoryId] = useState(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000);
-    return () => clearTimeout(timer);
+    // Load categories once
+    let mounted = true;
+    fetchCategories().then((cats) => {
+      if (!mounted) return;
+      setCategories(cats);
+    });
+    return () => (mounted = false);
   }, []);
 
+  const startQuiz = async () => {
+    setLoading(true);
+    setError(null);
+    setShowScore(false);
+    setCurrentQuestion(0);
+    setScore(0);
+    try {
+      const qs = await fetchQuiz({ amount, category: categoryId, difficulty });
+      setQuestions(qs);
+    } catch (e) {
+      setError("Failed to load questions. Using local questions.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleAnswer = (option) => {
-    if (option === questions[currentQuestion].answer) {
-      setScore(score + 1);
+    if (!questions[currentQuestion]) return;
+    if (option === questions[currentQuestion].correct_answer) {
+      setScore((s) => s + 1);
     }
     const next = currentQuestion + 1;
     if (next < questions.length) {
@@ -69,25 +72,62 @@ function QuizPage() {
     setShowScore(false);
   };
 
-  if (loading) {
-    return <LoadingPage />;
-  }
-
   return (
     <div className="quiz-page">
       <div className="quiz-box pixelify-sans-font">
-        {!showScore ? (
+        <div className="quiz-controls">
+          <label>
+            Amount:
+            <input
+              type="number"
+              min={1}
+              max={20}
+              value={amount}
+              onChange={(e) => setAmount(Number(e.target.value))}
+            />
+          </label>
+
+          <label>
+            Difficulty:
+            <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </label>
+
+          <label>
+            Category:
+            <select value={categoryId || ""} onChange={(e) => setCategoryId(e.target.value || null)}>
+              <option value="">Any</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <button onClick={startQuiz} className="start-btn">
+            Start Quiz
+          </button>
+        </div>
+
+        {loading ? (
+          <LoadingPage />
+        ) : error ? (
+          <div className="error">{error}</div>
+        ) : questions.length === 0 ? (
+          <div className="welcome">
+            <h2>Welcome to Quizy!</h2>
+            <p>Choose options above and press Start Quiz to fetch kid-friendly questions.</p>
+          </div>
+        ) : !showScore ? (
           <>
-            <h2 className="question">
-              {questions[currentQuestion].question}
-            </h2>
+            <h2 className="question">{questions[currentQuestion].question}</h2>
             <div className="options">
               {questions[currentQuestion].options.map((option, index) => (
-                <button
-                  key={index}
-                  className="option-btn"
-                  onClick={() => handleAnswer(option)}
-                >
+                <button key={index} className="option-btn" onClick={() => handleAnswer(option)}>
                   {option}
                 </button>
               ))}
@@ -98,7 +138,9 @@ function QuizPage() {
           </>
         ) : (
           <div className="score-section">
-            <h2>Your Score: {score}/{questions.length}</h2>
+            <h2>
+              Your Score: {score}/{questions.length}
+            </h2>
             <button className="restart-btn" onClick={handleRestart}>
               Play Again
             </button>

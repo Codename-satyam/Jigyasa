@@ -43,14 +43,8 @@ const Landing = () => {
       <img src={background} alt="Background" className="background-image" />
 
       <div className="button">
-        <img
-          src={button}
-          alt="Start Quiz"
-          className="start-quiz-image"
-          onClick={handleStartClick}
-        />
+        <img src={button} alt="Start Quiz" className="start-quiz-image" onClick={handleStartClick} />
       </div>
-
       <div className="gear-image-container">
         <img src={gear2} alt="Gear" className="gear-image" />
       </div>

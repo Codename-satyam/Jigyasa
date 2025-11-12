@@ -50,7 +50,7 @@ function Page2() {
         </div>
 
         <div className="buttons">
-          <a href="/enter-name" className="button2">Start Quiz</a>
+          <a href="/quiz" className="button2">Start Quiz</a>
           <a href="#contact" className="button3">Contact Us</a>
         </div>
       </div>

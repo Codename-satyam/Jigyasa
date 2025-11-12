@@ -1,131 +1,276 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root{
+  --neon-cyan: #00ffff;
+  --neon-magenta: #ff00ff;
+  --bg-dark-1: #000000;
+  --bg-dark-2: #0b0b0d;
+  --card-bg: rgba(0,0,0,0.75);
+  --accent-text: #e6f9ff;
+  --muted: #bfc7cc;
+}
+
 .quiz-page {
-  height: 100vh;
+  min-height: 100vh;
   width: 100%;
-  background: radial-gradient(circle, #000 70%, #111 100%);
+  background: radial-gradient(circle at 10% 10%, #050505 0%, var(--bg-dark-1) 40%, var(--bg-dark-2) 100%);
   display: flex;
   justify-content: center;
   align-items: center;
-  color: white;
+  color: var(--accent-text);
+  padding: 32px;
+  box-sizing: border-box;
+  font-family: "Press Start 2P", monospace;
 }
 
 .quiz-box {
-  border: 3px solid #00ffff;
-  box-shadow: 4px 4px 0 #ff00ff;
-  padding: 40px;
+  border: 3px solid var(--neon-cyan);
+  box-shadow: 8px 8px 0 var(--neon-magenta);
+  padding: 28px;
   border-radius: 16px;
-  width: 500px;
+  width: 100%;
+  max-width: 720px;
   text-align: center;
-  background: rgba(0, 0, 0, 0.8);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)), var(--card-bg);
+  backdrop-filter: blur(6px) saturate(120%);
+}
+
+.quiz-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+  font-family: "Press Start 2P", monospace;
+}
+
+.quiz-controls label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.quiz-controls input[type="number"],
+.quiz-controls select {
+  appearance: none;
+  background: transparent;
+  color: var(--accent-text);
+  border: 2px solid rgba(255,255,255,0.06);
+  padding: 8px 10px;
+  border-radius: 8px;
+  min-width: 120px;
+  outline: none;
+  transition: box-shadow .18s ease, border-color .18s ease;
+  font-family: "Press Start 2P", monospace;
+  font-size: 0.6rem;
+}
+
+.quiz-controls input[type="number"]:focus,
+.quiz-controls select:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 18px rgba(0,255,255,0.08);
+}
+
+.start-btn {
+  padding: 10px 18px;
+  background: linear-gradient(90deg, rgba(0,255,255,0.06), rgba(255,0,255,0.04));
+  color: var(--accent-text);
+  border: 2px solid var(--neon-magenta);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  font-family: "Press Start 2P", monospace;
+  font-size: 0.7rem;
+}
+
+.start-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 25px rgba(255,0,255,0.3), 0 0 25px rgba(0,255,255,0.3);
+  background: linear-gradient(90deg, rgba(255,0,255,0.08), rgba(0,255,255,0.06));
 }
 
 .question {
-  font-size: 1.8rem;
-  margin-bottom: 20px;
+  font-size: 1rem;
+  margin: 16px 0 22px;
+  line-height: 1.5;
+  color: var(--accent-text);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
 }
 
 .options {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .option-btn {
-  font-family: "Pixelify Sans", sans-serif;
-  background: transparent;
-  color: white;
-  border: 2px solid #00ffff;
-  padding: 10px;
-  font-size: 1.2rem;
-  border-radius: 10px;
+  font-family: "Press Start 2P", monospace;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+  color: var(--accent-text);
+  border: 2px solid rgba(0,255,255,0.12);
+  padding: 12px 14px;
+  font-size: 0.7rem;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform .12s ease, background .12s ease, box-shadow .12s ease, border-color .12s ease;
+  text-align: center;
 }
 
-.option-btn:hover {
-  background: #ff00ff;
+.option-btn:hover,
+.option-btn:focus {
+  transform: translateY(-3px);
+  background: linear-gradient(90deg, rgba(255,0,255,0.06), rgba(0,255,255,0.04));
+  box-shadow: 0 6px 24px rgba(0,255,255,0.04);
+  border-color: var(--neon-cyan);
+  outline: none;
+}
+
+.option-btn.selected {
+  background: linear-gradient(90deg, rgba(0,255,255,0.08), rgba(255,0,255,0.06));
+  border-color: var(--neon-cyan);
   color: black;
-  box-shadow: 0 0 15px #00ffff;
+}
+
+.option-btn.correct {
+  background: linear-gradient(90deg, rgba(0,255,255,0.16), rgba(0,255,255,0.08));
+  border-color: rgba(0,200,150,0.9);
+  color: black;
+}
+
+.option-btn.wrong {
+  background: linear-gradient(90deg, rgba(255,0,255,0.12), rgba(255,0,255,0.04));
+  border-color: rgba(200,0,120,0.9);
+  color: black;
 }
 
 .progress {
-  margin-top: 15px;
-  font-size: 1rem;
-  color: #ccc;
+  margin-top: 14px;
+  font-size: 0.6rem;
+  color: var(--muted);
 }
 
 .score-section {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 12px;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  font-family: "Press Start 2P", monospace;
 }
 
 .restart-btn {
-  font-family: "Pixelify Sans", sans-serif;
-  margin-top: 20px;
-  padding: 10px 20px;
+  font-family: "Press Start 2P", monospace;
+  margin-top: 18px;
+  padding: 10px 22px;
   background: transparent;
-  color: white;
-  border: 2px solid #ff00ff;
+  color: var(--accent-text);
+  border: 2px solid var(--neon-magenta);
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.18s ease;
+  font-size: 0.7rem;
 }
 
 .restart-btn:hover {
-  background: #00ffff;
+  background: linear-gradient(90deg, rgba(0,255,255,0.06), rgba(255,0,255,0.04));
   color: black;
-  box-shadow: 0 0 15px #ff00ff;
+  box-shadow: 0 0 25px rgba(255,0,255,0.3);
 }
 
-
 .loading-screen {
-  height: 100vh;
+  height: 60vh;
   width: 100%;
-  background: radial-gradient(circle, #000 70%, #111 100%);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: #00ffff;
-  text-shadow: 2px 2px 0 #ff00ff;
-  font-size: 2rem;
+  color: var(--neon-cyan);
+  text-shadow: 2px 2px 0 var(--neon-magenta);
+  font-size: 1rem;
+  font-family: "Press Start 2P", monospace;
 }
 
 .loader-text {
-  margin-bottom: 30px;
+  margin-bottom: 22px;
   animation: flicker 1.5s infinite;
+  font-weight: 700;
 }
 
 .loading-bar {
   width: 300px;
-  height: 20px;
-  border: 3px solid #00ffff;
-  box-shadow: 2px 2px 0 #ff00ff;
+  height: 14px;
+  border: 3px solid var(--neon-cyan);
+  box-shadow: 4px 4px 0 var(--neon-magenta);
   border-radius: 10px;
   overflow: hidden;
+  background: rgba(255,255,255,0.02);
 }
 
-.progress {
+.loading-screen .progress {
   width: 0%;
   height: 100%;
-  background: linear-gradient(90deg, #ff00ff, #00ffff);
+  background: linear-gradient(90deg, var(--neon-magenta), var(--neon-cyan));
   animation: loading 2s linear forwards;
 }
 
-@keyframes loading {
-  0% {
-    width: 0%;
-  }
-  100% {
-    width: 100%;
-  }
+.quiz-controls select {
+  appearance: none; 
+  background-color: rgba(0, 0, 0, 0.7);
+  color: var(--neon-cyan); 
+  border: 2px solid var(--neon-cyan);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 0.6rem;
+  cursor: pointer;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.quiz-controls select:hover,
+.quiz-controls select:focus {
+  background-color: rgba(0, 255, 255, 0.15);
+  box-shadow: 0 0 10px var(--neon-cyan);
+  outline: none;
+  color: #fff;
 }
 
+.quiz-controls select::-ms-expand {
+  display: none; 
+}
+
+/* Optional: Add a custom arrow using a pseudo-element */
+.quiz-controls select {
+  background-image: linear-gradient(45deg, var(--neon-magenta) 50%, transparent 50%),
+                    linear-gradient(135deg, var(--neon-magenta) 50%, transparent 50%);
+  background-position: calc(100% - 18px) center, calc(100% - 12px) center;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 25px;
+}
+
+
+
+
+/* Animations */
+@keyframes loading {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
 @keyframes flicker {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.4;
-  }
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .quiz-box { padding: 20px; width: 92%; max-width: 520px; }
+  .question { font-size: 0.9rem; }
+  .option-btn { font-size: 0.65rem; padding: 10px; }
+  .quiz-controls { gap: 8px; align-items: stretch; }
+  .quiz-controls label { font-size: 0.7rem; }
+  .loading-bar { width: 240px; }
 }
