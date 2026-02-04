@@ -9,14 +9,6 @@
   background: #120530;
   font-family: "Pixelify Sans", sans-serif;
 }
-.dashboard-root {
-  min-height: 100vh; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 36px 12px;
-  background: #120530; 
-}
 
 
 .dashboard-controls{

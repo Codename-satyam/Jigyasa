@@ -132,21 +132,21 @@
 }
 
 .option-btn.selected {
-  background: linear-gradient(90deg, rgba(0,255,255,0.08), rgba(255,0,255,0.06));
+  background: linear-gradient(90deg, rgba(0,255,255,0.2), rgba(255,0,255,0.15));
   border-color: var(--neon-cyan);
-  color: black;
+  color: var(--neon-cyan);
 }
 
 .option-btn.correct {
-  background: linear-gradient(90deg, rgba(0,255,255,0.16), rgba(0,255,255,0.08));
+  background: linear-gradient(90deg, rgba(0,255,255,0.3), rgba(0,255,255,0.2));
   border-color: rgba(0,200,150,0.9);
-  color: black;
+  color: #00ff88;
 }
 
 .option-btn.wrong {
-  background: linear-gradient(90deg, rgba(255,0,255,0.12), rgba(255,0,255,0.04));
+  background: linear-gradient(90deg, rgba(255,0,255,0.25), rgba(255,0,100,0.15));
   border-color: rgba(200,0,120,0.9);
-  color: black;
+  color: #ff4d8f;
 }
 
 .progress {
@@ -179,9 +179,10 @@
 }
 
 .restart-btn:hover {
-  background: linear-gradient(90deg, rgba(0,255,255,0.06), rgba(255,0,255,0.04));
-  color: black;
+  background: linear-gradient(90deg, rgba(0,255,255,0.15), rgba(255,0,255,0.12));
+  color: var(--accent-text);
   box-shadow: 0 0 25px rgba(255,0,255,0.3);
+  transform: translateY(-2px);
 }
 
 .loading-screen {
@@ -237,7 +238,7 @@
   background-color: rgba(0, 255, 255, 0.15);
   box-shadow: 0 0 10px var(--neon-cyan);
   outline: none;
-  color: #fff;
+  color: var(--accent-text);
 }
 
 .quiz-controls select::-ms-expand {

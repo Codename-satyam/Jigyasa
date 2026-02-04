@@ -1,4 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
+import Settings from "./Components/Settings/Settings.jsx";
 import Landing from "./Components/LandingPage/Landing.jsx";
 import HomePage from "./Components/HomePage/Page1/HomePage.jsx";
 import Navbar from "./Components/Navbar/Navbar.jsx";
@@ -17,111 +19,147 @@ import Register from "./Components/Login/Register.jsx";
 import ProtectedRoute from "./Components/Auth/ProtectedRoute.jsx";
 import Games from "./Components/Play/Games/Games.jsx";
 import Notes from "./Components/Play/Notes/Notes.jsx";
+import MemoryGame from "./Components/Play/Games/g1/game1.jsx";
+import Guessgame from "./Components/Play/Games/g2/g2.jsx";
+import PageTransition from "./Components/PageTransition.jsx";
 
-function App() {
+function AnimatedRoutes() {
+  const location = useLocation();
+
   return (
-    <div className="App">
-      <Router>
-        <Routes>
-          <Route path="/" element={<Landing />} />
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
+          <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
           <Route
             path="/home"
             element={
-              <>
+              <PageTransition>
                 <Navbar />
                 <HomePage />
                 <Page2 />
                 <Page3 />
                 <Page4 />
                 <Footer />
-              </>
+              </PageTransition>
             }
           />
           <Route
             path="/quiz"
             element={
               <ProtectedRoute>
-                <Navbar />
-                <QuizPage />
-                <Footer />
+                <PageTransition>
+                  <Navbar />
+                  <QuizPage />
+                  <Footer />
+                </PageTransition>
               </ProtectedRoute>
             }
           />
           <Route
             path="/play"
             element={
-              <>
+              <PageTransition>
                 <Navbar />
                 <PlayLanding />
                 <Footer />
-              </>
+              </PageTransition>
             }
           />
           <Route
             path="/contact"
             element={
-              <>
+              <PageTransition>
                 <Navbar />
                 <Contact />
                 <Footer />
-              </>
+              </PageTransition>
             }
           />
           <Route
             path="/videos"
             element={
               <ProtectedRoute>
-                <Navbar />
-                <Videos />
+                <PageTransition>
+                  <Navbar />
+                  <Videos />
+                </PageTransition>
               </ProtectedRoute>
             }
           />
           <Route
             path="/games"
             element={
-              <>
+              <PageTransition>
                 <Navbar />
                 <Games />
                 <Footer />
-              </>
+              </PageTransition>
             }
           />
           <Route
+            path="/play/games/g1"
+            element={
+              <PageTransition>
+                <Navbar />
+                <MemoryGame />
+                <Footer />
+              </PageTransition>
+            }
+          />
+          <Route path="/play/games/g2" element={
+            <PageTransition>
+              <Navbar />
+              <Guessgame/>
+              <Footer />
+            </PageTransition>
+          }/>
+          <Route
             path="/notes"
             element={
-              <>
+              <PageTransition>
                 <Navbar />
                 <Notes />
                 <Footer />
-              </>
+              </PageTransition>
             }
           />
           <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Navbar />
-                <Dashboard />
-                <Footer />
+                <PageTransition>
+                  <Navbar />
+                  <Dashboard />
+                  <Footer />
+                </PageTransition>
               </ProtectedRoute>
             }
           />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+          <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
           <Route
             path="/about"
             element={
-              <>
+              <PageTransition>
                 <Navbar />
                 <About />
                 <Footer />
-              </>
+              </PageTransition>
             }
           />
         </Routes>
-      </Router>
-    </div>
-  );
-}
+      </AnimatePresence>
+    );
+  }
 
+  function App() {
+    return (
+      <div className="App">
+        <Router>
+          <AnimatedRoutes />
+        </Router>
+      </div>
+    );
+  }
 export default App;

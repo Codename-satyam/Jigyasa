@@ -67,10 +67,10 @@ function About() {
 
                     <div className="about-action-buttons">
                         <div className="about-action a" onClick={scrollUp}>
-                            A
+                            X
                         </div>
                         <div className="about-action b" onClick={scrollDown}>
-                            B
+                            Y
                         </div>
                     </div>
                 </div>
