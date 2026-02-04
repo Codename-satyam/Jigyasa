@@ -4,8 +4,9 @@ import { Link } from 'react-router-dom';
 import { FaFilm, FaStickyNote, FaGamepad, FaQuestionCircle } from 'react-icons/fa';
 
 function PlayLanding() {
-    const [quote, setQuote] = useState('Choose an activity to have fun and learn');
-
+    const [quote, setQuote] = useState("");
+    const [typing, setTyping] = useState("");
+        
     useEffect(() => {
         let mounted = true;
         const localQuotes = [
@@ -29,14 +30,33 @@ function PlayLanding() {
         if (mounted) {
             const q = localQuotes[Math.floor(Math.random() * localQuotes.length)];
             setQuote(q);
+            setTyping(""); 
         }
+
         return () => { mounted = false; };
     }, []);
+
+    useEffect(() => {
+        if (!quote) return;
+
+        let index = -1;
+        const interval = setInterval(() => {
+            setTyping(prev => prev + quote.charAt(index));
+            index++;
+
+            if (index >= quote.length) {
+                clearInterval(interval);
+            }
+        }, 30);
+
+        return () => clearInterval(interval);
+    }, [quote]);
+
     return (
         <div className="play-landing">
             <header className="pl-header">
                 <h1 className="pl-title">Play</h1>
-                <p className="pl-sub"> "{quote}"</p>
+                <p className="pl-sub"> "{typing}"</p>
             </header>
 
             <div className="pl-grid">

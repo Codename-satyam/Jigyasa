@@ -51,7 +51,6 @@ function AnimatedRoutes() {
                 <PageTransition>
                   <Navbar />
                   <QuizPage />
-                  <Footer />
                 </PageTransition>
               </ProtectedRoute>
             }
@@ -62,7 +61,6 @@ function AnimatedRoutes() {
               <PageTransition>
                 <Navbar />
                 <PlayLanding />
-                <Footer />
               </PageTransition>
             }
           />
@@ -72,7 +70,6 @@ function AnimatedRoutes() {
               <PageTransition>
                 <Navbar />
                 <Contact />
-                <Footer />
               </PageTransition>
             }
           />
@@ -81,8 +78,8 @@ function AnimatedRoutes() {
             element={
               <ProtectedRoute>
                 <PageTransition>
-                  <Navbar />
-                  <Videos />
+                  <Navbar/>
+                  <Videos/>
                 </PageTransition>
               </ProtectedRoute>
             }
@@ -93,7 +90,6 @@ function AnimatedRoutes() {
               <PageTransition>
                 <Navbar />
                 <Games />
-                <Footer />
               </PageTransition>
             }
           />
@@ -103,7 +99,6 @@ function AnimatedRoutes() {
               <PageTransition>
                 <Navbar />
                 <MemoryGame />
-                <Footer />
               </PageTransition>
             }
           />
@@ -111,7 +106,6 @@ function AnimatedRoutes() {
             <PageTransition>
               <Navbar />
               <Guessgame/>
-              <Footer />
             </PageTransition>
           }/>
           <Route
@@ -120,7 +114,6 @@ function AnimatedRoutes() {
               <PageTransition>
                 <Navbar />
                 <Notes />
-                <Footer />
               </PageTransition>
             }
           />
@@ -131,7 +124,6 @@ function AnimatedRoutes() {
                 <PageTransition>
                   <Navbar />
                   <Dashboard />
-                  <Footer />
                 </PageTransition>
               </ProtectedRoute>
             }
@@ -144,7 +136,6 @@ function AnimatedRoutes() {
               <PageTransition>
                 <Navbar />
                 <About />
-                <Footer />
               </PageTransition>
             }
           />

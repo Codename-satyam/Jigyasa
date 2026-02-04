@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import Card from "./Card";
 import "./game1.css";
 
+
+const sounds = {
+    match: new Audio(require('./sounds/match.mp3')),
+    noMatch: new Audio(require('./sounds/not-match.mp3')),
+    select: new Audio(require('./sounds/select.mp3')),
+}
+
 const levelConfig = {
     easy: {
         pairs: 4,
@@ -68,6 +75,7 @@ function MemoryGame() {
     const handleChoice = (card) => {
         if (!disabled && !card.matched && card !== firstChoice) {
             firstChoice ? setSecondChoice(card) : setFirstChoice(card);
+            sounds.select.play();
         }
     };
 
@@ -84,8 +92,10 @@ function MemoryGame() {
                     )
                 );
                 setScore(prev => prev + 1);
+                sounds.match.play();
                 resetTurn();
             } else {
+                sounds.noMatch.play();
                 setTimeout(resetTurn, 700);
             }
         }
@@ -165,7 +175,7 @@ function MemoryGame() {
                             <h3>STAGE CLEAR</h3>
                             <p>TURNS: {turns}</p>
                             <p>{resultText}</p>
-                            <button className="button" onClick={() => shuffleCards(difficulty)}>RESTART</button>
+                            <button className="res-but" onClick={() => shuffleCards(difficulty)}>RESTART</button>
                         </div>
                     </div>
                 )}

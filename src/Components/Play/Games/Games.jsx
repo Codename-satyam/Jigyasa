@@ -81,8 +81,8 @@ function Games() {
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate("/play/games/g2")}
           >
-            ❌⭕ Tic Tac Toe
-            <span>Classic strategy battle</span>
+            Guess the Guy
+            <span>Who do you think is behind ?</span>
           </motion.button>
 
           <motion.button

@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
+
+
 /* ---------- GLOBAL CONTAINER ---------- */
 
 .play-landing {
@@ -44,10 +47,11 @@
 
 .pl-sub {
   color: #8fbfff;
-  font-size: 16px;
+  font-size: 20px;
   text-shadow: 0px 0px 5px #3366ff;
   max-width: 60%;
   margin: 0 auto;
+  font-family:'Bungee', cursive;
 }
 
 /* ---------- GRID ---------- */
@@ -111,4 +115,15 @@
   letter-spacing: 1px;
   color: #b59dff; /* soft purple */
   text-shadow: 0px 0px 6px #7a22ff;
+}
+
+.pl-sub::after {
+    content: "|";
+    margin-left: 4px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50%, 100% { opacity: 1; }
+    25%, 75% { opacity: 0; }
 }
