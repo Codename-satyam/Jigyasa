@@ -73,3 +73,43 @@
     width: 100%;
   }
 }
+
+@media (max-width: 768px) {
+  .page4 {
+    padding: 40px 30px;
+  }
+
+  .left1 h2 {
+    font-size: 1.8rem;
+  }
+
+  .right1 h3 {
+    font-size: 1.7rem;
+  }
+
+  .right1 p {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page4 {
+    padding: 30px 15px;
+  }
+
+  .left1, .right1 {
+    padding: 25px;
+  }
+
+  .left1 h2 {
+    font-size: 1.5rem;
+  }
+
+  .right1 h3 {
+    font-size: 1.4rem;
+  }
+
+  .right1 p {
+    font-size: 1rem;
+  }
+}

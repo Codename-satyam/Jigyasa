@@ -127,3 +127,65 @@
     0%, 50%, 100% { opacity: 1; }
     25%, 75% { opacity: 0; }
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .play-landing {
+    padding: 30px 12px;
+  }
+
+  .pl-title {
+    font-size: 8vh;
+  }
+
+  .pl-sub {
+    font-size: 16px;
+    max-width: 80%;
+  }
+
+  .pl-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 18px;
+  }
+
+  .pl-card {
+    padding: 16px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .play-landing {
+    padding: 20px 8px;
+  }
+
+  .pl-header {
+    margin-bottom: 30px;
+  }
+
+  .pl-title {
+    font-size: 6vh;
+  }
+
+  .pl-sub {
+    font-size: 14px;
+    max-width: 90%;
+  }
+
+  .pl-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 8px;
+  }
+
+  .pl-card {
+    padding: 14px 8px;
+  }
+
+  .pl-icon {
+    font-size: 32px;
+  }
+
+  .pl-label {
+    font-size: 11px;
+  }
+}

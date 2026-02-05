@@ -63,3 +63,20 @@ body{background:var(--bg)}
 	.container{width:92%}
 	.container-mail{display:none}
 }
+
+@media(max-width:600px){
+	.container{padding:24px}
+	.title{font-size:22px}
+	.form__label{font-size:14px}
+	.form__input, .form__textarea{font-size:14px;padding:10px 12px}
+	.form__btn{padding:8px 14px;font-size:14px}
+}
+
+@media(max-width:480px){
+	.contact-root{padding:20px 10px}
+	.container{padding:20px}
+	.title{font-size:20px}
+	.form__label{font-size:13px}
+	.form__input, .form__textarea{font-size:13px;padding:8px 10px}
+	.form__btn{padding:8px 12px;font-size:13px}
+}

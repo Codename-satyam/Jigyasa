@@ -3,6 +3,9 @@ import "./QuizPage.css";
 import { fetchQuiz, fetchCategories } from "../../../api/quizApi";
 import auth from "../../../api/auth";
 import { addScore } from "../../../api/scores";
+import QuizBackground3D from "./QuizBackground3D";
+import Navbar from "../../Navbar/Navbar";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 
 const LoadingPage = ({ text = "Loading Quiz..." }) => {
@@ -17,6 +20,14 @@ const LoadingPage = ({ text = "Loading Quiz..." }) => {
 };
 
 function QuizPage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  
+  // Get parameters from URL query string
+  const urlCategory = searchParams.get("category") || null;
+  const urlAmount = searchParams.get("amount") ? Number(searchParams.get("amount")) : 5;
+  const urlDifficulty = searchParams.get("difficulty") || "easy";
+  
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [questions, setQuestions] = useState([]);
@@ -26,9 +37,9 @@ function QuizPage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState(null);
 
-  const [amount, setAmount] = useState(5);
-  const [difficulty, setDifficulty] = useState("easy");
-  const [categoryId, setCategoryId] = useState(null);
+  const [amount, setAmount] = useState(urlAmount);
+  const [difficulty, setDifficulty] = useState(urlDifficulty);
+  const [categoryId, setCategoryId] = useState(urlCategory);
 
   useEffect(() => {
     // Load categories once
@@ -98,6 +109,7 @@ function QuizPage() {
 
   return (
     <div className="quiz-page">
+      <QuizBackground3D/>
       <div className="quiz-box pixelify-sans-font">
         <div className="quiz-controls">
           <label>
@@ -167,6 +179,7 @@ function QuizPage() {
         )}
       </div>
     </div>
+
   );
 }
 

@@ -76,23 +76,23 @@ function QuizGame() {
 
   if (showResult) {
     return (
-      <div className="quiz-game-page">
-        <div className="quiz-container result-container">
+      <div className="g2-game-page">
+        <div className="g2-container g2-result-container">
           <h2>🎉 Quiz Completed!</h2>
-          <p className="result-label">Final Score</p>
-          <h1 className="final-score">{score} / {quizData.length}</h1>
-          <button className="restart-btn" onClick={restartGame}>Play Again</button>
+          <p className="g2-result-label">Final Score</p>
+          <h1 className="g2-final-score">{score} / {quizData.length}</h1>
+          <button className="g2-restart-btn" onClick={restartGame}>Play Again</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="quiz-game-page">
-      <div className="quiz-container">
-        <div className="quiz-top">
+    <div className="g2-game-page">
+      <div className="g2-container">
+        <div className="g2-top">
           <span>Q {current + 1}/{quizData.length}</span>
-          <span className={`timer ${timeLeft <= 3 ? "danger" : ""}`}>
+          <span className={`g2-timer ${timeLeft <= 3 ? "danger" : ""}`}>
             ⏱ {timeLeft}s
           </span>
         </div>
@@ -100,16 +100,16 @@ function QuizGame() {
         <img
           src={question.image}
           alt="quiz"
-          className={`quiz-image ${reveal ? "reveal" : ""}`}
+          className={`g2-image ${reveal ? "reveal" : ""}`}
         />
 
-        <h3 className="quiz-question">{question.question}</h3>
+        <h3 className="g2-question">{question.question}</h3>
 
-        <div className="options">
+        <div className="g2-options">
           {question.options.map(option => (
             <button
               key={option}
-              className={`option-btn
+              className={`g2-option-btn
                 ${selected &&
                   (option === question.answer
                     ? "correct"
@@ -124,7 +124,7 @@ function QuizGame() {
           ))}
         </div>
 
-        <p className="score">Score: {score}</p>
+        <p className="g2-score">Score: {score}</p>
       </div>
     </div>
   );

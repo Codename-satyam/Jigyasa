@@ -179,6 +179,26 @@ function MemoryGame() {
                         </div>
                     </div>
                 )}
+                {/* D-Pad */}
+                <div className="b1">
+                    <div>↖</div>
+                    <div>↑</div>
+                    <div>↗</div>
+                    <div>←</div>
+                    <div></div>
+                    <div>→</div>
+                    <div>↙</div>
+                    <div>↓</div>
+                    <div>↘</div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="b2">
+                    <button>Y</button>
+                    <button>X</button>
+                    <button>B</button>
+                    <button>A</button>
+                </div>
             </div>
         </div>
     );

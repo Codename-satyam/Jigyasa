@@ -136,3 +136,26 @@
   .video-frame{height:420px}
   .thumb-img{width:120px;height:68px}
 }
+
+@media(max-width:768px){
+  .yt-root{padding:24px}
+  .player-card{padding:20px;padding-right:20px}
+  .video-frame{height:380px}
+  .current-info .now-label{font-size:14px}
+  .current-info .now-title{font-size:14px}
+  .sidebar-header{font-size:14px}
+}
+
+@media(max-width:480px){
+  .yt-root{padding:16px}
+  .yt-grid{gap:16px}
+  .player-card{padding:16px}
+  .video-frame{height:240px}
+  .current-info .now-label{font-size:12px}
+  .current-info .now-title{font-size:12px}
+  .sidebar-list{padding:10px}
+  .sidebar-header{font-size:12px}
+  .thumb-img{width:100px;height:56px}
+  .thumb-title{font-size:13px}
+  .pixel-btn{padding:6px 10px;font-size:11px}
+}

@@ -17,3 +17,22 @@
     justify-content: center;
     align-items: center;
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .settings-container{
+    max-width: 95%;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-page{
+    padding: 10px;
+  }
+
+  .settings-container{
+    max-width: 100%;
+    padding: 12px;
+  }
+}

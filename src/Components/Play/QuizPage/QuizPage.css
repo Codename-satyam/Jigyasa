@@ -13,7 +13,7 @@
 .quiz-page {
   min-height: 100vh;
   width: 100%;
-  background: radial-gradient(circle at 10% 10%, #050505 0%, var(--bg-dark-1) 40%, var(--bg-dark-2) 100%);
+  background: #000000;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -21,17 +21,32 @@
   padding: 32px;
   box-sizing: border-box;
   font-family: "Press Start 2P", monospace;
+  position: relative;
+  overflow: hidden;
+  padding-top: 120px;
+}
+
+.quiz-container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
 }
 .quiz-box {
   border: 3px solid var(--neon-cyan);
-  box-shadow: 8px 8px 0 var(--neon-magenta);
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.3), 8px 8px 0 var(--neon-magenta), inset 0 0 20px rgba(0, 255, 255, 0.1);
   padding: 28px;
   border-radius: 16px;
   width: 100%;
   max-width: 720px;
   text-align: center;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)), var(--card-bg);
-  backdrop-filter: blur(6px) saturate(120%);
+  background: linear-gradient(135deg, rgba(0, 20, 40, 0.9) 0%, rgba(20, 0, 40, 0.85) 100%);
+  backdrop-filter: blur(12px) saturate(150%);
+  animation: slideUp 0.6s ease-out;
+  border-left: 3px solid var(--neon-magenta);
 }
 
 .quiz-controls {
@@ -111,22 +126,39 @@
 
 .option-btn {
   font-family: "Press Start 2P", monospace;
-  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.08), rgba(255, 0, 255, 0.05));
   color: var(--accent-text);
-  border: 2px solid rgba(0,255,255,0.12);
+  border: 2px solid rgba(0, 255, 255, 0.3);
   padding: 12px 14px;
   font-size: 0.7rem;
   border-radius: 12px;
   cursor: pointer;
-  transition: transform .12s ease, background .12s ease, box-shadow .12s ease, border-color .12s ease;
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.option-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.option-btn:hover::before {
+  left: 100%;
 }
 
 .option-btn:hover,
 .option-btn:focus {
-  transform: translateY(-3px);
-  background: linear-gradient(90deg, rgba(255,0,255,0.06), rgba(0,255,255,0.04));
-  box-shadow: 0 6px 24px rgba(0,255,255,0.04);
+  transform: translateY(-4px) scale(1.02);
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(255, 0, 255, 0.1));
+  box-shadow: 0 8px 32px rgba(0, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   border-color: var(--neon-cyan);
   outline: none;
 }
@@ -263,12 +295,43 @@
   0% { width: 0%; }
   100% { width: 100%; }
 }
+
 @keyframes flicker {
   0%,100% { opacity: 1; }
   50% { opacity: 0.45; }
 }
 
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Responsive */
+@media (max-width: 768px) {
+  .quiz-page {
+    padding: 24px;
+  }
+
+  .quiz-box {
+    padding: 22px;
+  }
+
+  .question {
+    font-size: 0.95rem;
+  }
+
+  .quiz-controls input[type="number"],
+  .quiz-controls select {
+    min-width: 100px;
+  }
+}
+
 @media (max-width: 640px) {
   .quiz-box { padding: 20px; width: 92%; max-width: 520px; }
   .question { font-size: 0.9rem; }
@@ -276,4 +339,49 @@
   .quiz-controls { gap: 8px; align-items: stretch; }
   .quiz-controls label { font-size: 0.7rem; }
   .loading-bar { width: 240px; }
+}
+
+@media (max-width: 480px) {
+  .quiz-page {
+    padding: 16px;
+  }
+
+  .quiz-box {
+    padding: 16px;
+  }
+
+  .question {
+    font-size: 0.8rem;
+    margin: 12px 0 18px;
+  }
+
+  .option-btn {
+    font-size: 0.6rem;
+    padding: 8px 10px;
+  }
+
+  .quiz-controls input[type="number"],
+  .quiz-controls select {
+    min-width: 80px;
+    font-size: 0.55rem;
+    padding: 6px 8px;
+  }
+
+  .start-btn {
+    font-size: 0.6rem;
+    padding: 8px 14px;
+  }
+
+  .loading-bar {
+    width: 200px;
+  }
+
+  .score-section {
+    font-size: 0.7rem;
+  }
+
+  .restart-btn {
+    font-size: 0.6rem;
+    padding: 8px 18px;
+  }
 }

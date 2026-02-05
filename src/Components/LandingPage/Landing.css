@@ -82,3 +82,36 @@
     transform: translateY(-10px);
   }
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .start-quiz-image {
+    max-width: 60%;
+  }
+
+  .gear-image-container,
+  .note-image-container {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .start-quiz-image {
+    max-width: 70%;
+  }
+
+  .gear-image-container {
+    bottom: 10px;
+    left: 10px;
+    width: 60px;
+    height: 60px;
+  }
+
+  .note-image-container {
+    bottom: 10px;
+    right: 10px;
+    width: 60px;
+    height: 60px;
+  }
+}

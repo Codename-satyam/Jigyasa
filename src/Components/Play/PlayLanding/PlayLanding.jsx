@@ -75,7 +75,7 @@ function PlayLanding() {
                     <div className="pl-label">Games</div>
                 </Link>
 
-                <Link to="/quiz" className="pl-card" aria-label="Quiz">
+                <Link to="/play/quiz-select" className="pl-card" aria-label="Quiz">
                     <div className="pl-icon"><FaQuestionCircle /></div>
                     <div className="pl-label">Quiz</div>
                 </Link>

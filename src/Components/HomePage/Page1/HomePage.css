@@ -8,12 +8,13 @@
 }
 
 .home-page {
+  padding-top: 90px;
   position: relative;
   height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
   text-align: center;
   color: white;
-  z-index: 1;
+  z-index: -1;
   font-family: "Pixelify Sans", sans-serif;
 }
 
@@ -92,4 +93,82 @@
   color: #000;
   box-shadow: 3px 3px 0 #00ffff;
   transform: translate(-2px, -2px);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .right {
+    width: 45%;
+    padding: 20px;
+  }
+
+  .home-page h1 {
+    font-size: 3rem;
+  }
+
+  .home-page p {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .right {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+  }
+
+  .home-page h1 {
+    font-size: 2.5rem;
+    margin-top: 3vh;
+  }
+
+  .home-page p {
+    font-size: 1rem;
+  }
+
+  .right h2, .right h3 {
+    font-size: 1.3rem;
+  }
+
+  .right ul {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-page {
+    overflow-y: auto;
+  }
+
+  .right {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .home-page h1 {
+    font-size: 2rem;
+    margin-top: 2vh;
+  }
+
+  .home-page p {
+    font-size: 0.9rem;
+  }
+
+  .right h2, .right h3 {
+    font-size: 1.1rem;
+  }
+
+  .right ul {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  .pixel-button {
+    font-size: 1rem;
+    padding: 8px 16px;
+  }
 }

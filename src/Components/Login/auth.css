@@ -104,3 +104,40 @@
 
 .auth-box a { color: #8ecaff; text-decoration: underline; }
 .auth-box p { color: #d4e4ff; font-size: 0.9rem; text-align: center; margin: 0; }
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .auth-root {
+    padding: 20px 12px;
+  }
+
+  .auth-box {
+    width: 100%;
+    max-width: 340px;
+    padding: 18px;
+  }
+
+  .auth-box h2 {
+    font-size: 1.3rem;
+  }
+
+  .auth-box label {
+    font-size: 0.7rem;
+  }
+
+  .auth-box input,
+  .auth-box textarea,
+  .auth-box select {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+
+  .auth-box button {
+    padding: 10px 0;
+    font-size: 0.9rem;
+  }
+
+  .auth-error {
+    font-size: 0.8rem;
+  }
+}

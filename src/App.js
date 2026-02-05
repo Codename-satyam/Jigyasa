@@ -9,6 +9,7 @@ import Page3 from "./Components/HomePage/Page3/Page3.jsx";
 import Page4 from "./Components/HomePage/Page4/Page4.jsx";
 import Footer from "./Components/Footer/Footer.jsx";
 import QuizPage from "./Components/Play/QuizPage/QuizPage.jsx";
+import SelectQuiz from "./Components/Play/QuizPage/SelectQuiz.jsx";
 import PlayLanding from "./Components/Play/PlayLanding/PlayLanding.jsx";
 import Contact from "./Components/ContactUs/Contact.jsx";
 import About from "./Components/About/About.jsx";
@@ -22,6 +23,7 @@ import Notes from "./Components/Play/Notes/Notes.jsx";
 import MemoryGame from "./Components/Play/Games/g1/game1.jsx";
 import Guessgame from "./Components/Play/Games/g2/g2.jsx";
 import PageTransition from "./Components/PageTransition.jsx";
+// import ThreeScene from "./Components/ThreeScene.jsx";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -45,14 +47,20 @@ function AnimatedRoutes() {
             }
           />
           <Route
-            path="/quiz"
+            path="/play/quiz-select"
             element={
-              <ProtectedRoute>
-                <PageTransition>
-                  <Navbar />
-                  <QuizPage />
-                </PageTransition>
-              </ProtectedRoute>
+              <PageTransition>
+                <SelectQuiz />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/play/quiz"
+            element={
+              <PageTransition>
+                <Navbar />
+                <QuizPage/>
+              </PageTransition>
             }
           />
           <Route

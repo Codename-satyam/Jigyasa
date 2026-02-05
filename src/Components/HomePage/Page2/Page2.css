@@ -112,3 +112,65 @@
   box-shadow: 3px 3px 0 #ff00ff;
   transform: translate(-2px, -2px);
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .p2 {
+    width: 95%;
+  }
+
+  .start1 h2 {
+    font-size: 2rem;
+  }
+
+  .start1 p {
+    font-size: 1.1rem;
+  }
+
+  .boxes {
+    gap: 25px;
+  }
+
+  .box {
+    width: 100%;
+    max-width: 400px;
+    padding: 25px 30px;
+  }
+
+  .buttons {
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-2 {
+    padding: 40px 0;
+  }
+
+  .start1 h2 {
+    font-size: 1.5rem;
+  }
+
+  .start1 p {
+    font-size: 1rem;
+    margin-bottom: 40px;
+  }
+
+  .box {
+    padding: 20px 25px;
+  }
+
+  .box h3 {
+    font-size: 1.3rem;
+  }
+
+  .box ul li {
+    font-size: 0.95rem;
+  }
+
+  .button2, .button3 {
+    font-size: 1rem;
+    padding: 10px 20px;
+  }
+}

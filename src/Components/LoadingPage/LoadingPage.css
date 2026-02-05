@@ -88,3 +88,45 @@
     transform: rotate(360deg);
   }
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .loading-content h1 {
+    font-size: 2.5rem;
+  }
+
+  .loading-content p {
+    font-size: 1rem;
+  }
+
+  .pixel-spinner {
+    width: 70px;
+    height: 70px;
+  }
+
+  .pixel-block {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .loading-content h1 {
+    font-size: 2rem;
+  }
+
+  .loading-content p {
+    font-size: 0.9rem;
+  }
+
+  .pixel-spinner {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+  }
+
+  .pixel-block {
+    width: 20px;
+    height: 20px;
+  }
+}
