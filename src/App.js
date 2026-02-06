@@ -22,6 +22,7 @@ import Games from "./Components/Play/Games/Games.jsx";
 import Notes from "./Components/Play/Notes/Notes.jsx";
 import MemoryGame from "./Components/Play/Games/g1/game1.jsx";
 import Guessgame from "./Components/Play/Games/g2/g2.jsx";
+import Monumentgame from "./Components/Play/Games/g3/g3.jsx";
 import PageTransition from "./Components/PageTransition.jsx";
 // import ThreeScene from "./Components/ThreeScene.jsx";
 
@@ -114,6 +115,12 @@ function AnimatedRoutes() {
             <PageTransition>
               <Navbar />
               <Guessgame/>
+            </PageTransition>
+          }/>
+          <Route path="/play/games/g3" element={
+            <PageTransition>
+              <Navbar />
+              <Monumentgame />
             </PageTransition>
           }/>
           <Route

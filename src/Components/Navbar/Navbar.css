@@ -43,7 +43,32 @@
 .logo span {
   color: #3700ff;
 }
-.navbar ul {
+
+/* Hamburger menu - hidden by default on desktop */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+  gap: 5px;
+}
+
+.hamburger span {
+  width: 30px;
+  height: 3px;
+  background-color: #00ffff;
+  transition: all 0.3s ease;
+  box-shadow: 1px 1px 0 #fff;
+}
+
+.hamburger:hover span {
+  background-color: #ff00ff;
+}
+
+.nav-menu {
   list-style: none;
   display: flex;
   margin: 0;
@@ -95,3 +120,124 @@
 
 /* Remove default button appearance in some browsers */
 .navbar ul li .nav-logout { -webkit-appearance: none; appearance: none; }
+
+/* Style for user greeting */
+.navbar ul li .nav-user {
+  color: #00ffff;
+  font-weight: 600;
+  padding: 6px 14px;
+}
+
+/* Tablet and smaller screens */
+@media (max-width: 768px) {
+  .navbar {
+    flex-wrap: wrap;
+    padding: 15px 20px;
+    font-size: 18px;
+    clip-path: none; /* Remove clip-path for better mobile display */
+    position: relative;
+  }
+
+  .logo {
+    font-size: 36px;
+    text-align: center;
+    flex: 1;
+  }
+
+  /* Show hamburger menu */
+  .hamburger {
+    display: flex;
+    order: 3;
+  }
+
+  /* Hide menu by default on mobile */
+  .nav-menu {
+    flex-direction: column;
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    order: 4;
+    background-color: #222;
+    padding: 0;
+  }
+
+  /* Show menu when active */
+  .nav-menu.active {
+    max-height: 600px;
+    padding: 15px 0;
+  }
+
+  .navbar ul li {
+    margin: 8px 0;
+    margin-left: 0;
+    width: 100%;
+    text-align: center;
+  }
+
+  .navbar ul li a,
+  .navbar ul li .nav-logout {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+
+  .navbar ul li .nav-user {
+    display: block;
+    padding: 10px;
+    font-size: 16px;
+    text-align: center;
+  }
+}
+
+/* Mobile phones */
+@media (max-width: 480px) {
+  .navbar {
+    padding: 12px 15px;
+    font-size: 16px;
+    border-width: 3px;
+    box-shadow: 3px 3px 0 #ff00ff;
+  }
+
+  .logo {
+    font-size: 28px;
+  }
+
+  .hamburger span {
+    width: 25px;
+    height: 3px;
+  }
+
+  .nav-menu.active {
+    max-height: 500px;
+    padding: 10px 0;
+  }
+
+  .navbar ul li {
+    margin: 6px 0;
+  }
+
+  .navbar ul li a,
+  .navbar ul li .nav-logout {
+    max-width: 250px;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-width: 2px;
+    box-shadow: 2px 2px 0 #00ffff;
+  }
+
+  .navbar ul li a:hover,
+  .navbar ul li .nav-logout:hover {
+    box-shadow: 2px 2px 0 #ff00ff;
+    transform: translate(-1px, -1px);
+  }
+
+  .navbar ul li .nav-user {
+    font-size: 14px;
+    padding: 8px;
+  }
+}

@@ -14,7 +14,6 @@
   overflow-x: hidden;
   text-align: center;
   color: white;
-  z-index: -1;
   font-family: "Pixelify Sans", sans-serif;
 }
 
@@ -34,6 +33,7 @@
   left: 5%;
   text-align: left;
   max-width: 40%;
+  z-index: 1;
 } */
 
 .right {
@@ -47,6 +47,7 @@
   background: rgba(0, 0, 0, 0.6); 
   box-shadow: 3px 3px 0 #00ffff;
   border-radius: 8px;
+  z-index: 1;
 }
 
 .home-page h1 {

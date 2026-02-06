@@ -47,7 +47,7 @@ function Games() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-            🎮 SELECT YOUR GAME
+            SELECT YOUR GAME
           </motion.h1>
           <motion.p
             className="games-subtitle"
@@ -104,10 +104,10 @@ function Games() {
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate("/play/games/g3")}
             >
-              <div className="card-icon">🐍</div>
+              <div className="card-icon">🏛️</div>
               <div className="card-content">
-                <h3>Snake Game</h3>
-                <p>Retro survival challenge</p>
+                <h3>What is this wonder</h3>
+                <p>Name the Monument</p>
               </div>
               <div className="card-badge">LEVEL 3</div>
             </motion.button>

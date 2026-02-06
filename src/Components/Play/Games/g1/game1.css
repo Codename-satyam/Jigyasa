@@ -133,9 +133,8 @@
   background: rgba(15, 56, 15, 0.8);
   display: grid;
   place-items: center;
+  z-index: 1000;
 }
-
-
 
 
 /* D-Pad (b1) */

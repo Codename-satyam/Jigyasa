@@ -5,6 +5,7 @@ import auth from "../../api/auth";
 
 const Navbar = () => {
   const [user, setUser] = useState(auth.getCurrentUser());
+  const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,6 +18,15 @@ const Navbar = () => {
     auth.logout();
     setUser(null);
     navigate('/home');
+    setMenuOpen(false); // Close menu after logout
+  };
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
   };
 
   return (
@@ -24,15 +34,27 @@ const Navbar = () => {
       <div className="logo">
         <span>J</span>igyasa
       </div>
-      <ul>
-        <li><Link to="/home">Home</Link></li>
-        <li><Link to="/about">About</Link></li>
-        <li><Link to="/play">Play</Link></li>
-        {/* <li><Link to="/contact">Contact</Link></li> */}
-        <li><Link to="/dashboard">Dashboard</Link></li>
+      
+      <button 
+        className="hamburger" 
+        onClick={toggleMenu}
+        aria-label="Toggle menu"
+        aria-expanded={menuOpen}
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <ul className={menuOpen ? 'nav-menu active' : 'nav-menu'}>
+        <li><Link to="/home" onClick={closeMenu}>Home</Link></li>
+        <li><Link to="/about" onClick={closeMenu}>About</Link></li>
+        <li><Link to="/play" onClick={closeMenu}>Play</Link></li>
+        {/* <li><Link to="/contact" onClick={closeMenu}>Contact</Link></li> */}
+        <li><Link to="/dashboard" onClick={closeMenu}>Dashboard</Link></li>
         {!user ? (
           <>
-            <li><Link to="/login">Login</Link></li>
+            <li><Link to="/login" onClick={closeMenu}>Login</Link></li>
           </>
         ) : (
           <>

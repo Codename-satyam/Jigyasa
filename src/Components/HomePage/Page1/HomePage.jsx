@@ -27,7 +27,9 @@ function HomePage() {
         </ul>
 
         <div style={{display:'flex',gap:12,marginTop:12,justifyContent:'center'}}>
-          <button className="pixel-button">Get Started</button>
+          <Link to="/play" className="pixel-button" style={{textDecoration:'none'}}>
+            Play Now
+          </Link>
           <Link to="/contact" className="pixel-button" style={{textDecoration:'none'}}>
             Contact Us
           </Link>
