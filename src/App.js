@@ -13,7 +13,6 @@ import SelectQuiz from "./Components/Play/QuizPage/SelectQuiz.jsx";
 import PlayLanding from "./Components/Play/PlayLanding/PlayLanding.jsx";
 import Contact from "./Components/ContactUs/Contact.jsx";
 import About from "./Components/About/About.jsx";
-import Videos from "./Components/Play/Videos/Videos.jsx";
 import Dashboard from "./Components/Dashboard/Dashboard.jsx";
 import Login from "./Components/Login/Login.jsx";
 import Register from "./Components/Login/Register.jsx";
@@ -25,6 +24,9 @@ import Guessgame from "./Components/Play/Games/g2/g2.jsx";
 import Monumentgame from "./Components/Play/Games/g3/g3.jsx";
 import MathGame from "./Components/Play/Games/g4/g4.jsx";
 import PageTransition from "./Components/PageTransition.jsx";
+import SubjectSelector from "./Components/Play/Videos/Selector/SubjectCards.jsx";
+import TopicSelector from "./Components/Play/Videos/Selector/TopicSelector.jsx";
+import VideoPlayer from "./Components/Play/Videos/VideoPlayer.jsx";
 // import ThreeScene from "./Components/ThreeScene.jsx";
 
 function AnimatedRoutes() {
@@ -86,12 +88,28 @@ function AnimatedRoutes() {
           <Route
             path="/videos"
             element={
-              <ProtectedRoute>
-                <PageTransition>
-                  <Navbar/>
-                  <Videos/>
-                </PageTransition>
-              </ProtectedRoute>
+              <PageTransition>
+                <Navbar />
+                <SubjectSelector />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/videos/subject/:subject"
+            element={
+              <PageTransition>
+                <Navbar />
+                <TopicSelector />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/videos/subject/:subject/topic/:topicIndex"
+            element={
+              <PageTransition>
+                <Navbar />
+                <VideoPlayer />
+              </PageTransition>
             }
           />
           <Route

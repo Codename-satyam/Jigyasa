@@ -1,22 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./Videos.css";
-
-const sampleVideos = [
-  { id: "uwzViw-T0-A", title: "Pyasa marta hua kaua" },
-  { id: "zTwYLyx-frE", title: "The Ant and the Piegon" },
-  { id: "jKi2SvWOCXc", title: "The Bear And the BEE" },
-  { id: "1Q_4HXewiS0", title: "FUN science Experiments" },
-  { id: "_yH3BntZCSI", title: "FUN Fact about the Ocean" },
-  { id: "8adtdg0N2-g", title: "Ocean Adventures" },
-  { id: "mjlsSYLLOSE", title: "Basic Addition" },
-  { id: "K3fzAYLytgg", title: "FUN maths" },
-  { id: "be9RJp4f4Pc", title: "Riddles" },
-];
+import { trackVideoCompletion } from "../../../../api/progressTracker.js";
 
 function extractYouTubeId(item) {
   if (!item) return null;
   if (item.id) return item.id;
   if (item.videoId) return item.videoId;
+  
+  // Check embed link first
+  if (item.embed) {
+    const embedUrl = item.embed;
+    const embedMatch = embedUrl.match(/embed\/([\w-]{11})/);
+    if (embedMatch && embedMatch[1]) return embedMatch[1];
+  }
+  
   if (item.url) {
     const url = item.url;
     const patterns = [
@@ -32,16 +29,38 @@ function extractYouTubeId(item) {
   return null;
 }
 
-export default function YouTubeVideoGallery({ videos = sampleVideos }) {
-  const list = Array.isArray(videos) && videos.length ? videos : sampleVideos;
+export default function YouTubeVideoGallery({ videos, startIndex = 0, subject, topicIndex }) {
+  const list = Array.isArray(videos) && videos.length ? videos : [];
   const ids = list.map(extractYouTubeId);
-  const firstId = ids[0] || "uwzViw-T0-A";
-  const [currentId, setCurrentId] = useState(firstId);
+  const startId = ids[startIndex] || ids[0] || "uwzViw-T0-A";
+  const [currentId, setCurrentId] = useState(startId);
+  const [watchedVideos, setWatchedVideos] = useState(new Set());
+  const hasTrackedRef = useRef(false);
 
+  // Track initial video when component mounts
   useEffect(() => {
+    if (!hasTrackedRef.current && startIndex >= 0 && subject && topicIndex !== undefined) {
+      hasTrackedRef.current = true;
+      trackVideoCompletion(subject, topicIndex, startIndex);
+      setWatchedVideos(new Set([startIndex]));
+    }
+  }, [subject, topicIndex, startIndex]);
+
+  // Track video when current ID changes and scroll to it
+  useEffect(() => {
+    const currentIndex = ids.indexOf(currentId);
+    if (currentIndex !== -1 && subject && topicIndex !== undefined && currentIndex !== startIndex) {
+      trackVideoCompletion(subject, topicIndex, currentIndex);
+      setWatchedVideos(prev => {
+        const newSet = new Set(prev);
+        newSet.add(currentIndex);
+        return newSet;
+      });
+    }
+    
     const el = document.querySelector(`[data-video-id="${currentId}"]`);
     if (el && el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
-  }, [currentId]);
+  }, [currentId, ids, subject, topicIndex, startIndex]);
 
   function makeEmbedUrl(id) {
     return `https://www.youtube.com/embed/${id}?rel=0&showinfo=0`;
@@ -60,6 +79,7 @@ export default function YouTubeVideoGallery({ videos = sampleVideos }) {
   }
 
   const current = list.find(item => extractYouTubeId(item) === currentId) || {};
+  const currentIndex = ids.indexOf(currentId);
 
   return (
     <div className="yt-root">
@@ -78,6 +98,7 @@ export default function YouTubeVideoGallery({ videos = sampleVideos }) {
             <div className="current-info">
               <div className="now-label">Now playing</div>
               <div className="now-title">{current.title || currentId}</div>
+              <div className="video-counter">{currentIndex + 1} / {list.length}</div>
             </div>
 
             <div className="sidebar-list">
@@ -88,14 +109,17 @@ export default function YouTubeVideoGallery({ videos = sampleVideos }) {
                   if (!id) return null;
                   const title = item.title || item.name || `Video ${idx + 1}`;
                   const thumb = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+                  const isWatched = watchedVideos.has(idx);
+                  
                   return (
                     <div
                       key={id + idx}
                       data-video-id={id}
-                      className={`list-thumb ${id === currentId ? "selected" : ""}`}
+                      className={`list-thumb ${id === currentId ? "selected" : ""} ${isWatched ? "watched" : ""}`}
                       onClick={() => setCurrentId(id)}
                     >
                       <img className="thumb-img" src={thumb} alt={title} />
+                      {isWatched && <div className="watched-indicator">✓</div>}
                       <div className="thumb-meta">
                         <div className="thumb-title">{title}</div>
                       </div>
