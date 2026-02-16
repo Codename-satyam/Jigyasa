@@ -127,7 +127,7 @@ function QuizPage() {
 
           <label>
             Category:
-            <select value={categoryId || ""} onChange={(e) => setCategoryId(e.target.value || null)}>
+            <select value={categoryId || ""} onChange={(e) => setCategoryId(e.target.value || null)} className="category-select">
               <option value="">Any</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>

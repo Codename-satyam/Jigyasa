@@ -24,6 +24,7 @@ function SelectQuiz() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [amount, setAmount] = useState(5);
+  const [amountInput, setAmountInput] = useState("5");
   const [difficulty, setDifficulty] = useState("easy");
 
   useEffect(() => {
@@ -107,8 +108,19 @@ function SelectQuiz() {
                         type="number"
                         min={1}
                         max={20}
-                        value={amount}
-                        onChange={(e) => setAmount(Number(e.target.value))}
+                        value={amountInput}
+                        onChange={(e) => {
+                          setAmountInput(e.target.value);
+                          if (e.target.value !== "") {
+                            const num = Math.max(1, Math.min(20, Number(e.target.value)));
+                            setAmount(num);
+                          }
+                        }}
+                        onBlur={() => {
+                          if (amountInput === "" || Number(amountInput) < 1) {
+                            setAmountInput(String(amount));
+                          }
+                        }}
                       />
                     </label>
                   </div>

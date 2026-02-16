@@ -378,7 +378,7 @@
   .question { font-size: 0.9rem; }
   .option-btn { font-size: 0.65rem; padding: 10px; }
   .quiz-controls { gap: 8px; align-items: stretch; }
-  .quiz-controls label { font-size: 0.7rem; }
+  .quiz-controls label { font-size: 0.7rem; width: 100%; justify-content: space-between; }
   .loading-bar { width: 240px; }
 }
 
