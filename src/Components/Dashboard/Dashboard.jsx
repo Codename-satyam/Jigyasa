@@ -7,7 +7,7 @@ import { getSubjectProgress } from '../../api/progressTracker.js';
 import { Link } from 'react-router-dom';
 
 function Dashboard() {
-  const [link, setLink] = useState('/leaderboard');
+  const [link] = useState('/leaderboard');
   const [scores, setScores] = useState([]);
 
   useEffect(() => {

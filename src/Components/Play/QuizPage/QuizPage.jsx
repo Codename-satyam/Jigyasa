@@ -4,8 +4,7 @@ import { fetchQuiz, fetchCategories } from "../../../api/quizApi";
 import auth from "../../../api/auth";
 import { addScore } from "../../../api/scores";
 import QuizBackground3D from "./QuizBackground3D";
-import Navbar from "../../Navbar/Navbar";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams} from "react-router-dom";
 
 
 const LoadingPage = ({ text = "Loading Quiz..." }) => {
@@ -21,7 +20,6 @@ const LoadingPage = ({ text = "Loading Quiz..." }) => {
 
 function QuizPage() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   
   // Get parameters from URL query string
   const urlCategory = searchParams.get("category") || null;
@@ -156,9 +154,9 @@ function QuizPage() {
         ) : !showScore ? (
           <>
             <h2 className="question">{questions[currentQuestion].question}</h2>
-            <div className="options">
+            <div className="quiz-options">
               {questions[currentQuestion].options.map((option, index) => (
-                <button key={index} className="option-btn" onClick={() => handleAnswer(option)}>
+                <button key={index} className="quiz-option-btn" onClick={() => handleAnswer(option)}>
                   {option}
                 </button>
               ))}

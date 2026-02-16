@@ -119,10 +119,10 @@ function Games() {
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate("/play/games/g4")}
             >
-              <div className="card-icon">🔥</div>
+              <div className="card-icon">➕</div>
               <div className="card-content">
-                <h3>Game 4</h3>
-                <p>Upr wala hi baachaye ab</p>
+                <h3>Math-A-Magic</h3>
+                <p>Are you a Wizard of Maths ??</p>
               </div>
               <div className="card-badge">LEVEL 4</div>
             </motion.button>

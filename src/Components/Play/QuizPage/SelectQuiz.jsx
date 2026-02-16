@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SelectQuiz.css";
 import { fetchCategories } from "../../../api/quizApi";
+import auth from "../../../api/auth";
 import QuizBackground3D from "./QuizBackground3D";
+
 
 const LoadingPage = ({ text = "Loading Categories..." }) => {
   return (
@@ -17,11 +19,21 @@ const LoadingPage = ({ text = "Loading Categories..." }) => {
 
 function SelectQuiz() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [amount, setAmount] = useState(5);
   const [difficulty, setDifficulty] = useState("easy");
+
+  useEffect(() => {
+    const currentUser = auth.getCurrentUser();
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+    setUser(currentUser);
+  }, [navigate]);
 
   useEffect(() => {
     let mounted = true;
