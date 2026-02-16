@@ -30,14 +30,10 @@
 }
 
 .yt-grid{
-  display:grid;
-  grid-template-columns:1fr 420px;
-  gap:28px;
+  display:block;
   width:100%;
   max-width:1500px;
-  height:110%;
-  align-items:stretch;
-  margin-left: 70vh;
+  margin:0 auto;
 }
 
 .player-column{display:flex;flex-direction:column;align-items:center;justify-content:center}
@@ -80,6 +76,8 @@
 .video-frame{
   width:100%;
   flex:1 1 auto;
+  aspect-ratio:16 / 9;
+  min-height:360px;
   background:#021018;
   border-radius:10px;
   overflow:hidden;
@@ -129,7 +127,6 @@
 .pixel-btn:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--accent)}
 
 @media(max-width:1200px){
-  .yt-grid{grid-template-columns:1fr 360px}
   .sidebar-list{margin-left:-360px;width:320px}
 }
 @media(max-width:900px){

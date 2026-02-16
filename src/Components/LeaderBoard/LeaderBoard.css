@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.leaderboard-container {
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #1a1a2e, #0f0f1b);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 20px;
+    font-family: 'Press Start 2P', cursive;
+    color: #fff;
+}
+
+.leaderboard-title {
+    font-size: 28px;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+    color: #00f5ff;
+    text-shadow: 
+        0 0 5px #00f5ff,
+        0 0 15px #00f5ff,
+        0 0 30px #00f5ff;
+    animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+    from { text-shadow: 0 0 5px #00f5ff, 0 0 10px #00f5ff; }
+    to { text-shadow: 0 0 15px #00f5ff, 0 0 30px #00f5ff; }
+}
+
+.leaderboard-table {
+    width: 100%;
+    max-width: 800px;
+    border-collapse: collapse;
+    background: rgba(20, 20, 40, 0.95);
+    border: 3px solid #00f5ff;
+    box-shadow: 
+        0 0 20px #00f5ff,
+        inset 0 0 20px rgba(0, 245, 255, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.leaderboard-table thead {
+    background: linear-gradient(90deg, #ff00cc, #3333ff);
+}
+
+.leaderboard-table th {
+    padding: 18px;
+    font-size: 12px;
+    text-align: center;
+    color: #fff;
+    letter-spacing: 2px;
+}
+
+.leaderboard-table td {
+    padding: 18px;
+    text-align: center;
+    font-size: 11px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.leaderboard-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.leaderboard-table tbody tr:hover {
+    background: rgba(0, 245, 255, 0.1);
+    transform: scale(1.02);
+}
+
+.leaderboard-table tbody tr:nth-child(1) {
+    background: linear-gradient(90deg, #ffd70033, #ffcc0033);
+    color: #ffd700;
+    font-weight: bold;
+}
+
+.leaderboard-table tbody tr:nth-child(2) {
+    background: linear-gradient(90deg, #c0c0c033, #aaaaaa33);
+    color: #c0c0c0;
+}
+
+.leaderboard-table tbody tr:nth-child(3) {
+    background: linear-gradient(90deg, #cd7f3233, #b8733333);
+    color: #cd7f32;
+}
+
+.leaderboard-empty {
+    padding: 30px;
+    font-size: 12px;
+    color: #ff4d6d;
+}
+
+.loading {
+    font-size: 14px;
+    color: #ff00cc;
+    text-shadow: 0 0 10px #ff00cc;
+    animation: blink 1s infinite alternate;
+}
+
+@keyframes blink {
+    from { opacity: 0.5; }
+    to { opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .leaderboard-title {
+        font-size: 18px;
+        text-align: center;
+    }
+
+    .leaderboard-table th,
+    .leaderboard-table td {
+        padding: 12px;
+        font-size: 9px;
+    }
+}

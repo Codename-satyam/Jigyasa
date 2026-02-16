@@ -27,6 +27,8 @@ import PageTransition from "./Components/PageTransition.jsx";
 import SubjectSelector from "./Components/Play/Videos/Selector/SubjectCards.jsx";
 import TopicSelector from "./Components/Play/Videos/Selector/TopicSelector.jsx";
 import VideoPlayer from "./Components/Play/Videos/VideoPlayer.jsx";
+import Courses from "./Components/Play/Courses/Courses.jsx";
+import LeaderBoard from "./Components/LeaderBoard/LeaderBoard.jsx";
 // import ThreeScene from "./Components/ThreeScene.jsx";
 
 function AnimatedRoutes() {
@@ -73,6 +75,15 @@ function AnimatedRoutes() {
               <PageTransition>
                 <Navbar />
                 <PlayLanding />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/courses"
+            element={
+              <PageTransition>
+                <Navbar />
+                <Courses />
               </PageTransition>
             }
           />
@@ -154,6 +165,15 @@ function AnimatedRoutes() {
               <PageTransition>
                 <Navbar />
                 <Notes />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/leaderboard"
+            element={
+              <PageTransition>
+                <Navbar />
+                <LeaderBoard />
               </PageTransition>
             }
           />

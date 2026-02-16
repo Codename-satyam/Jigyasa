@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import './PlayLanding.css';
 import { Link } from 'react-router-dom';
-import { FaFilm, FaStickyNote, FaGamepad, FaQuestionCircle } from 'react-icons/fa';
+import { FaBook, FaGamepad, FaQuestionCircle } from 'react-icons/fa';
 
 function PlayLanding() {
     const [quote, setQuote] = useState("");
     const [typing, setTyping] = useState("");
-        
+
     useEffect(() => {
         let mounted = true;
         const localQuotes = [
@@ -30,7 +30,7 @@ function PlayLanding() {
         if (mounted) {
             const q = localQuotes[Math.floor(Math.random() * localQuotes.length)];
             setQuote(q);
-            setTyping(""); 
+            setTyping("");
         }
 
         return () => { mounted = false; };
@@ -60,14 +60,9 @@ function PlayLanding() {
             </header>
 
             <div className="pl-grid">
-                <Link to="/videos" className="pl-card" aria-label="Videos">
-                    <div className="pl-icon"><FaFilm /></div>
-                    <div className="pl-label">Videos</div>
-                </Link>
-
-                <Link to="/notes" className="pl-card" aria-label="Notes">
-                    <div className="pl-icon"><FaStickyNote /></div>
-                    <div className="pl-label">Notes</div>
+                <Link to="/courses" className='pl-card' aria-label='Courses'>
+                    <div className="pl-icon"><FaBook /></div>
+                    <div className="pl-label">Courses</div>
                 </Link>
 
                 <Link to="/games" className="pl-card" aria-label="Games">

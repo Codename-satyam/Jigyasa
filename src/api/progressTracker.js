@@ -57,15 +57,25 @@ export function getSubjectProgress(subject, totalTopics, topicsData) {
   
   let totalVideos = 0;
   let completedVideos = 0;
-  
-  // Calculate total videos in subject and completed videos
-  Object.keys(subjectData).forEach(topicIdx => {
-    const topicData = topicsData[parseInt(topicIdx)];
-    if (topicData && topicData.videos) {
-      totalVideos += topicData.videos.length;
-      completedVideos += subjectData[topicIdx].completed.length;
-    }
-  });
+
+  const hasVideoGroups = Array.isArray(topicsData) && topicsData.some(item => item && item.videos);
+
+  if (hasVideoGroups) {
+    topicsData.forEach((topic, index) => {
+      if (!topic || !topic.videos) return;
+      totalVideos += topic.videos.length;
+      const topicProgress = subjectData[index];
+      completedVideos += topicProgress ? topicProgress.completed.length : 0;
+    });
+  } else {
+    totalVideos = Array.isArray(topicsData) ? topicsData.length : 0;
+    completedVideos = Object.keys(subjectData).reduce((count, topicIdx) => {
+      const topicProgress = subjectData[topicIdx];
+      if (topicProgress && topicProgress.completed.length > 0) return count + 1;
+      return count;
+    }, 0);
+    completedVideos = Math.min(completedVideos, totalVideos);
+  }
   
   const percentage = totalVideos > 0 ? Math.round((completedVideos / totalVideos) * 100) : 0;
   
@@ -90,10 +100,11 @@ export function getTopicProgress(subject, topicIndex, totalVideos) {
   }
   
   const completed = topicData.completed.length;
-  const percentage = Math.round((completed / totalVideos) * 100);
+  const boundedCompleted = totalVideos > 0 ? Math.min(completed, totalVideos) : completed;
+  const percentage = totalVideos > 0 ? Math.round((boundedCompleted / totalVideos) * 100) : 0;
   
   return {
-    completed,
+    completed: boundedCompleted,
     total: totalVideos,
     percentage,
     lastViewed: topicData.lastViewed
