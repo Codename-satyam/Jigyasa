@@ -2,6 +2,22 @@
 const USERS_KEY = "qq_users";
 const CURRENT_KEY = "qq_currentUser";
 
+// Avatar options
+export const AVATAR_OPTIONS = [
+  { id: 1, emoji: '🦁', name: 'Lion' },
+  { id: 2, emoji: '🐯', name: 'Tiger' },
+  { id: 3, emoji: '🦊', name: 'Fox' },
+  { id: 4, emoji: '🐻', name: 'Bear' },
+  { id: 5, emoji: '🐢', name: 'Turtle' },
+  { id: 6, emoji: '🦅', name: 'Eagle' },
+  { id: 7, emoji: '🐉', name: 'Dragon' },
+  { id: 8, emoji: '🦄', name: 'Unicorn' },
+  { id: 9, emoji: '🐙', name: 'Octopus' },
+  { id: 10, emoji: '🦈', name: 'Shark' },
+  { id: 11, emoji: '🐸', name: 'Frog' },
+  { id: 12, emoji: '🦚', name: 'Peacock' }
+];
+
 function loadUsers() {
   try {
     const raw = localStorage.getItem(USERS_KEY);
@@ -15,16 +31,33 @@ function saveUsers(users) {
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
 }
 
-export function register({ name, email, password }) {
+export function register({ name, email, password, avatarId }) {
   const users = loadUsers();
   if (users.find((u) => u.email === email)) {
     throw new Error("User already exists");
   }
-  const user = { id: Date.now(), name, email, password };
+  
+  const avatar = AVATAR_OPTIONS.find(a => a.id === avatarId) || AVATAR_OPTIONS[0];
+  
+  const user = { 
+    id: Date.now(), 
+    name, 
+    email, 
+    password,
+    avatarId: avatar.id,
+    avatar: avatar.emoji
+  };
   users.push(user);
   saveUsers(users);
+  
   // auto-login after register
-  localStorage.setItem(CURRENT_KEY, JSON.stringify({ id: user.id, name: user.name, email: user.email }));
+  localStorage.setItem(CURRENT_KEY, JSON.stringify({ 
+    id: user.id, 
+    name: user.name, 
+    email: user.email,
+    avatarId: user.avatarId,
+    avatar: user.avatar
+  }));
   return user;
 }
 
@@ -32,8 +65,17 @@ export function login({ email, password }) {
   const users = loadUsers();
   const u = users.find((x) => x.email === email && x.password === password);
   if (!u) throw new Error("Invalid credentials");
-  localStorage.setItem(CURRENT_KEY, JSON.stringify({ id: u.id, name: u.name, email: u.email }));
-  return { id: u.id, name: u.name, email: u.email };
+  
+  const userData = { 
+    id: u.id, 
+    name: u.name, 
+    email: u.email,
+    avatarId: u.avatarId || 1,
+    avatar: u.avatar || '🦁'
+  };
+  
+  localStorage.setItem(CURRENT_KEY, JSON.stringify(userData));
+  return userData;
 }
 
 export function logout() {
@@ -53,5 +95,5 @@ export function isAuthenticated() {
   return !!getCurrentUser();
 }
 
-const auth = { register, login, logout, getCurrentUser, isAuthenticated };
+const auth = { register, login, logout, getCurrentUser, isAuthenticated, AVATAR_OPTIONS };
 export default auth;

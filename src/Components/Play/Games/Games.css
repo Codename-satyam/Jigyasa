@@ -116,6 +116,11 @@
   display: block;
   animation: float 3s ease-in-out infinite;
 }
+.card-icon1{
+  font-size: 60px;
+  display: block;
+  animation: float 3s ease-in-out infinite;
+}
 
 .game-card:nth-child(1) .card-icon {
   animation-delay: 0s;
@@ -175,11 +180,12 @@
   z-index: 2;
 }
 
+
+
 .card-featured {
   border-color: rgba(34, 197, 94, 0.6);
   grid-column: span 1;
 }
-
 .card-featured:hover {
   border-color: rgba(34, 197, 94, 1);
   background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.08));
@@ -188,15 +194,16 @@
     0 12px 48px rgba(34, 197, 94, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
-
 .card-featured .card-badge {
   background: linear-gradient(135deg, #22c55e, #10b981);
 }
 
+
+
+
 .card-medium {
   border-color: rgba(139, 92, 246, 0.6);
 }
-
 .card-medium:hover {
   border-color: rgba(139, 92, 246, 1);
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(168, 85, 247, 0.08));
@@ -205,27 +212,65 @@
     0 12px 48px rgba(139, 92, 246, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
-
 .card-medium .card-badge {
   background: linear-gradient(135deg, #8b5cf6, #a855f7);
 }
 
+
+
+
 .card-hard {
   border-color: rgba(239, 68, 68, 0.6);
 }
-
 .card-hard:hover {
   border-color: rgba(239, 68, 68, 1);
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.08));
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.08));
   box-shadow: 
     0 0 60px rgba(239, 68, 68, 0.3),
     0 12px 48px rgba(239, 68, 68, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
-
 .card-hard .card-badge {
   background: linear-gradient(135deg, #ef4444, #dc2626);
 }
+
+
+
+
+.card-extreme{
+  border-color: rgba(255, 140, 0, 0.6);
+}
+.card-extreme:hover {
+  border-color: rgba(255, 140, 0, 1);
+  background: linear-gradient(135deg, rgba(255, 140, 0, 0.1), rgba(255, 140, 0, 0.08));
+  box-shadow: 
+    0 0 60px rgba(255, 140, 0, 0.3),
+    0 12px 48px rgba(255, 140, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.card-extreme .card-badge {
+  background: linear-gradient(135deg, #ff8c00, #ff7f50);
+}
+
+
+
+
+.card-mythic{
+  border-color: rgba(255, 0, 255, 0.6);
+}
+.card-mythic:hover {
+  border-color: rgba(255, 0, 255, 1);
+  background: linear-gradient(135deg, rgba(255, 0, 255, 0.1), rgba(255, 0, 255, 0.08));
+  box-shadow: 
+    0 0 60px rgba(255, 0, 255, 0.3),
+    0 12px 48px rgba(255, 0, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.card-mythic .card-badge {
+  background: linear-gradient(135deg, #ff00ff, #ff69b4);
+}
+
+
 
 /* Responsive Design */
 @media (max-width: 1024px) {

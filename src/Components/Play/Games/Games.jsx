@@ -98,7 +98,8 @@ function Games() {
 
             <motion.button
               type="button"
-              className="game-card card-hard"
+              className="game-card card-hard
+              "
               variants={cardVariants}
               whileHover={{ scale: 1.08, y: -10 }}
               whileTap={{ scale: 0.95 }}
@@ -134,10 +135,10 @@ function Games() {
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate("/play/games/g5")}
             >
-              <div className="card-icon">🔥</div>
+              <div className="card-icon1">2️⃣0️⃣4️⃣8️⃣</div>
               <div className="card-content">
-                <h3>Game 5</h3>
-                <p>Upr wala hi baachaye ab</p>
+                <h3>Are-u Puzzled</h3>
+                <p>Will you be able to reach the Highest Score ?</p>
               </div>
               <div className="card-badge">LEVEL 5</div>
             </motion.button>

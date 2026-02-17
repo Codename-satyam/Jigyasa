@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import Card from "./Card";
 import "./game1.css";
+import gamesTracker from "../../../../api/gamesTracker";
+import auth from "../../../../api/auth";
 
 
 const sounds = {
@@ -124,6 +126,19 @@ function MemoryGame() {
     useEffect(() => {
         if (score === levelConfig[difficulty].pairs && turns > 0) {
             setShowResult(true);
+            
+            // Record game play
+            const current = auth.getCurrentUser();
+            if (current) {
+                gamesTracker.recordGamePlay({
+                    email: current.email,
+                    gameType: 'memory',
+                    gameName: 'Memory Card Game',
+                    difficulty: difficulty,
+                    score: turns,
+                    date: new Date().toISOString()
+                });
+            }
         }
     }, [score, turns, difficulty]);
 

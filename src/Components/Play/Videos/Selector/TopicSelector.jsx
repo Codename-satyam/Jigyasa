@@ -7,7 +7,7 @@ import { getTopicProgress, getLastViewedTopic } from '../../../../api/progressTr
 
 function TopicSelector() {
     const { subject } = useParams();
-    const [setSelectedTopic] = useState(null);
+    const [SelectedTopic,setSelectedTopic] = useState(null);
     const [topicProgress, setTopicProgress] = useState({});
     const [lastViewed, setLastViewed] = useState(null);
     const navigate = useNavigate();

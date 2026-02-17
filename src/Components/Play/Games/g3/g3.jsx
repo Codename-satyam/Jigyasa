@@ -4,12 +4,30 @@ import "./g3.css";
 import correctSound from "./data/sounds/correct.mp3";
 import wrongSound from "./data/sounds/wrong.mp3";
 import timeoutSound from "./data/sounds/timeout.mp3";
+import gamesTracker from "../../../../api/gamesTracker";
+import auth from "../../../../api/auth";
 
 const CORRECT_SOUND = new Audio(correctSound);
 const WRONG_SOUND = new Audio(wrongSound);
 const TIMEOUT_SOUND = new Audio(timeoutSound);
 
+// Function to shuffle an array
+const shuffleArray = (array) => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+// Function to get 10 random questions
+const getRandomQuestions = () => {
+  return shuffleArray(quizData).slice(0, 10);
+};
+
 function QuizGame() {
+  const [randomizedQuestions] = useState(() => getRandomQuestions());
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState(null);
@@ -17,18 +35,30 @@ function QuizGame() {
   const [timeLeft, setTimeLeft] = useState(10);
   const [reveal, setReveal] = useState(false);
 
-  const question = quizData[current];
+  const question = randomizedQuestions[current];
 
   const moveNext = useCallback(() => {
-    if (current + 1 < quizData.length) {
+    if (current + 1 < randomizedQuestions.length) {
       setCurrent(prev => prev + 1);
       setSelected(null);
       setReveal(false);
       setTimeLeft(10);
     } else {
       setShowResult(true);
+      
+      // Record game play
+      const user = auth.getCurrentUser();
+      if (user) {
+        gamesTracker.recordGamePlay({
+          email: user.email,
+          gameType: 'monument',
+          gameName: 'Monument Game',
+          score: score,
+          date: new Date().toISOString()
+        });
+      }
     }
-  }, [current]);
+  }, [current, randomizedQuestions.length, score]);
 
   useEffect(() => {
     if (timeLeft === 0 && !selected) {
@@ -80,7 +110,7 @@ function QuizGame() {
         <div className="g3-container g3-result-container">
           <h2>🎉 Quiz Completed!</h2>
           <p className="g3-result-label">Final Score</p>
-          <h1 className="g3-final-score">{score} / {quizData.length}</h1>
+          <h1 className="g3-final-score">{score} / {randomizedQuestions.length}</h1>
           <button className="g3-restart-btn" onClick={restartGame}>Play Again</button>
         </div>
       </div>
@@ -91,7 +121,7 @@ function QuizGame() {
     <div className="g3-game-page">
       <div className="g3-container">
         <div className="g3-top">
-          <span>Q {current + 1}/{quizData.length}</span>
+          <span>Q {current + 1}/{randomizedQuestions.length}</span>
           <span className={`g3-timer ${timeLeft <= 3 ? "danger" : ""}`}>
             ⏱ {timeLeft}s
           </span>

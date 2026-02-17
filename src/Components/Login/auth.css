@@ -20,10 +20,17 @@
   box-shadow: 4px 4px 0 #00ffff, 0 0 12px #ff00ff;
 }
 
-.auth-box .field {
+.register-box {
+  width: 100%;
+  max-width: 520px;
+  gap: 16px;
+}
+
+.form-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  margin: 0;
 }
 
 .auth-box h2 {
@@ -83,11 +90,92 @@
   transition: all 0.06s steps(1, end);
   width: 100%;
 }
-.auth-box button:hover {
+
+.submit-btn {
+  margin-top: 6px;
+  padding: 12px 0;
+  background: #000;
+  color: #fff;
+  border: 3px solid #fff;
+  font-size: 1.05rem;
+  font-family: "Pixelify Sans", sans-serif;
+  cursor: pointer;
+  letter-spacing: 2px;
+  box-shadow: 3px 3px 0 #ff00ff, 0 0 10px #00ffff;
+  transition: all 0.06s steps(1, end);
+  width: 100%;
+}
+
+.submit-btn:hover {
   background: #fff;
   color: #000;
   box-shadow: 3px 3px 0 #00ffff, 0 0 10px #ff00ff;
   transform: translate(-2px, -2px);
+}
+
+/* Avatar Section */
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 6px 0;
+  padding: 12px;
+  border: 2px solid rgba(0, 255, 255, 0.3);
+  border-radius: 4px;
+  background: rgba(0, 255, 255, 0.05);
+}
+
+.avatar-section label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.avatar-preview {
+  font-size: 4rem;
+  text-align: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid #ff00ff;
+  border-radius: 8px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+  gap: 10px;
+}
+
+.avatar-btn {
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid #00ffff;
+  border-radius: 8px;
+  font-size: 1.8rem;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  min-height: 50px;
+}
+
+.avatar-btn:hover {
+  border-color: #ff00ff;
+  background: rgba(255, 0, 255, 0.1);
+  transform: scale(1.08);
+}
+
+.avatar-btn.active {
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(255, 0, 255, 0.3));
+  border-color: #ff00ff;
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+  transform: scale(1.1);
 }
 
 .auth-error {
@@ -117,6 +205,11 @@
     padding: 18px;
   }
 
+  .register-box {
+    max-width: 100%;
+    gap: 12px;
+  }
+
   .auth-box h2 {
     font-size: 1.3rem;
   }
@@ -132,12 +225,28 @@
     padding: 8px;
   }
 
-  .auth-box button {
+  .auth-box button,
+  .submit-btn {
     padding: 10px 0;
     font-size: 0.9rem;
   }
 
   .auth-error {
     font-size: 0.8rem;
+  }
+
+  .avatar-preview {
+    font-size: 3rem;
+    height: 90px;
+  }
+
+  .avatar-grid {
+    grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+  }
+
+  .avatar-btn {
+    font-size: 1.5rem;
+    padding: 8px;
+    min-height: 45px;
   }
 }

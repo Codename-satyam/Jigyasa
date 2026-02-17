@@ -6,7 +6,7 @@ function learningVideos() {
         embed: "https://www.youtube-nocookie.com/embed/mjlsSYLLOSE"
       },
       {
-        title: "Subtraction for Kids",
+        title: "Subtraction for Kids",//issue with the link
         embed: "https://www.youtube-nocookie.com/embed/8LMSv6YcHkA"
       },
       {
@@ -18,11 +18,11 @@ function learningVideos() {
         embed: "https://www.youtube-nocookie.com/embed/ndfeFjoperg"
       },
       {
-        title: "Place Value Explained",
+        title: "Place Value Explained",// issue with the link
         embed: "https://www.youtube-nocookie.com/embed/Y_6vWk6G4Wc"
       },
       {
-        title: "Fractions for Kids",
+        title: "Fractions for Kids",//issue with the link
         embed: "https://www.youtube-nocookie.com/embed/R0m1kM0WlOw"
       },
       {
@@ -31,7 +31,7 @@ function learningVideos() {
       }
     ],
 
-    generalKnowledge: [
+    generalKnowledge: [ //all the links are broken [new imports]
       {
         title: "Amazing Facts for Kids",
         embed: "https://www.youtube-nocookie.com/embed/Y9F1piLpgrY"
@@ -71,6 +71,7 @@ function learningVideos() {
         title: "Solar System Geography Basics",
         embed: "https://www.youtube-nocookie.com/embed/libKVRa01L8"
       },
+      //all the links are broken [new imports are required]
       {
         title: "Indian History for Kids",
         embed: "https://www.youtube-nocookie.com/embed/WYgF8lsszQM"
@@ -95,7 +96,7 @@ function learningVideos() {
 
     science: [
       {
-        title: "Human Body for Kids",
+        title: "Human Body for Kids",//expired link
         embed: "https://www.youtube-nocookie.com/embed/VQm4q0pS79c"
       },
       {
@@ -103,15 +104,15 @@ function learningVideos() {
         embed: "https://www.youtube-nocookie.com/embed/al-do-HGuIk"
       },
       {
-        title: "States of Matter",
+        title: "States of Matter",//expired link
         embed: "https://www.youtube-nocookie.com/embed/9VJ3hXv9e8Q"
       },
       {
-        title: "Plants and Photosynthesis",
+        title: "Plants and Photosynthesis",//expired link
         embed: "https://www.youtube-nocookie.com/embed/UPBMG5EYydo"
       },
       {
-        title: "Simple Science Experiments",
+        title: "Simple Science Experiments",//expired link
         embed: "https://www.youtube-nocookie.com/embed/eQX5zEJ4VKc"
       },
       {
@@ -119,12 +120,13 @@ function learningVideos() {
         embed: "https://www.youtube-nocookie.com/embed/libKVRa01L8"
       },
       {
-        title: "Force and Motion",
+        title: "Force and Motion",//expired link
         embed: "https://www.youtube-nocookie.com/embed/GZgqM3k0HkE"
       }
     ],
 
     english: [
+      //all the links are broken [new imports are required]
       {
         title: "English Alphabet Learning",
         embed: "https://www.youtube-nocookie.com/embed/Ee4ef2H2M2k"
@@ -156,6 +158,7 @@ function learningVideos() {
     ],
 
     funActivities: [
+      //all the links are broken [new imports are required]
       {
         title: "Easy Drawing for Kids",
         embed: "https://www.youtube-nocookie.com/embed/VL6_1c1eB4U"

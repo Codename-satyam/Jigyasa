@@ -4,12 +4,29 @@ import "./g2.css";
 import correctSound from "./data/sounds/correct.mp3";
 import wrongSound from "./data/sounds/wrong.mp3";
 import timeoutSound from "./data/sounds/timeout.mp3";
+import gamesTracker from "../../../../api/gamesTracker";
+import auth from "../../../../api/auth";
 
 const CORRECT_SOUND = new Audio(correctSound);
 const WRONG_SOUND = new Audio(wrongSound);
 const TIMEOUT_SOUND = new Audio(timeoutSound);
 
+const shuffleArray = (array) => {
+  const shuffled =[...array];
+  for(let i= shuffled.length -1;i>0;i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+const getRandomQuestions = () => {
+  return shuffleArray(quizData).slice(0, 10);
+}
+
+
 function QuizGame() {
+  const [randomizedQuestions] = useState(() => getRandomQuestions());
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState(null);
@@ -17,7 +34,7 @@ function QuizGame() {
   const [timeLeft, setTimeLeft] = useState(10);
   const [reveal, setReveal] = useState(false);
 
-  const question = quizData[current];
+  const question = randomizedQuestions[current];
 
   useEffect(() => {
     if (timeLeft === 0 && !selected) {
@@ -55,13 +72,25 @@ function QuizGame() {
   };
 
   const moveNext = () => {
-    if (current + 1 < quizData.length) {
+    if (current + 1 < randomizedQuestions.length) {
       setCurrent(prev => prev + 1);
       setSelected(null);
       setReveal(false);
       setTimeLeft(10);
     } else {
       setShowResult(true);
+      
+      // Record game play
+      const user = auth.getCurrentUser();
+      if (user) {
+        gamesTracker.recordGamePlay({
+          email: user.email,
+          gameType: 'guess',
+          gameName: 'Guess the Guy',
+          score: score,
+          date: new Date().toISOString()
+        });
+      }
     }
   };
 
@@ -80,7 +109,7 @@ function QuizGame() {
         <div className="g2-container g2-result-container">
           <h2>🎉 Quiz Completed!</h2>
           <p className="g2-result-label">Final Score</p>
-          <h1 className="g2-final-score">{score} / {quizData.length}</h1>
+          <h1 className="g2-final-score">{score} / {randomizedQuestions.length}</h1>
           <button className="g2-restart-btn" onClick={restartGame}>Play Again</button>
         </div>
       </div>
@@ -91,7 +120,7 @@ function QuizGame() {
     <div className="g2-game-page">
       <div className="g2-container">
         <div className="g2-top">
-          <span>Q {current + 1}/{quizData.length}</span>
+          <span>Q {current + 1}/{randomizedQuestions.length}</span>
           <span className={`g2-timer ${timeLeft <= 3 ? "danger" : ""}`}>
             ⏱ {timeLeft}s
           </span>

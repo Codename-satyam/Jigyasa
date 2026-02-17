@@ -57,6 +57,7 @@ function Login() {
         </motion.label>
         <motion.input
           type="email"
+          placeholder="your@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -74,6 +75,7 @@ function Login() {
         </motion.label>
         <motion.input
           type="password"
+          placeholder="Enter password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required

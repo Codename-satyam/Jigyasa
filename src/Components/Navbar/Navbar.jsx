@@ -32,11 +32,17 @@ const Navbar = () => {
   return (
     <nav className="navbar pixelify-sans-font">
       <div className="logo">
-        <span>J</span>igyasa
+        <span className="logo-letter">J</span>
+        <span className="logo-letter">i</span>
+        <span className="logo-letter">g</span>
+        <span className="logo-letter">y</span>
+        <span className="logo-letter">a</span>
+        <span className="logo-letter">s</span>
+        <span className="logo-letter">a</span>
       </div>
-      
-      <button 
-        className="hamburger" 
+
+      <button
+        className="hamburger"
         onClick={toggleMenu}
         aria-label="Toggle menu"
         aria-expanded={menuOpen}
@@ -65,16 +71,16 @@ const Navbar = () => {
               <a
                 href="#"
                 className="nav-logout"
-              onClick={(e) => {
-                e.preventDefault();
-                handleLogout();
-              }}
-              role="button"
-              aria-label="Logout"
-            >
-              Logout
-            </a>
-          </li>
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLogout();
+                }}
+                role="button"
+                aria-label="Logout"
+              >
+                Logout
+              </a>
+            </li>
           </>
         )}
       </ul>

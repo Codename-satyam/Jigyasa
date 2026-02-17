@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import './Dashboard.css';
 import scoresApi from '../../api/scores';
+import gamesTracker from '../../api/gamesTracker';
 import auth from '../../api/auth';
 import data from '../Play/Videos/data.js';
 import { getSubjectProgress } from '../../api/progressTracker.js';
@@ -9,9 +10,11 @@ import { Link } from 'react-router-dom';
 function Dashboard() {
   const [link] = useState('/leaderboard');
   const [scores, setScores] = useState([]);
+  const [games, setGames] = useState([]);
 
   useEffect(() => {
     setScores(scoresApi.getScores());
+    setGames(gamesTracker.getGamePlays());
   }, []);
 
   const current = auth.getCurrentUser();
@@ -47,44 +50,138 @@ function Dashboard() {
       return Math.max(best, Math.round((score / total) * 100));
     }, 0);
 
+    // Get games played by current user
+    const userGames = current ? games.filter(g => g.email === current.email) : [];
+    const gamesByType = {};
+    userGames.forEach(g => {
+      if (!gamesByType[g.gameType]) {
+        gamesByType[g.gameType] = [];
+      }
+      gamesByType[g.gameType].push(g);
+    });
+
+    // Calculate best score in games
+    const bestGameScore = userGames.reduce((best, g) => {
+      const score = Number(g.score) || 0;
+      return Math.max(best, score);
+    }, 0);
+
     return [
+      // Learning Achievements
       {
         id: 'first-lesson',
         title: 'First Lesson',
         detail: 'Watch one video lesson.',
-        unlocked: totals.completedLessons >= 1
+        unlocked: totals.completedLessons >= 1,
+        icon: '📺'
       },
       {
         id: 'five-lessons',
         title: 'Mini Streak',
         detail: 'Finish 5 lessons.',
-        unlocked: totals.completedLessons >= 5
+        unlocked: totals.completedLessons >= 5,
+        icon: '🔥'
       },
       {
         id: 'ten-lessons',
         title: 'Lesson Explorer',
         detail: 'Finish 10 lessons.',
-        unlocked: totals.completedLessons >= 10
+        unlocked: totals.completedLessons >= 10,
+        icon: '🎓'
       },
+      // Quiz Achievements
       {
         id: 'quiz-starter',
         title: 'Quiz Starter',
         detail: 'Complete your first quiz.',
-        unlocked: myScores.length >= 1
+        unlocked: myScores.length >= 1,
+        icon: '🧠'
       },
       {
         id: 'quiz-ace',
         title: 'Quiz Ace',
         detail: 'Score 80% or more on a quiz.',
-        unlocked: bestScore >= 80
+        unlocked: bestScore >= 80,
+        icon: '⭐'
+      },
+      // Game Achievements
+      {
+        id: 'game-first',
+        title: 'Game Master',
+        detail: 'Play your first game.',
+        unlocked: userGames.length >= 1,
+        icon: '🎮'
+      },
+      {
+        id: 'game-5-plays',
+        title: 'Game Fan',
+        detail: 'Play 5 games.',
+        unlocked: userGames.length >= 5,
+        icon: '🎯'
+      },
+      {
+        id: 'game-10-plays',
+        title: 'Game Legend',
+        detail: 'Play 10 games.',
+        unlocked: userGames.length >= 10,
+        icon: '👑'
+      },
+      {
+        id: 'memory-master',
+        title: 'Memory Master',
+        detail: 'Play Memory Card Game.',
+        unlocked: (gamesByType['memory'] || []).length >= 1,
+        icon: '🧠'
+      },
+      {
+        id: 'guess-expert',
+        title: 'Guess Expert',
+        detail: 'Play Guess the Guy game.',
+        unlocked: (gamesByType['guess'] || []).length >= 1,
+        icon: '🤔'
+      },
+      {
+        id: 'monument-traveler',
+        title: 'Monument Traveler',
+        detail: 'Play Monument game.',
+        unlocked: (gamesByType['monument'] || []).length >= 1,
+        icon: '🗼'
+      },
+      {
+        id: 'math-solver',
+        title: 'Math Solver',
+        detail: 'Play Math game.',
+        unlocked: (gamesByType['math'] || []).length >= 1,
+        icon: '🔢'
+      },
+      {
+        id: 'game-2048-player',
+        title: '2048 Player',
+        detail: 'Play 2048 game.',
+        unlocked: (gamesByType['2048'] || []).length >= 1,
+        icon: '🎲'
+      },
+      {
+        id: 'game-6-player',
+        title: 'Game 6 Explorer',
+        detail: 'Play Game 6.',
+        unlocked: (gamesByType['game6'] || []).length >= 1,
+        icon: '🚀'
+      },
+      {
+        id: 'game-high-scorer',
+        title: 'High Scorer',
+        detail: 'Score 100 or more in any game.',
+        unlocked: bestGameScore >= 100,
+        icon: '🏆'
       }
     ];
-  }, [totals.completedLessons, myScores]);
+  }, [totals.completedLessons, myScores, games, current]);
   return (
     <div className="dashboard-root">
       <div className="dashboard-shell">
         <header className="dashboard-hero">
-          <div>
+          <div className="hero-content">
             <p className="hero-kicker">Your learning space</p>
             <h1>{current ? `Welcome back, ${current.name}` : 'Welcome back'}</h1>
             <Link to={link}>
@@ -92,8 +189,16 @@ function Dashboard() {
             </Link>
             <p className="hero-subtitle">Track your progress, celebrate wins, and jump back in.</p>
           </div>
-          <div className="hero-chip">
-            {current ? current.email : 'Guest mode'}
+          <div className="hero-avatar-section">
+            {current && (
+              <div className="hero-avatar">
+                <div className="avatar-emoji">{current.avatar || '🦁'}</div>
+                <span className="avatar-name">{current.name}</span>
+              </div>
+            )}
+            <div className="hero-chip">
+              {current ? current.email : 'Guest mode'}
+            </div>
           </div>
         </header>
 
@@ -104,7 +209,7 @@ function Dashboard() {
         )}
 
         <section className="dashboard-grid">
-          <div className="dash-card stats">
+          <div className="dash-card dash-stats">
             <h2>Learning stats</h2>
             <div className="stat-grid">
               <div>
@@ -137,6 +242,7 @@ function Dashboard() {
                   key={badge.id}
                   className={`achievement-item ${badge.unlocked ? 'unlocked' : ''}`}
                 >
+                  <div className="achievement-icon">{badge.icon}</div>
                   <div>
                     <span className="achievement-title">{badge.title}</span>
                     <span className="achievement-detail">{badge.detail}</span>

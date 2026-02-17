@@ -4,6 +4,8 @@ import "./g4.css";
 import correctSound from "./sounds/correct.mp3";
 import wrongSound from "./sounds/wrong.mp3";
 import timeoutSound from "./sounds/timeout.mp3";
+import gamesTracker from "../../../../api/gamesTracker";
+import auth from "../../../../api/auth";
 
 const CORRECT_SOUND = new Audio(correctSound);
 const WRONG_SOUND = new Audio(wrongSound);
@@ -102,6 +104,22 @@ function MathGame() {
 
     return () => clearInterval(interval);
   }, [timer, feedback, gameOver, generateEquation]);
+
+  // Record game when it's over
+  useEffect(() => {
+    if (gameOver && questionCount === MAX_QUESTIONS) {
+      const user = auth.getCurrentUser();
+      if (user) {
+        gamesTracker.recordGamePlay({
+          email: user.email,
+          gameType: 'math',
+          gameName: 'Math Game',
+          score: score,
+          date: new Date().toISOString()
+        });
+      }
+    }
+  }, [gameOver, questionCount, score]);
 
   const handleClick = (equation) => {
     if (feedback) {

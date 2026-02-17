@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFacebookF, faTwitter, faInstagram } from "@fortawesome/free-brands-svg-icons";
+import { Link } from "react-router-dom";
 import "./Footer.css";
 
 function Footer() {
@@ -14,10 +15,10 @@ function Footer() {
         <div className="footer-center">
           <h4>Quick Links</h4>
           <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/contact">Contact</a></li>
-            <li><a href="/quiz">Start Quiz</a></li>
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/about">About</Link></li>
+            <li><Link to="/contact">Contact</Link></li>
+            <li><Link to="/play/quiz-select">Start Quiz</Link></li>
           </ul>
         </div>
 

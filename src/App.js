@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Settings from "./Components/Settings/Settings.jsx";
+
+//Pages
 import Landing from "./Components/LandingPage/Landing.jsx";
 import HomePage from "./Components/HomePage/Page1/HomePage.jsx";
 import Navbar from "./Components/Navbar/Navbar.jsx";
@@ -8,28 +10,54 @@ import Page2 from "./Components/HomePage/Page2/Page2.jsx";
 import Page3 from "./Components/HomePage/Page3/Page3.jsx";
 import Page4 from "./Components/HomePage/Page4/Page4.jsx";
 import Footer from "./Components/Footer/Footer.jsx";
-import QuizPage from "./Components/Play/QuizPage/QuizPage.jsx";
-import SelectQuiz from "./Components/Play/QuizPage/SelectQuiz.jsx";
-import PlayLanding from "./Components/Play/PlayLanding/PlayLanding.jsx";
 import Contact from "./Components/ContactUs/Contact.jsx";
 import About from "./Components/About/About.jsx";
 import Dashboard from "./Components/Dashboard/Dashboard.jsx";
+//Pages
+
+
+//The page is responsible for routing the Quiz, Games and Courses
+import PlayLanding from "./Components/Play/PlayLanding/PlayLanding.jsx";
+
+
+
+//Login and Register
 import Login from "./Components/Login/Login.jsx";
 import Register from "./Components/Login/Register.jsx";
 import ProtectedRoute from "./Components/Auth/ProtectedRoute.jsx";
-import Games from "./Components/Play/Games/Games.jsx";
+//Login and Register
+
 import Notes from "./Components/Play/Notes/Notes.jsx";
+
+//Quiz
+import QuizPage from "./Components/Play/QuizPage/QuizPage.jsx";
+import SelectQuiz from "./Components/Play/QuizPage/SelectQuiz.jsx";
+//Quiz
+
+//Games
+import Games from "./Components/Play/Games/Games.jsx";
 import MemoryGame from "./Components/Play/Games/g1/game1.jsx";
 import Guessgame from "./Components/Play/Games/g2/g2.jsx";
 import Monumentgame from "./Components/Play/Games/g3/g3.jsx";
 import MathGame from "./Components/Play/Games/g4/g4.jsx";
-import PageTransition from "./Components/PageTransition.jsx";
+import Game2048 from "./Components/Play/Games/g5/g5.jsx";
+//Games
+
+
+//Videos
 import SubjectSelector from "./Components/Play/Videos/Selector/SubjectCards.jsx";
 import TopicSelector from "./Components/Play/Videos/Selector/TopicSelector.jsx";
 import VideoPlayer from "./Components/Play/Videos/VideoPlayer.jsx";
 import Courses from "./Components/Play/Courses/Courses.jsx";
+//Videos
+
+//leaderboard
 import LeaderBoard from "./Components/LeaderBoard/LeaderBoard.jsx";
 // import ThreeScene from "./Components/ThreeScene.jsx";
+
+
+//transitions
+import PageTransition from "./Components/PageTransition.jsx";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -157,6 +185,12 @@ function AnimatedRoutes() {
             <PageTransition>
               <Navbar />
               <MathGame />
+            </PageTransition>
+          }/>
+          <Route path="/play/games/g5" element={
+            <PageTransition>
+              <Navbar />
+              <Game2048 />
             </PageTransition>
           }/>
           <Route
