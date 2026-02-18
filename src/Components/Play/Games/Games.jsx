@@ -142,18 +142,18 @@ function Games() {
               </div>
               <div className="card-badge">LEVEL 5</div>
             </motion.button>
-             <motion.button
+            <motion.button
               type="button"
               className="game-card card-chickchick"
               variants={cardVariants}
               whileHover={{ scale: 1.08, y: -10 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate("/play/games/g4")}
+              onClick={() => navigate("/play/games/g6")}
             >
-              <div className="card-icon">🔥</div>
+              <div className="card-icon">⚔️</div>
               <div className="card-content">
-                <h3>Game 6</h3>
-                <p>Upr wala hi baachaye ab</p>
+                <h3>Riddler</h3>
+                <p>Be The Riddle master and defeat your enemies</p>
               </div>
               <div className="card-badge">LEVEL 6</div>
             </motion.button>

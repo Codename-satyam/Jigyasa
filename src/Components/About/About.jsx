@@ -4,6 +4,7 @@ import siddarth from '../../Assets/about_videos/sidh.mp4';
 import yashvi from '../../Assets/about_videos/yash[1].mp4';
 import rabindra from '../../Assets/about_videos/rabindra.mp4';
 import Prashant from '../../Assets/about_videos/prashant.mp4';
+import Sanjay from '../../Assets/about_videos/sanjay.mp4';
 
 import "./About.css";
 
@@ -75,6 +76,12 @@ function About() {
                 <video src={Prashant} autoPlay loop muted className="about-video" />
                 <div className="box-label">Prashant</div>
                 <div className="box-pulse"></div>
+            </div>
+            <div className={`floating-box box-6 ${hoveredBox === 5 ? 'hovered' : ''}`}
+                onMouseEnter={() => setHoveredBox(5)}
+                onMouseLeave={() => setHoveredBox(null)}>
+                <video src={Sanjay} autoPlay loop muted className="about-video" />
+                <div className="box-label">Sanjay</div>
             </div>
 
             <div className="about-gameboy">

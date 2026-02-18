@@ -41,6 +41,7 @@ import Guessgame from "./Components/Play/Games/g2/g2.jsx";
 import Monumentgame from "./Components/Play/Games/g3/g3.jsx";
 import MathGame from "./Components/Play/Games/g4/g4.jsx";
 import Game2048 from "./Components/Play/Games/g5/g5.jsx";
+import Game6 from "./Components/Play/Games/g6/g6.jsx";
 //Games
 
 
@@ -66,185 +67,191 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
-          <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
-          <Route
-            path="/home"
-            element={
-              <PageTransition>
-                <Navbar />
-                <HomePage />
-                <Page2 />
-                <Page3 />
-                <Page4 />
-                <Footer />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/play/quiz-select"
-            element={
-              <PageTransition>
-                <SelectQuiz />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/play/quiz"
-            element={
-              <PageTransition>
-                <Navbar />
-                <QuizPage/>
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/play"
-            element={
-              <PageTransition>
-                <Navbar />
-                <PlayLanding />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/courses"
-            element={
-              <PageTransition>
-                <Navbar />
-                <Courses />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/contact"
-            element={
-              <PageTransition>
-                <Navbar />
-                <Contact />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/videos"
-            element={
-              <PageTransition>
-                <Navbar />
-                <SubjectSelector />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/videos/subject/:subject"
-            element={
-              <PageTransition>
-                <Navbar />
-                <TopicSelector />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/videos/subject/:subject/topic/:topicIndex"
-            element={
-              <PageTransition>
-                <Navbar />
-                <VideoPlayer />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/games"
-            element={
-              <PageTransition>
-                <Navbar />
-                <Games />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/play/games/g1"
-            element={
-              <PageTransition>
-                <Navbar />
-                <MemoryGame />
-              </PageTransition>
-            }
-          />
-          <Route path="/play/games/g2" element={
+        <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
+        <Route
+          path="/home"
+          element={
             <PageTransition>
               <Navbar />
-              <Guessgame/>
+              <HomePage />
+              <Page2 />
+              <Page3 />
+              <Page4 />
+              <Footer />
             </PageTransition>
-          }/>
-          <Route path="/play/games/g3" element={
+          }
+        />
+        <Route
+          path="/play/quiz-select"
+          element={
+            <PageTransition>
+              <SelectQuiz />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/play/quiz"
+          element={
             <PageTransition>
               <Navbar />
-              <Monumentgame />
+              <QuizPage />
             </PageTransition>
-          }/>
-          <Route path="/play/games/g4" element={
+          }
+        />
+        <Route
+          path="/play"
+          element={
             <PageTransition>
               <Navbar />
-              <MathGame />
+              <PlayLanding />
             </PageTransition>
-          }/>
-          <Route path="/play/games/g5" element={
+          }
+        />
+        <Route
+          path="/courses"
+          element={
             <PageTransition>
               <Navbar />
-              <Game2048 />
+              <Courses />
             </PageTransition>
-          }/>
-          <Route
-            path="/notes"
-            element={
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <PageTransition>
+              <Navbar />
+              <Contact />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/videos"
+          element={
+            <PageTransition>
+              <Navbar />
+              <SubjectSelector />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/videos/subject/:subject"
+          element={
+            <PageTransition>
+              <Navbar />
+              <TopicSelector />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/videos/subject/:subject/topic/:topicIndex"
+          element={
+            <PageTransition>
+              <Navbar />
+              <VideoPlayer />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/games"
+          element={
+            <PageTransition>
+              <Navbar />
+              <Games />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/play/games/g1"
+          element={
+            <PageTransition>
+              <Navbar />
+              <MemoryGame />
+            </PageTransition>
+          }
+        />
+        <Route path="/play/games/g2" element={
+          <PageTransition>
+            <Navbar />
+            <Guessgame />
+          </PageTransition>
+        } />
+        <Route path="/play/games/g3" element={
+          <PageTransition>
+            <Navbar />
+            <Monumentgame />
+          </PageTransition>
+        } />
+        <Route path="/play/games/g4" element={
+          <PageTransition>
+            <Navbar />
+            <MathGame />
+          </PageTransition>
+        } />
+        <Route path="/play/games/g5" element={
+          <PageTransition>
+            <Navbar />
+            <Game2048 />
+          </PageTransition>
+        } />
+        <Route path="/play/games/g6" element={
+          <PageTransition>
+            <Navbar />
+            <Game6 />
+          </PageTransition>
+        } />
+        <Route
+          path="/notes"
+          element={
+            <PageTransition>
+              <Navbar />
+              <Notes />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/leaderboard"
+          element={
+            <PageTransition>
+              <Navbar />
+              <LeaderBoard />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
               <PageTransition>
                 <Navbar />
-                <Notes />
+                <Dashboard />
               </PageTransition>
-            }
-          />
-          <Route
-            path="/leaderboard"
-            element={
-              <PageTransition>
-                <Navbar />
-                <LeaderBoard />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <PageTransition>
-                  <Navbar />
-                  <Dashboard />
-                </PageTransition>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
-          <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
-          <Route
-            path="/about"
-            element={
-              <PageTransition>
-                <Navbar />
-                <About />
-              </PageTransition>
-            }
-          />
-        </Routes>
-      </AnimatePresence>
-    );
-  }
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+        <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+        <Route
+          path="/about"
+          element={
+            <PageTransition>
+              <Navbar />
+              <About />
+            </PageTransition>
+          }
+        />
+      </Routes>
+    </AnimatePresence>
+  );
+}
 
-  function App() {
-    return (
-      <div className="App">
-        <Router>
-          <AnimatedRoutes />
-        </Router>
-      </div>
-    );
-  }
+function App() {
+  return (
+    <div className="App">
+      <Router>
+        <AnimatedRoutes />
+      </Router>
+    </div>
+  );
+}
 export default App;
