@@ -1,0 +1,256 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: radial-gradient(circle at top, #1a0033, #000000);
+  font-family: 'Press Start 2P', cursive;
+  color: #00ffff;
+}
+
+/* ================= ROOT ================= */
+
+.teacher-panel-root {
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+/* ================= HEADER ================= */
+
+.teacher-panel-header {
+  background: #110022;
+  border: 4px solid #00ffff;
+  padding: 25px;
+  margin-bottom: 40px;
+  box-shadow: 0 0 20px #00ffff;
+}
+
+.teacher-panel-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.teacher-panel-user {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.teacher-panel-avatar {
+  font-size: 32px;
+}
+
+.teacher-panel-logout {
+  background: #ff0055;
+  color: #fff;
+  border: 3px solid #fff;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.teacher-panel-logout:hover {
+  background: #ff3377;
+  transform: scale(1.05);
+  box-shadow: 0 0 15px #ff0055;
+}
+
+/* ================= STATS ================= */
+
+.teacher-panel-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+.teacher-panel-stat-card {
+  background: #140033;
+  border: 3px solid #ffff00;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 0 15px #ffff00;
+  transition: 0.3s;
+}
+
+.teacher-panel-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 25px #ffff00;
+}
+
+.teacher-panel-stat-icon {
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+.teacher-panel-stat-value {
+  font-size: 18px;
+  color: #ffff00;
+  margin-bottom: 10px;
+}
+
+.teacher-panel-stat-label {
+  font-size: 10px;
+  color: #00ffff;
+}
+
+/* ================= TABS ================= */
+
+.teacher-panel-tabs {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.teacher-panel-tab {
+  background: #000;
+  border: 3px solid #00ffff;
+  color: #00ffff;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.teacher-panel-tab:hover {
+  background: #00ffff;
+  color: #000;
+}
+
+.teacher-panel-tab.active {
+  background: #ffff00;
+  color: #000;
+  border-color: #ffff00;
+  box-shadow: 0 0 15px #ffff00;
+}
+
+/* ================= CONTENT ================= */
+
+.teacher-panel-content {
+  background: #0d001a;
+  border: 4px solid #ff00ff;
+  padding: 30px;
+  box-shadow: 0 0 20px #ff00ff;
+}
+
+/* ================= TABLE ================= */
+
+.teacher-panel-table-wrapper {
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+.teacher-panel-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.teacher-panel-table th,
+.teacher-panel-table td {
+  border: 2px solid #00ffff;
+  padding: 12px;
+  font-size: 10px;
+  text-align: center;
+}
+
+.teacher-panel-table th {
+  background: #220044;
+  color: #ffff00;
+}
+
+.teacher-panel-table tr:nth-child(even) {
+  background: #140033;
+}
+
+.teacher-panel-table tr:hover {
+  background: #1f0044;
+}
+
+/* ================= QUIZ GRID ================= */
+
+.teacher-panel-quiz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.teacher-panel-quiz-card {
+  background: #110022;
+  border: 3px solid #00ff99;
+  padding: 20px;
+  box-shadow: 0 0 15px #00ff99;
+  transition: 0.3s;
+}
+
+.teacher-panel-quiz-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 25px #00ff99;
+}
+
+.teacher-panel-quiz-card h3 {
+  color: #ffff00;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
+.teacher-panel-quiz-card p {
+  font-size: 9px;
+  margin-bottom: 15px;
+  color: #ccc;
+}
+
+.teacher-panel-quiz-card a,
+.teacher-panel-quiz-card button {
+  display: inline-block;
+  margin: 5px 5px 0 0;
+  padding: 6px 10px;
+  font-size: 8px;
+  border: 2px solid #00ffff;
+  background: #000;
+  color: #00ffff;
+  cursor: pointer;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.teacher-panel-quiz-card a:hover,
+.teacher-panel-quiz-card button:hover {
+  background: #00ffff;
+  color: #000;
+}
+
+/* ================= CREATE BUTTON ================= */
+
+.teacher-panel-create {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.teacher-panel-create-btn {
+  background: #ffff00;
+  color: #000;
+  border: 3px solid #000;
+  padding: 15px 25px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.teacher-panel-create-btn:hover {
+  background: #ffcc00;
+  box-shadow: 0 0 20px #ffff00;
+  transform: scale(1.05);
+}
+
+/* ================= EMPTY STATE ================= */
+
+p {
+  font-size: 10px;
+  color: #aaa;
+  margin-top: 20px;
+}

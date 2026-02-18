@@ -14,9 +14,8 @@ function Login() {
     e.preventDefault();
     setError(null);
     try {
-      await auth.login({ email, password });
-      // After successful login, send user to the homepage instead of opening the quiz
-      navigate('/home');
+      const user = await auth.login({ email, password });
+      navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Login failed');
     }

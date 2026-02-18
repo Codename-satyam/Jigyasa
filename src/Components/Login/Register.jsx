@@ -9,25 +9,28 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [selectedAvatar, setSelectedAvatar] = useState(1);
+  const [role, setRole] = useState("student"); // 'student' or 'teacher'
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const submit = async (e) => {
     e.preventDefault();
     setError(null);
-    
+
     if (!name.trim()) {
       setError("Please enter your name");
       return;
     }
-    
+
     try {
-      await auth.register({ name, email, password, avatarId: selectedAvatar });
-      navigate('/home');
+      await auth.register({ name, email, password, avatarId: selectedAvatar, role });
+      // Redirect to dashboard
+      navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Registration failed');
     }
   };
+
 
   const selectedAvatarEmoji = AVATAR_OPTIONS.find(a => a.id === selectedAvatar)?.emoji || '🦁';
 
@@ -47,7 +50,7 @@ function Register() {
         >
           Create Account
         </motion.h2>
-        
+
         {error && (
           <motion.div
             className="auth-error"
@@ -58,7 +61,7 @@ function Register() {
             {error}
           </motion.div>
         )}
-        
+
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -111,6 +114,55 @@ function Register() {
         </motion.div>
 
         <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.42 }}
+          className="form-group"
+        >
+          <label>Account Type</label>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <motion.button
+              type="button"
+              className={`role-btn ${role === 'student' ? 'active' : ''}`}
+              onClick={() => setRole('student')}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              style={{
+                flex: 1,
+                padding: '10px',
+                border: '2px solid',
+                borderColor: role === 'student' ? '#00ffff' : '#666',
+                background: role === 'student' ? 'rgba(0,255,255,0.1)' : 'transparent',
+                color: '#fff',
+                borderRadius: '5px',
+                cursor: 'pointer'
+              }}
+            >
+              👨‍🎓 Student
+            </motion.button>
+            <motion.button
+              type="button"
+              className={`role-btn ${role === 'teacher' ? 'active' : ''}`}
+              onClick={() => setRole('teacher')}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              style={{
+                flex: 1,
+                padding: '10px',
+                border: '2px solid',
+                borderColor: role === 'teacher' ? '#00ffff' : '#666',
+                background: role === 'teacher' ? 'rgba(0,255,255,0.1)' : 'transparent',
+                color: '#fff',
+                borderRadius: '5px',
+                cursor: 'pointer'
+              }}
+            >
+              👨‍🏫 Teacher
+            </motion.button>
+          </div>
+        </motion.div>
+
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45 }}
@@ -140,6 +192,7 @@ function Register() {
               </motion.button>
             ))}
           </div>
+
         </motion.div>
 
         <motion.button

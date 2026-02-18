@@ -27,11 +27,12 @@ function loadUsers() {
   }
 }
 
+
 function saveUsers(users) {
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
 }
 
-export function register({ name, email, password, avatarId }) {
+export function register({ name, email, password, avatarId, role = 'student' }) {
   const users = loadUsers();
   if (users.find((u) => u.email === email)) {
     throw new Error("User already exists");
@@ -45,7 +46,8 @@ export function register({ name, email, password, avatarId }) {
     email, 
     password,
     avatarId: avatar.id,
-    avatar: avatar.emoji
+    avatar: avatar.emoji,
+    role: role // 'student' or 'teacher'
   };
   users.push(user);
   saveUsers(users);
@@ -56,7 +58,8 @@ export function register({ name, email, password, avatarId }) {
     name: user.name, 
     email: user.email,
     avatarId: user.avatarId,
-    avatar: user.avatar
+    avatar: user.avatar,
+    role: user.role
   }));
   return user;
 }
@@ -71,7 +74,8 @@ export function login({ email, password }) {
     name: u.name, 
     email: u.email,
     avatarId: u.avatarId || 1,
-    avatar: u.avatar || '🦁'
+    avatar: u.avatar || '🦁',
+    role: u.role || 'student'
   };
   
   localStorage.setItem(CURRENT_KEY, JSON.stringify(userData));

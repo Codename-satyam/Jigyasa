@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, {useEffect, useMemo, useState } from 'react';
 import './Dashboard.css';
 import scoresApi from '../../api/scores';
 import gamesTracker from '../../api/gamesTracker';
@@ -8,26 +8,32 @@ import { getSubjectProgress } from '../../api/progressTracker.js';
 import { Link } from 'react-router-dom';
 
 function Dashboard() {
+  const [user, setUser] = useState(null);
   const [link] = useState('/leaderboard');
   const [scores, setScores] = useState([]);
   const [games, setGames] = useState([]);
+  const [teacher] = useState('/teacher-dashboard');
+
+  useEffect(() => {
+    const current = auth.getCurrentUser();
+    setUser(current);
+  }, []);
 
   useEffect(() => {
     setScores(scoresApi.getScores());
     setGames(gamesTracker.getGamePlays());
   }, []);
 
-  const current = auth.getCurrentUser();
-
   const myScores = useMemo(() => {
-    if (!current) return [];
+    if (!user) return [];
     return scores
-      .filter((s) => s.email && s.email === current.email)
+      .filter((s) => s.email && s.email === user.email)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [scores, current]);
+  }, [scores, user]);
 
   const subjects = useMemo(() => Object.keys(data), []);
   const subjectSummaries = useMemo(() => {
+    if (!subjects.length) return [];
     return subjects.map((subject) => {
       const topics = data[subject] || [];
       const progress = getSubjectProgress(subject, topics.length, topics);
@@ -51,7 +57,7 @@ function Dashboard() {
     }, 0);
 
     // Get games played by current user
-    const userGames = current ? games.filter(g => g.email === current.email) : [];
+    const userGames = user ? games.filter(g => g.email === user.email) : [];
     const gamesByType = {};
     userGames.forEach(g => {
       if (!gamesByType[g.gameType]) {
@@ -176,33 +182,38 @@ function Dashboard() {
         icon: '🏆'
       }
     ];
-  }, [totals.completedLessons, myScores, games, current]);
+  }, [totals.completedLessons, myScores, games, user]);
   return (
     <div className="dashboard-root">
       <div className="dashboard-shell">
         <header className="dashboard-hero">
           <div className="hero-content">
             <p className="hero-kicker">Your learning space</p>
-            <h1>{current ? `Welcome back, ${current.name}` : 'Welcome back'}</h1>
+            <h1>{user ? `Welcome back, ${user.name}` : 'Welcome back'}</h1>
             <Link to={link}>
               <button className='ViewLeaderBoard'>View Leaderboard</button>
             </Link>
+            {user?.role === 'teacher' && (
+              <Link to={teacher}>
+                <button className='ViewTeacherDashboard'>View Teacher Dashboard</button>
+              </Link>
+            )}
             <p className="hero-subtitle">Track your progress, celebrate wins, and jump back in.</p>
           </div>
           <div className="hero-avatar-section">
-            {current && (
+            {user && (
               <div className="hero-avatar">
-                <div className="avatar-emoji">{current.avatar || '🦁'}</div>
-                <span className="avatar-name">{current.name}</span>
+                <div className="avatar-emoji">{user.avatar || '🦁'}</div>
+                <span className="avatar-name">{user.name}</span>
               </div>
             )}
             <div className="hero-chip">
-              {current ? current.email : 'Guest mode'}
+              {user ? user.email : 'Guest mode'}
             </div>
           </div>
         </header>
 
-        {!current && (
+        {!user && (
           <div className="dashboard-alert">
             Please log in to see your personal progress and quiz history.
           </div>

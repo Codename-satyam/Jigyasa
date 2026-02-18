@@ -13,6 +13,8 @@ import Footer from "./Components/Footer/Footer.jsx";
 import Contact from "./Components/ContactUs/Contact.jsx";
 import About from "./Components/About/About.jsx";
 import Dashboard from "./Components/Dashboard/Dashboard.jsx";
+import TeacherDashboard from "./Components/Dashboard/TeacherDashboard.jsx";
+import CreateQuiz from "./Components/Dashboard/CreateQuiz.jsx";
 //Pages
 
 
@@ -25,6 +27,7 @@ import PlayLanding from "./Components/Play/PlayLanding/PlayLanding.jsx";
 import Login from "./Components/Login/Login.jsx";
 import Register from "./Components/Login/Register.jsx";
 import ProtectedRoute from "./Components/Auth/ProtectedRoute.jsx";
+import RoleProtectedRoute from "./Components/Auth/RoleProtectedRoute.jsx";
 //Login and Register
 
 import Notes from "./Components/Play/Notes/Notes.jsx";
@@ -229,8 +232,47 @@ function AnimatedRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/teacher-dashboard"
+          element={
+            <RoleProtectedRoute requiredRoles={['teacher']}>
+              <PageTransition>
+                <TeacherDashboard />
+              </PageTransition>
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/create-quiz"
+          element={
+            <RoleProtectedRoute requiredRoles={['teacher']}>
+              <PageTransition>
+                <CreateQuiz />
+              </PageTransition>
+            </RoleProtectedRoute>
+          }
+        />
         <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
         <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+        <Route 
+          path="/unauthorized" 
+          element={
+            <PageTransition>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                height: '100vh',
+                color: '#fff',
+                flexDirection: 'column',
+                gap: '20px'
+              }}>
+                <h1>Access Denied</h1>
+                <p>You don't have permission to access this page</p>
+              </div>
+            </PageTransition>
+          } 
+        />
         <Route
           path="/about"
           element={
