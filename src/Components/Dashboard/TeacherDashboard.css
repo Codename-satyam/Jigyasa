@@ -9,7 +9,7 @@
 body {
   background: radial-gradient(circle at top, #1a0033, #000000);
   font-family: 'Press Start 2P', cursive;
-  color: #00ffff;
+  color: #ffffff;
 }
 
 /* ================= ROOT ================= */
@@ -154,8 +154,9 @@ body {
 .teacher-panel-table td {
   border: 2px solid #00ffff;
   padding: 12px;
-  font-size: 10px;
+  font-size: 15px;
   text-align: center;
+
 }
 
 .teacher-panel-table th {

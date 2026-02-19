@@ -1,8 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./g6.css";
-import goblin from "../../../../Assets/g6/goblin.png";
+// import goblin from "../../../../Assets/g6/goblin.png";
 import knight from "../../../../Assets/g6/knight.png";
 import beast from "../../../../Assets/g6/Beast.png";
+import knightdamage from "../../../../Assets/g6/knight-damage.png";
+import beastdamage from "../../../../Assets/g6/Beast-damage.png";
+import gameend from "../../../../Assets/g6/game-end.png";
 
 const riddles = [
     {
@@ -133,6 +136,11 @@ function RiddleRPG() {
     const [shake, setShake] = useState(false);
     const [damagePopup, setDamagePopup] = useState(null);
     const [victoryScreen, setVictoryScreen] = useState(false);
+    const [playerDamaged, setPlayerDamaged] = useState(false);
+    const [enemyDamaged, setEnemyDamaged] = useState(false);
+
+    const playerDamageTimerRef = useRef(null);
+    const enemyDamageTimerRef = useRef(null);
 
     const isVictory = enemy.hp <= 0;
     const isDefeat = player.hp <= 0;
@@ -143,6 +151,12 @@ function RiddleRPG() {
     const enemyAttack = () => {
         setShake(true);
         setDamagePopup({ value: `-${enemy.damage}`, type: "player" });
+
+        setPlayerDamaged(true);
+        if (playerDamageTimerRef.current) {
+            clearTimeout(playerDamageTimerRef.current);
+        }
+        playerDamageTimerRef.current = setTimeout(() => setPlayerDamaged(false), 400);
 
         setPlayer((prev) => ({
             ...prev,
@@ -190,8 +204,7 @@ function RiddleRPG() {
         }
 
         const correct =
-            input.trim().toLowerCase() === riddles[current].answer;
-
+            input.trim().toLowerCase() === riddles[current].answer.toLowerCase();
         if (!correct) {
             setMessage("Wrong answer! Enemy attacks!");
             enemyAttack();
@@ -204,6 +217,12 @@ function RiddleRPG() {
 
         setShake(true);
         setDamagePopup({ value: `-${damage}`, type: "enemy" });
+
+        setEnemyDamaged(true);
+        if (enemyDamageTimerRef.current) {
+            clearTimeout(enemyDamageTimerRef.current);
+        }
+        enemyDamageTimerRef.current = setTimeout(() => setEnemyDamaged(false), 400);
 
         setEnemy((prev) => ({
             ...prev,
@@ -227,6 +246,17 @@ function RiddleRPG() {
             setVictoryScreen(true);
         }
     }, [isVictory]);
+
+    useEffect(() => {
+        return () => {
+            if (playerDamageTimerRef.current) {
+                clearTimeout(playerDamageTimerRef.current);
+            }
+            if (enemyDamageTimerRef.current) {
+                clearTimeout(enemyDamageTimerRef.current);
+            }
+        };
+    }, []);
 
     const continueGame = () => {
         setVictoryScreen(false);
@@ -260,7 +290,11 @@ function RiddleRPG() {
                     <div className="character-header">
                         <h3 className="level-badge">LEVEL {player.level}</h3>
                     </div>
-                    <img src={knight} alt="Player" className="character-portrait" />
+                    <img
+                        src={playerDamaged ? knightdamage : knight}
+                        alt="Player"
+                        className="character-portrait"
+                    />
                     <div className="stats-container">
                         <div className="stat-row">
                             <span className="stat-label">HP</span>
@@ -269,6 +303,7 @@ function RiddleRPG() {
                                     className={`player-fill ${player.hp < player.maxHp * 0.3 ? "low-hp" : ""}`}
                                     style={{ width: `${hpPercent}%` }}
                                 />
+                                <span className="hp-text">{player.hp}/{player.maxHp}</span>
                             </div>
                             {/* <span className="stat-value">{player.hp}/{player.maxHp}</span> */}
                         </div>
@@ -302,7 +337,11 @@ function RiddleRPG() {
                         <h3 className="enemy-name">{enemy.name}</h3>
                         <span className="enemy-level">Lv {enemy.level}</span>
                     </div>
-                    <img src={beast} alt="Enemy" className="character-portrait enemy-portrait" />
+                    <img
+                        src={enemyDamaged ? beastdamage : beast}
+                        alt="Enemy"
+                        className="character-portrait enemy-portrait"
+                    />
                     <div className="stats-container">
                         <div className="stat-row">
                             <span className="stat-label">HP</span>
@@ -311,6 +350,7 @@ function RiddleRPG() {
                                     className={`enemy-fill ${enemy.hp < enemy.maxHp * 0.3 ? "low-hp" : ""}`}
                                     style={{ width: `${enemyPercent}%` }}
                                 />
+                                <span className="hp-text">{enemy.hp}/{enemy.maxHp}</span>
                             </div>
                             {/* <span className="stat-value">{enemy.hp}/{enemy.maxHp}</span> */}
                         </div>
@@ -349,9 +389,12 @@ function RiddleRPG() {
             {message && <div className="message">{message}</div>}
 
             {isDefeat && (
-                <div className="message">
-                    ☠️ You were defeated!
-                    <button className="g6-button" onClick={restartGame}>Restart</button>
+                <div className="defeat-screen">
+                    <div className="defeat-content">
+                        <img src={gameend} alt="Game over" className="gamend" />
+                        <h2>YOU WERE DEFEATED</h2>
+                        <button className="g6-button" onClick={restartGame}>Restart</button>
+                    </div>
                 </div>
             )}
 
