@@ -176,6 +176,56 @@ function Game2048() {
         return () => window.removeEventListener("keydown", handleKey);
     }, [board, gameOver]);
 
+    // Swipe Event Listeners
+    useEffect(() => {
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        const handleTouchStart = (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        };
+
+        const handleTouchEnd = (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+            const minSwipeDistance = 25;
+
+            // Detect horizontal swipes
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+                if (deltaX > 0) {
+                    handleMove("right");
+                } else {
+                    handleMove("left");
+                }
+            }
+            // Detect vertical swipes
+            else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > minSwipeDistance) {
+                if (deltaY > 0) {
+                    handleMove("down");
+                } else {
+                    handleMove("up");
+                }
+            }
+        };
+
+        const gameBoard = document.querySelector(".board");
+        if (gameBoard) {
+            gameBoard.addEventListener("touchstart", handleTouchStart, false);
+            gameBoard.addEventListener("touchend", handleTouchEnd, false);
+
+            return () => {
+                gameBoard.removeEventListener("touchstart", handleTouchStart);
+                gameBoard.removeEventListener("touchend", handleTouchEnd);
+            };
+        }
+    }, [board, gameOver]);
+
     // Record game when it's over
     useEffect(() => {
         if (gameOver) {
@@ -248,7 +298,7 @@ function Game2048() {
 
                         <div className="controls-info">
                             <p>⬆️ ⬇️ ⬅️ ➡️</p>
-                            <p>Use arrow keys</p>
+                            <p>Use arrow keys or swipe</p>
                         </div>
                     </div>
                 </div>
