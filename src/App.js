@@ -15,6 +15,7 @@ import About from "./Components/About/About.jsx";
 import Dashboard from "./Components/Dashboard/Dashboard.jsx";
 import TeacherDashboard from "./Components/Dashboard/TeacherDashboard.jsx";
 import CreateQuiz from "./Components/Dashboard/CreateQuiz.jsx";
+import Admin from "./Components/Dashboard/Admin.jsx";
 //Pages
 
 
@@ -26,8 +27,11 @@ import PlayLanding from "./Components/Play/PlayLanding/PlayLanding.jsx";
 //Login and Register
 import Login from "./Components/Login/Login.jsx";
 import Register from "./Components/Login/Register.jsx";
+import AdminLogin from "./Components/Login/AdminLogin.jsx";
+import BlockedUser from "./Components/Login/BlockedUser.jsx";
 import ProtectedRoute from "./Components/Auth/ProtectedRoute.jsx";
 import RoleProtectedRoute from "./Components/Auth/RoleProtectedRoute.jsx";
+import AdminProtectedRoute from "./Components/Auth/AdminProtectedRoute.jsx";
 //Login and Register
 
 import Notes from "./Components/Play/Notes/Notes.jsx";
@@ -252,8 +256,20 @@ function AnimatedRoutes() {
             </RoleProtectedRoute>
           }
         />
+        <Route
+          path="/admin"
+          element={
+            <AdminProtectedRoute>
+              <PageTransition>
+                <Admin />
+              </PageTransition>
+            </AdminProtectedRoute>
+          }
+        />
         <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
         <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+        <Route path="/admin/login" element={<PageTransition><AdminLogin /></PageTransition>} />
+        <Route path="/blocked" element={<PageTransition><BlockedUser /></PageTransition>} />
         <Route 
           path="/unauthorized" 
           element={
@@ -263,12 +279,16 @@ function AnimatedRoutes() {
                 justifyContent: 'center', 
                 alignItems: 'center', 
                 height: '100vh',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 color: '#fff',
                 flexDirection: 'column',
-                gap: '20px'
+                gap: '20px',
+                textAlign: 'center',
+                padding: '20px'
               }}>
-                <h1>Access Denied</h1>
-                <p>You don't have permission to access this page</p>
+                <h1 style={{ fontSize: '3rem', margin: '0 0 10px' }}>Access Denied</h1>
+                <p style={{ fontSize: '1.2rem', margin: 0 }}>You don't have permission to access this page</p>
+                <p style={{ fontSize: '0.95rem', opacity: 0.8 }}>Please contact an administrator if you believe this is an error.</p>
               </div>
             </PageTransition>
           } 

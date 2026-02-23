@@ -69,13 +69,19 @@ export function login({ email, password }) {
   const u = users.find((x) => x.email === email && x.password === password);
   if (!u) throw new Error("Invalid credentials");
   
+  // Check if user is blocked
+  if (u.blocked) {
+    throw new Error("ACCOUNT_BLOCKED");
+  }
+  
   const userData = { 
     id: u.id, 
     name: u.name, 
     email: u.email,
     avatarId: u.avatarId || 1,
     avatar: u.avatar || '🦁',
-    role: u.role || 'student'
+    role: u.role || 'student',
+    blocked: u.blocked || false
   };
   
   localStorage.setItem(CURRENT_KEY, JSON.stringify(userData));
@@ -89,15 +95,39 @@ export function logout() {
 export function getCurrentUser() {
   try {
     const raw = localStorage.getItem(CURRENT_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    
+    const currentUser = JSON.parse(raw);
+    
+    // Check if user is still blocked in the database
+    const users = loadUsers();
+    const dbUser = users.find(u => u.id === currentUser.id);
+    
+    if (dbUser && dbUser.blocked) {
+      // User has been blocked, logout immediately
+      localStorage.removeItem(CURRENT_KEY);
+      return null;
+    }
+    
+    return currentUser;
   } catch (e) {
     return null;
   }
+}
+
+export function isUserBlocked(userId) {
+  const users = loadUsers();
+  const user = users.find(u => u.id === userId);
+  return user ? user.blocked || false : false;
 }
 
 export function isAuthenticated() {
   return !!getCurrentUser();
 }
 
-const auth = { register, login, logout, getCurrentUser, isAuthenticated, AVATAR_OPTIONS };
+export function getAllUsers() {
+  return loadUsers();
+}
+
+const auth = { register, login, logout, getCurrentUser, isAuthenticated, isUserBlocked, getAllUsers, AVATAR_OPTIONS };
 export default auth;
