@@ -1,26 +1,25 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import auth from '../../api/auth';
+import * as auth from '../../api/auth';
 
-function RoleProtectedRoute({ children, requiredRoles = [] }) {
-  const user = auth.getCurrentUser();
+function AdminProtectedRoute({ children }) {
+  const user = auth.getCurrentUser?.();
   
+  // Check if user exists and has admin role
   if (!user) {
     return <Navigate to="/login" replace />;
   }
-
   // Check if user is blocked
-  if (auth.isUserBlocked(user.id)) {
+  if (auth.isUserBlocked?.(user.id)) {
     // Logout the user
-    auth.logout();
+    auth.logout?.();
     return <Navigate to="/blocked" replace />;
   }
-
-  if (requiredRoles.length > 0 && !requiredRoles.includes(user.role)) {
+  if (user.role !== 'admin') {
     return <Navigate to="/unauthorized" replace />;
   }
 
   return children;
 }
 
-export default RoleProtectedRoute;
+export default AdminProtectedRoute;

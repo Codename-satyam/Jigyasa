@@ -6,8 +6,8 @@ function learningVideos() {
         embed: "https://www.youtube-nocookie.com/embed/mjlsSYLLOSE"
       },
       {
-        title: "Subtraction for Kids",//issue with the link
-        embed: "https://www.youtube-nocookie.com/embed/8LMSv6YcHkA"
+        title: "Subtraction for Kids",
+        embed: "https://www.youtube-nocookie.com/embed/9X5E9T9S9zY"
       },
       {
         title: "Multiplication for Beginners",
@@ -18,12 +18,12 @@ function learningVideos() {
         embed: "https://www.youtube-nocookie.com/embed/ndfeFjoperg"
       },
       {
-        title: "Place Value Explained",// issue with the link
-        embed: "https://www.youtube-nocookie.com/embed/Y_6vWk6G4Wc"
+        title: "Place Value Explained",
+        embed: "https://www.youtube-nocookie.com/embed/T5Qf0qSSJFI"
       },
       {
-        title: "Fractions for Kids",//issue with the link
-        embed: "https://www.youtube-nocookie.com/embed/R0m1kM0WlOw"
+        title: "Fractions for Kids",
+        embed: "https://www.youtube-nocookie.com/embed/5arM5wpCNUo"
       },
       {
         title: "Shapes and Geometry for Kids",
@@ -31,34 +31,34 @@ function learningVideos() {
       }
     ],
 
-    generalKnowledge: [ //all the links are broken [new imports]
-      {
-        title: "Amazing Facts for Kids",
-        embed: "https://www.youtube-nocookie.com/embed/Y9F1piLpgrY"
-      },
+    generalKnowledge: [
       {
         title: "Countries and Flags of the World",
-        embed: "https://www.youtube-nocookie.com/embed/3WmFz4t1S4E"
+        embed: "https://www.youtube-nocookie.com/embed/E__rzzAfDp8"
+      },
+      {
+        title: "Amazing Facts for Kids",
+        embed: "https://www.youtube-nocookie.com/embed/v_S9_fK_e_E"
       },
       {
         title: "Wonders of the World",
-        embed: "https://www.youtube-nocookie.com/embed/2yP8V5QhJGo"
+        embed: "https://www.youtube-nocookie.com/embed/m9Yy6U_D53g"
       },
       {
         title: "World Capitals for Kids",
-        embed: "https://www.youtube-nocookie.com/embed/8F1KzjGm3qY"
+        embed: "https://www.youtube-nocookie.com/embed/8vB8o8rI3lQ"
       },
       {
         title: "Famous Personalities for Kids",
-        embed: "https://www.youtube-nocookie.com/embed/5mXl6YlH2gM"
+        embed: "https://www.youtube-nocookie.com/embed/-TvG_V5J4Tw"
       },
       {
         title: "National Symbols of India",
-        embed: "https://www.youtube-nocookie.com/embed/9Pz0XwR7Q0E"
+        embed: "https://www.youtube-nocookie.com/embed/yFNlm8p2ATA"
       },
       {
         title: "Fun Quiz for Kids",
-        embed: "https://www.youtube-nocookie.com/embed/6rd2vmy8wXM"
+        embed: "https://www.youtube-nocookie.com/embed/aVRDtMJMQI8"
       }
     ],
 
@@ -71,121 +71,110 @@ function learningVideos() {
         title: "Solar System Geography Basics",
         embed: "https://www.youtube-nocookie.com/embed/libKVRa01L8"
       },
-      //all the links are broken [new imports are required]
       {
-        title: "Indian History for Kids",
-        embed: "https://www.youtube-nocookie.com/embed/WYgF8lsszQM"
+        title: "Incredible India Facts",
+        embed: "https://www.youtube-nocookie.com/embed/qfFMeOiDKEI"
       },
       {
         title: "Types of Government",
-        embed: "https://www.youtube-nocookie.com/embed/nm_pq6fu8To"
+        embed: "https://www.youtube-nocookie.com/embed/9REx97Yp_9E"
       },
       {
         title: "Map Reading for Kids",
-        embed: "https://www.youtube-nocookie.com/embed/2cQpHfPpKxA"
+        embed: "https://www.youtube-nocookie.com/embed/IwBe7e8d74Y"
       },
       {
         title: "Natural Resources",
-        embed: "https://www.youtube-nocookie.com/embed/JcF8M4eY7zA"
+        embed: "https://www.youtube-nocookie.com/embed/dsTgyb_ITtk"
       },
       {
-        title: "States and Capitals of India",
-        embed: "https://www.youtube-nocookie.com/embed/H8sL8F4cQhM"
+        title: "Indian States and Capitals",
+        embed: "https://www.youtube-nocookie.com/embed/RAnfB9eG984"
       }
     ],
 
     science: [
       {
-        title: "Human Body for Kids",//expired link
-        embed: "https://www.youtube-nocookie.com/embed/VQm4q0pS79c"
+        title: "Human Body Systems",
+        embed: "https://www.youtube-nocookie.com/embed/VUNx9ENMLmE"
       },
       {
         title: "Water Cycle Explained",
         embed: "https://www.youtube-nocookie.com/embed/al-do-HGuIk"
       },
       {
-        title: "States of Matter",//expired link
-        embed: "https://www.youtube-nocookie.com/embed/9VJ3hXv9e8Q"
+        title: "States of Matter",
+        embed: "https://www.youtube-nocookie.com/embed/JQ4WduVp9k4"
       },
       {
-        title: "Plants and Photosynthesis",//expired link
-        embed: "https://www.youtube-nocookie.com/embed/UPBMG5EYydo"
+        title: "Plants and Photosynthesis",
+        embed: "https://www.youtube-nocookie.com/embed/D1Ymc311XS8"
       },
       {
-        title: "Simple Science Experiments",//expired link
-        embed: "https://www.youtube-nocookie.com/embed/eQX5zEJ4VKc"
+        title: "Simple Science Experiments",
+        embed: "https://www.youtube-nocookie.com/embed/McVpXiIvtnU"
       },
       {
         title: "Solar System Explained",
         embed: "https://www.youtube-nocookie.com/embed/libKVRa01L8"
       },
       {
-        title: "Force and Motion",//expired link
-        embed: "https://www.youtube-nocookie.com/embed/GZgqM3k0HkE"
+        title: "Force and Motion",
+        embed: "https://www.youtube-nocookie.com/embed/1R6MxJpEjfs"
       }
     ],
 
     english: [
-      //all the links are broken [new imports are required]
       {
-        title: "English Alphabet Learning",
-        embed: "https://www.youtube-nocookie.com/embed/Ee4ef2H2M2k"
+        title: "English Alphabet Adventure",
+        embed: "https://www.youtube-nocookie.com/embed/FT_Kx8LO-SU"
       },
       {
         title: "Phonics for Beginners",
-        embed: "https://www.youtube-nocookie.com/embed/Yv5oYFQk6nE"
+        embed: "https://www.youtube-nocookie.com/embed/saF3-f0XWAY"
       },
       {
-        title: "Basic Grammar for Kids",
-        embed: "https://www.youtube-nocookie.com/embed/3XggLAeVY2M"
+        title: "English Grammar for Kids",
+        embed: "https://www.youtube-nocookie.com/embed/QGkcqup4fUo"
       },
       {
         title: "Parts of Speech",
-        embed: "https://www.youtube-nocookie.com/embed/F5tQJm0p5IY"
+        embed: "https://www.youtube-nocookie.com/embed/K8nIasidmS0"
       },
       {
         title: "Simple Sentence Formation",
-        embed: "https://www.youtube-nocookie.com/embed/I4WlYkWmFz0"
+        embed: "https://www.youtube-nocookie.com/embed/fTPrJ21-3_E"
       },
       {
         title: "The Lion and the Mouse - Story",
-        embed: "https://www.youtube-nocookie.com/embed/N5gz2Rc8R8w"
+        embed: "https://www.youtube-nocookie.com/embed/GxcGVCEEdcU"
       },
       {
         title: "Opposite Words for Kids",
-        embed: "https://www.youtube-nocookie.com/embed/HGeqf6L1z0E"
+        embed: "https://www.youtube-nocookie.com/embed/L_S8K_uK_wE"
       }
     ],
 
     funActivities: [
-      //all the links are broken [new imports are required]
-      {
-        title: "Easy Drawing for Kids",
-        embed: "https://www.youtube-nocookie.com/embed/VL6_1c1eB4U"
-      },
-      {
-        title: "DIY Craft Ideas",
-        embed: "https://www.youtube-nocookie.com/embed/H8kV7FJQYxk"
-      },
       {
         title: "Kids Yoga Session",
-        embed: "https://www.youtube-nocookie.com/embed/X655B4ISakg"
+        embed: "https://www.youtube-nocookie.com/embed/GM616bRA_uw"
       },
       {
         title: "Brain Teasers and Riddles",
-        embed: "https://www.youtube-nocookie.com/embed/LAnp2KO3p_4"
+        embed: "https://www.youtube-nocookie.com/embed/8nGtT1G4_LE"
       },
       {
         title: "Fun Origami for Kids",
-        embed: "https://www.youtube-nocookie.com/embed/Vlb2udqPx-M"
+        embed: "https://www.youtube-nocookie.com/embed/OrPwdvwplsk"
       },
       {
-        title: "Coloring and Painting Ideas",
-        embed: "https://www.youtube-nocookie.com/embed/2lZ6kE0g7fY"
+        title: "Learn Colors and Painting",
+        embed: "https://www.youtube-nocookie.com/embed/fAoAV6nTrEs"
       },
       {
         title: "Memory Game Activity",
-        embed: "https://www.youtube-nocookie.com/embed/VYF3xQ9V9rE"
+        embed: "https://www.youtube-nocookie.com/embed/NiDREw3PKcA"
       }
     ]
   };

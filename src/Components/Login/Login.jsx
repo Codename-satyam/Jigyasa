@@ -17,6 +17,11 @@ function Login() {
       const user = await auth.login({ email, password });
       navigate('/dashboard');
     } catch (err) {
+      // Check if account is blocked
+      if (err.message === "ACCOUNT_BLOCKED") {
+        navigate('/blocked');
+        return;
+      }
       setError(err.message || 'Login failed');
     }
   };

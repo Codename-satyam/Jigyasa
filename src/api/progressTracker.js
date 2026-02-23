@@ -9,8 +9,16 @@ function getProgressData() {
     if (!user) return {};
     
     const raw = localStorage.getItem(`${PROGRESS_KEY}_${user.id}`);
-    return raw ? JSON.parse(raw) : {};
+    if (!raw) return {};
+    
+    try {
+      return JSON.parse(raw);
+    } catch (parseError) {
+      console.error("Error parsing progress data:", parseError);
+      return {};
+    }
   } catch (e) {
+    console.error("Error retrieving progress data:", e);
     return {};
   }
 }
@@ -27,6 +35,11 @@ function saveProgressData(data) {
 }
 
 export function trackVideoCompletion(subject, topicIndex, videoIndex) {
+  if (!subject || topicIndex === null || topicIndex === undefined || videoIndex === null || videoIndex === undefined) {
+    console.error("Invalid parameters: subject, topicIndex, and videoIndex are required");
+    return;
+  }
+  
   const progress = getProgressData();
   
   if (!progress[subject]) {
@@ -39,6 +52,10 @@ export function trackVideoCompletion(subject, topicIndex, videoIndex) {
       lastViewed: null,
       timestamp: Date.now()
     };
+  }
+  
+  if (!Array.isArray(progress[subject][topicIndex].completed)) {
+    progress[subject][topicIndex].completed = [];
   }
   
   if (!progress[subject][topicIndex].completed.includes(videoIndex)) {
@@ -71,10 +88,11 @@ export function getSubjectProgress(subject, totalTopics, topicsData) {
     totalVideos = Array.isArray(topicsData) ? topicsData.length : 0;
     completedVideos = Object.keys(subjectData).reduce((count, topicIdx) => {
       const topicProgress = subjectData[topicIdx];
-      if (topicProgress && topicProgress.completed.length > 0) return count + 1;
+      if (topicProgress && Array.isArray(topicProgress.completed)) {
+        return count + topicProgress.completed.length;
+      }
       return count;
     }, 0);
-    completedVideos = Math.min(completedVideos, totalVideos);
   }
   
   const percentage = totalVideos > 0 ? Math.round((completedVideos / totalVideos) * 100) : 0;
@@ -99,7 +117,7 @@ export function getTopicProgress(subject, topicIndex, totalVideos) {
     };
   }
   
-  const completed = topicData.completed.length;
+  const completed = Array.isArray(topicData.completed) ? topicData.completed.length : 0;
   const boundedCompleted = totalVideos > 0 ? Math.min(completed, totalVideos) : completed;
   const percentage = totalVideos > 0 ? Math.round((boundedCompleted / totalVideos) * 100) : 0;
   
@@ -131,7 +149,8 @@ export function getLastViewedTopic(subject) {
 
 export function isVideoCompleted(subject, topicIndex, videoIndex) {
   const progress = getProgressData();
-  return progress[subject]?.[topicIndex]?.completed.includes(videoIndex) || false;
+  const completed = progress[subject]?.[topicIndex]?.completed;
+  return Array.isArray(completed) ? completed.includes(videoIndex) : false;
 }
 
 export function clearAllProgress() {
