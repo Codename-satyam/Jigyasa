@@ -30,14 +30,9 @@ async function fetchAllUsers() {
 
 async function toggleUserStatus(userId, blocked) {
   try {
-    const users = authApi.getAllUsers?.() || [];
-    const userIndex = users.findIndex(u => u.id === userId);
-    if (userIndex !== -1) {
-      users[userIndex].blocked = blocked;
-      localStorage.setItem('qq_users', JSON.stringify(users));
-      return true;
-    }
-    return false;
+    const endpoint = blocked ? `/api/users/${userId}/block` : `/api/users/${userId}/unblock`;
+    const response = await apiCall(endpoint, 'POST');
+    return response.success || false;
   } catch (e) {
     console.error("Error updating user status:", e);
     return false;
@@ -50,7 +45,7 @@ async function changeUserRole(userId, newRole) {
     const userIndex = users.findIndex(u => u.id === userId);
     if (userIndex !== -1) {
       users[userIndex].role = newRole;
-      localStorage.setItem('qq_users', JSON.stringify(users));
+      localStorage.setItem('jq_users', JSON.stringify(users));
       return true;
     }
     return false;
@@ -64,7 +59,7 @@ async function deleteUserAccount(userId) {
   try {
     let users = authApi.getAllUsers?.() || [];
     users = users.filter(u => u.id !== userId);
-    localStorage.setItem('qq_users', JSON.stringify(users));
+    localStorage.setItem('jq_users', JSON.stringify(users));
     return true;
   } catch (e) {
     console.error("Error deleting user:", e);
@@ -85,7 +80,7 @@ function searchUsers(users, searchTerm) {
 async function fetchAllQuizzes() {
   try {
     // Get all quizzes directly from localStorage (admin needs all, not just published)
-    const quizzes = JSON.parse(localStorage.getItem('qq_quizzes') || '[]');
+    const quizzes = JSON.parse(localStorage.getItem('jq_quizzes') || '[]');
     return Array.isArray(quizzes) ? quizzes : [];
   } catch (e) {
     console.error("Error fetching quizzes:", e);
@@ -95,11 +90,11 @@ async function fetchAllQuizzes() {
 
 async function toggleQuizPublication(quizId, published) {
   try {
-    const quizzes = JSON.parse(localStorage.getItem('qq_quizzes') || '[]');
+    const quizzes = JSON.parse(localStorage.getItem('jq_quizzes') || '[]');
     const quizIndex = quizzes.findIndex(q => q.id === quizId);
     if (quizIndex !== -1) {
       quizzes[quizIndex].isPublished = published;
-      localStorage.setItem('qq_quizzes', JSON.stringify(quizzes));
+      localStorage.setItem('jq_quizzes', JSON.stringify(quizzes));
       return true;
     }
     return false;
@@ -111,9 +106,9 @@ async function toggleQuizPublication(quizId, published) {
 
 async function deleteQuiz(quizId) {
   try {
-    let quizzes = JSON.parse(localStorage.getItem('qq_quizzes') || '[]');
+    let quizzes = JSON.parse(localStorage.getItem('jq_quizzes') || '[]');
     quizzes = quizzes.filter(q => q.id !== quizId);
-    localStorage.setItem('qq_quizzes', JSON.stringify(quizzes));
+    localStorage.setItem('jq_quizzes', JSON.stringify(quizzes));
     return true;
   } catch (e) {
     console.error("Error deleting quiz:", e);
@@ -170,7 +165,7 @@ function getQuizPerformanceReport(quizId, scores) {
 // MODERATION FUNCTIONS
 async function flagContent(contentId, contentType, reason) {
   try {
-    const flags = JSON.parse(localStorage.getItem('qq_flagged') || '[]');
+    const flags = JSON.parse(localStorage.getItem('jq_flagged') || '[]');
     flags.push({
       id: Date.now(),
       contentId,
@@ -179,7 +174,7 @@ async function flagContent(contentId, contentType, reason) {
       flaggedAt: new Date().toISOString(),
       status: 'pending'
     });
-    localStorage.setItem('qq_flagged', JSON.stringify(flags));
+    localStorage.setItem('jq_flagged', JSON.stringify(flags));
     return true;
   } catch (e) {
     console.error("Error flagging content:", e);
@@ -189,7 +184,7 @@ async function flagContent(contentId, contentType, reason) {
 
 async function getFlaggedContent() {
   try {
-    return JSON.parse(localStorage.getItem('qq_flagged') || '[]');
+    return JSON.parse(localStorage.getItem('jq_flagged') || '[]');
   } catch (e) {
     console.error("Error retrieving flagged content:", e);
     return [];
@@ -198,13 +193,13 @@ async function getFlaggedContent() {
 
 async function moderateContent(flagId, action, feedback) {
   try {
-    let flags = JSON.parse(localStorage.getItem('qq_flagged') || '[]');
+    let flags = JSON.parse(localStorage.getItem('jq_flagged') || '[]');
     const flagIndex = flags.findIndex(f => f.id === flagId);
     if (flagIndex !== -1) {
       flags[flagIndex].status = action;
       flags[flagIndex].feedback = feedback;
       flags[flagIndex].moderatedAt = new Date().toISOString();
-      localStorage.setItem('qq_flagged', JSON.stringify(flags));
+      localStorage.setItem('jq_flagged', JSON.stringify(flags));
       return true;
     }
     return false;
@@ -231,7 +226,7 @@ async function approveTeacher(teacherId) {
     if (userIndex !== -1) {
       users[userIndex].approved = true;
       users[userIndex].approvedAt = new Date().toISOString();
-      localStorage.setItem('qq_users', JSON.stringify(users));
+      localStorage.setItem('jq_users', JSON.stringify(users));
       return true;
     }
     return false;
@@ -248,7 +243,7 @@ async function rejectTeacher(teacherId, reason) {
     if (userIndex !== -1) {
       users[userIndex].approved = false;
       users[userIndex].rejectionReason = reason;
-      localStorage.setItem('qq_users', JSON.stringify(users));
+      localStorage.setItem('jq_users', JSON.stringify(users));
       return true;
     }
     return false;
@@ -284,7 +279,7 @@ async function backupSystemData(users, quizzes, scores) {
 
 async function sendNotification(userIds, message) {
   try {
-    const notifications = JSON.parse(localStorage.getItem('qq_notifications') || '[]');
+    const notifications = JSON.parse(localStorage.getItem('jq_notifications') || '[]');
     userIds.forEach(userId => {
       notifications.push({
         id: Date.now() + Math.random(),
@@ -294,7 +289,7 @@ async function sendNotification(userIds, message) {
         read: false
       });
     });
-    localStorage.setItem('qq_notifications', JSON.stringify(notifications));
+      localStorage.setItem('jq_notifications', JSON.stringify(notifications));
     return true;
   } catch (e) {
     console.error("Error sending notification:", e);
@@ -342,7 +337,7 @@ function Admin() {
         // Fetch all users from backend
         const usersResponse = await apiCall('/api/users', 'GET');
         console.log('👥 [Admin] Users response:', usersResponse);
-        const fetchedUsers = usersResponse.success ? usersResponse.users : [];
+        const fetchedUsers = usersResponse.success ? usersResponse.users.map(u => ({ ...u, id: u._id })) : [];
 
         // Fetch all quizzes from backend
         const quizzesResponse = await apiCall('/api/quizzes/all', 'GET');
@@ -355,7 +350,7 @@ function Admin() {
         const fetchedScores = scoresResponse.success ? scoresResponse.scores : [];
 
         // Fetch flagged content from localStorage for now
-        const fetchedFlags = JSON.parse(localStorage.getItem('qq_flagged') || '[]');
+        const fetchedFlags = JSON.parse(localStorage.getItem('jq_flagged') || '[]');
 
         console.log('✅ [Admin] All data fetched successfully');
         console.log('  - Users:', fetchedUsers.length);

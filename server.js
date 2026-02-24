@@ -23,13 +23,13 @@ const allowedOrigins = [
 
 app.use(cors({ 
   origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (like mobile apps or curl requests or direct server calls)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      console.log('❌ CORS blocked origin:', origin);
+      console.log('❌ CORS blocked origin:', origin, '(allowed:', allowedOrigins, ')');
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -76,23 +76,50 @@ app.use((err, req, res, next) => {
 });
 
 function tryParseJsonMaybe(text) {
+  if (!text) return null;
+  
   const cleaned = stripCodeFences(text);
-  try { return JSON.parse(cleaned); } catch (e) {}
-  try { return JSON.parse(text); } catch (e) {}
+  
+  // Try 1: Parse cleaned version directly
+  try { 
+    const result = JSON.parse(cleaned);
+    console.log('✅ Parsed JSON from cleaned text');
+    return result;
+  } catch (e) {}
+  
+  // Try 2: Parse original text
+  try { 
+    const result = JSON.parse(text);
+    console.log('✅ Parsed JSON from original text');
+    return result;
+  } catch (e) {}
+  
+  // Try 3: Extract JSON from between first { and last }
   const first = text.indexOf('{');
   const last = text.lastIndexOf('}');
   if (first !== -1 && last !== -1 && last > first) {
     const candidate = text.slice(first, last + 1);
-    try { return JSON.parse(candidate); } catch (e) {}
+    try { 
+      const result = JSON.parse(candidate);
+      console.log('✅ Parsed JSON from extracted substring');
+      return result;
+    } catch (e) {
+      console.log('Failed to parse extracted substring:', e.message);
+    }
   }
 
+  // Try 4: Fix common JSON issues
   try {
     let fixed = text.replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":');
     fixed = fixed.replace(/'/g, '"');
-    return JSON.parse(fixed);
-  } catch (e) {}
+    const result = JSON.parse(fixed);
+    console.log('✅ Parsed JSON after fixing common issues');
+    return result;
+  } catch (e) {
+    console.log('Failed to parse fixed JSON:', e.message);
+  }
 
-  // Give up
+  console.log('❌ All parsing attempts failed for text length:', text.length);
   return null;
 }
 
@@ -106,10 +133,18 @@ function stripCodeFences(text) {
 }
 
 app.post('/api/generate-quiz', async (req, res) => {
-  if (!GEMINI_KEY) return res.status(500).json({ success: false, error: 'GOOGLE_API_KEY not configured on server' });
+  console.log('\n🔵 /api/generate-quiz called');
+  console.log('Request body:', req.body);
+  
+  if (!GEMINI_KEY) {
+    console.log('❌ GEMINI_KEY is empty');
+    return res.status(500).json({ success: false, error: 'GOOGLE_API_KEY not configured on server' });
+  }
+  console.log('✅ GEMINI_KEY is present');
 
   const { topic = 'General knowledge', count = 5, difficulty = 'easy', type = 'mcq' } = req.body || {};
   const maxOutputTokens = Math.min(4096, 400 + Number(count || 5) * 300);
+  console.log('Parameters:', { topic, count, difficulty, type, maxOutputTokens });
 
   const system = `You are a helpful assistant that returns EXACT JSON. Return a single JSON object with a property "quiz" which is an array of objects: { id, question, options (array of 4 strings), correct (one of options), explanation, difficulty }. Return only JSON, no surrounding text.`;
   const user = `Generate ${count} ${type} questions about ${topic} at difficulty ${difficulty}. Ensure exactly 4 options per question and short explanations.`;
@@ -138,27 +173,59 @@ app.post('/api/generate-quiz', async (req, res) => {
 
     const status = response.status;
     const raw = await response.text();
-    console.log('Gemini status:', status);
-    console.log('Gemini raw (truncated):', raw.slice(0, 2000));
+    console.log('✅ Gemini API responded with status:', status);
+    console.log('Response size:', raw.length, 'bytes');
 
     if (!response.ok) {
+      console.log('❌ Gemini API error response:', raw.slice(0, 500));
       return res.status(500).json({ success: false, error: 'Gemini API returned error', status, raw });
     }
 
     let apiPayload = null;
     try {
       apiPayload = JSON.parse(raw);
+      console.log('✅ Valid JSON from Gemini');
     } catch (e) {
+      console.log('❌ Failed to parse Gemini JSON:', e.message);
       return res.json({ success: false, error: 'invalid-gemini-json', raw });
     }
 
-    const content = apiPayload?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    // Try to extract content from Gemini response
+    // First try the standard candidates format
+    let content = apiPayload?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    
+    // If that didn't work, maybe the response is structured differently
+    if (!content && typeof apiPayload === 'object') {
+      // Check if the entire response is the quiz data
+      if (apiPayload.quiz && Array.isArray(apiPayload.quiz)) {
+        console.log('✅ Found quiz directly in response');
+        return res.json({ success: true, quiz: apiPayload.quiz });
+      }
+      
+      // Try to find text in alternative structures
+      if (apiPayload.text) content = apiPayload.text;
+      else if (apiPayload.content) content = JSON.stringify(apiPayload.content);
+    }
+    
+    console.log('Extracted content length:', content.length);
+    console.log('Extracted content (first 300 chars):', content.slice(0, 300));
+    
+    if (!content) {
+      console.log('❌ No content extracted from response');
+      console.log('Response structure:', JSON.stringify(apiPayload).slice(0, 500));
+      return res.json({ success: false, error: 'no-content-extracted', apiPayloadKeys: Object.keys(apiPayload) });
+    }
+    
     const finishReason = apiPayload?.candidates?.[0]?.finishReason || apiPayload?.candidates?.[0]?.finish_reason || '';
     let parsed = tryParseJsonMaybe(content);
+    console.log('Parsed quiz:', parsed ? `${parsed.quiz ? parsed.quiz.length + ' questions' : 'no quiz property'}` : 'null');
+    
     if (!parsed || !Array.isArray(parsed.quiz)) {
+      console.log('❌ Invalid quiz format, parsed:', JSON.stringify(parsed).slice(0, 200));
       return res.json({ success: false, error: 'invalid-quiz-json', raw, content, finishReason, parsedAttempt: parsed });
     }
 
+    console.log('✅ Returning', parsed.quiz.length, 'questions');
     return res.json({ success: true, quiz: parsed.quiz });
   } catch (err) {
     console.error('Server -> Gemini call failed:', err);

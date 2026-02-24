@@ -2,7 +2,7 @@
 import { getCurrentUser } from './auth.js';
 import { apiCall } from './client.js';
 
-const PROGRESS_KEY = "qq_userProgress";
+const PROGRESS_KEY = "jq_userProgress";
 
 function getProgressData() {
   try {

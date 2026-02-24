@@ -2,11 +2,23 @@ import { useState, useEffect, useRef } from "react";
 import "./g6.css";
 import knight from "../../../../Assets/g6/knight.png";
 import knightdamage from "../../../../Assets/g6/knight-damage.png";
+import slash from "../../../../Assets/g6/attack.mp3";
+import damage from "../../../../Assets/g6/damage.mp3";
+import knightattack from "../../../../Assets/g6/knight-attack.png";
+import victory from "../../../../Assets/g6/victory.mp3";
 import gameend from "../../../../Assets/g6/game-end.png";
 import { riddles } from "./riddles";
 import { enemyPool } from "./enemyPool";
 
+
+
+
 function RiddleRPG() {
+
+    /* ================= AUDIO REFS ================= */
+    const attackSoundRef = useRef(new Audio(slash));
+    const damageSoundRef = useRef(new Audio(damage));
+    const victorySoundRef = useRef(new Audio(victory));
 
     /* ================= PLAYER ================= */
 
@@ -71,6 +83,10 @@ function RiddleRPG() {
 
     const enemyAttack = () => {
         setShake(true);
+
+        // Play damage sound when enemy attacks
+        damageSoundRef.current.currentTime = 0;
+        damageSoundRef.current.play().catch(e => console.log("Audio play failed:", e));
 
         const finalDamage = enemy.damage;
 
@@ -145,6 +161,10 @@ function RiddleRPG() {
             return;
         }
 
+        // Play attack sound on successful hit
+        attackSoundRef.current.currentTime = 0;
+        attackSoundRef.current.play().catch(e => console.log("Audio play failed:", e));
+
         const baseDamage = power ? 40 : 20;
         const damage =
             Math.random() < 0.2 ? baseDamage * 2 : baseDamage;
@@ -181,6 +201,11 @@ function RiddleRPG() {
         if (isVictory && !xpAwardedRef.current) {
             gainXP(40);
             setVictoryScreen(true);
+            
+            // Play victory sound when player wins
+            victorySoundRef.current.currentTime = 0;
+            victorySoundRef.current.play().catch(e => console.log("Audio play failed:", e));
+            
             xpAwardedRef.current = true;
         }
     }, [isVictory]);

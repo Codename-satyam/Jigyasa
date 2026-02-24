@@ -34,7 +34,7 @@ function AdminLogin() {
       if (response.token) {
         localStorage.setItem('token', response.token);
         if (response.user) {
-          localStorage.setItem('qq_currentUser', JSON.stringify(response.user));
+          localStorage.setItem('jq_currentUser', JSON.stringify(response.user));
         }
         
         setSuccess(true);
@@ -136,7 +136,7 @@ function AdminLogin() {
             </motion.label>
             <motion.input
               type="email"
-              placeholder="admin@quizy.com"
+              placeholder="admin@jigyasa.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required

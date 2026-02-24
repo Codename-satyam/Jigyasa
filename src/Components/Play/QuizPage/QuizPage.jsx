@@ -153,7 +153,7 @@ function QuizPage() {
           <div className="error">{error}</div>
         ) : questions.length === 0 ? (
           <div className="welcome">
-            <h2>Welcome to Quizy!</h2>
+            <h2>Welcome to Jigyasa!</h2>
             <p>Choose options above and press Start Quiz to fetch kid-friendly questions.</p>
           </div>
         ) : !showScore ? (

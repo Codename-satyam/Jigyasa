@@ -92,9 +92,9 @@ function About() {
 
                 <div className="about-gb-screen">
                     <div className="about-screen-inner" ref={screenRef}>
-                        <h2 className="screen-title">About Quizy</h2>
+                        <h2 className="screen-title">About Jigyasa</h2>
                         <p className="screen-description">
-                            Quizy is a playful learning app that makes quizzes feel like a
+                            Jigyasa is a playful learning app that makes quizzes feel like a
                             game. It uses bright challenges, friendly feedback, and simple
                             progression to keep kids engaged built by a team of six passionate
                             developers.

@@ -1,7 +1,7 @@
 // Auth helper - connects to backend API with JWT tokens
 import { apiCall } from './client';
 
-const CURRENT_KEY = "qq_currentUser";
+const CURRENT_KEY = "jq_currentUser";
 const TOKEN_KEY = "token";
 
 // Avatar options

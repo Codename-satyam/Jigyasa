@@ -1,6 +1,6 @@
 // Quiz Manager - handles quiz creation, assignment, and retrieval
-const QUIZZES_KEY = 'qq_quizzes';
-const QUIZ_ASSIGNMENTS_KEY = 'qq_quiz_assignments';
+const QUIZZES_KEY = 'jq_quizzes';
+const QUIZ_ASSIGNMENTS_KEY = 'jq_quiz_assignments';
 
 function loadQuizzes() {
   try {

@@ -1,6 +1,6 @@
 import { apiCall } from './client.js';
 
-const GAMES_KEY = 'qq_games_played';
+const GAMES_KEY = 'jq_games_played';
 
 function loadGames() {
   try {
