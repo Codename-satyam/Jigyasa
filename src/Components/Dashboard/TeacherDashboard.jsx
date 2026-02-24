@@ -12,6 +12,7 @@ function TeacherDashboard() {
   const [allScores, setAllScores] = useState([]);
   const [myQuizzes, setMyQuizzes] = useState([]);
   const [activeTab, setActiveTab] = useState('scores');
+  const [studentScoresSummary, setStudentScoresSummary] = useState([]);
 
   useEffect(() => {
     const user = auth.getCurrentUser();
@@ -23,27 +24,32 @@ function TeacherDashboard() {
   }, [navigate]);
 
   useEffect(() => {
-    setAllScores(scores.getScores());
+    const loadData = async () => {
+      const scoresData = await scores.getScores();
+      setAllScores(scoresData || []);
+
+      const summaryData = await scores.getAllStudentsScoresSummary();
+      setStudentScoresSummary(summaryData || []);
+
+      if (current) {
+        setMyQuizzes(quizManager.getQuizzesByTeacher(current.id));
+      }
+    };
     if (current) {
-      setMyQuizzes(quizManager.getQuizzesByTeacher(current.id));
+      loadData();
     }
   }, [current]);
 
   const summary = useMemo(() => {
-    const studentSummary = scores.getAllStudentsScoresSummary();
     return {
-      totalStudents: studentSummary.length,
+      totalStudents: studentScoresSummary.length,
       totalQuizzes: myQuizzes.length,
       publishedQuizzes: myQuizzes.filter((q) => q.isPublished).length,
-      averageStudentScore: studentSummary.length > 0
-        ? Math.round(studentSummary.reduce((sum, s) => sum + s.averageScore, 0) / studentSummary.length)
+      averageStudentScore: studentScoresSummary.length > 0
+        ? Math.round(studentScoresSummary.reduce((sum, s) => sum + s.averageScore, 0) / studentScoresSummary.length)
         : 0
     };
-  }, [myQuizzes]);
-
-  const studentScoresSummary = useMemo(() => {
-    return scores.getAllStudentsScoresSummary();
-  }, [allScores]);
+  }, [myQuizzes, studentScoresSummary]);
 
   const handleCreateQuiz = () => {
     navigate('/create-quiz');

@@ -20,15 +20,30 @@ function Dashboard() {
   }, []);
 
   useEffect(() => {
-    setScores(scoresApi.getScores());
-    setGames(gamesTracker.getGamePlays());
+    const loadData = async () => {
+      try {
+        const scoresData = await scoresApi.getScores();
+        const gamesData = gamesTracker.getGamePlays();
+        setScores(scoresData || []);
+        setGames(gamesData || []);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        setScores([]);
+        setGames([]);
+      }
+    };
+    loadData();
   }, []);
 
   const myScores = useMemo(() => {
     if (!user) return [];
     return scores
       .filter((s) => s.email && s.email === user.email)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .sort((a, b) => {
+        const dateB = new Date(b.timestamp || b.date).getTime();
+        const dateA = new Date(a.timestamp || a.date).getTime();
+        return dateB - dateA;
+      });
   }, [scores, user]);
 
   const subjects = useMemo(() => Object.keys(data), []);
@@ -50,8 +65,8 @@ function Dashboard() {
 
   const achievements = useMemo(() => {
     const bestScore = myScores.reduce((best, s) => {
-      const total = Number(s.total) || 0;
-      const score = Number(s.score) || 0;
+      const total = Number(s.totalQuestions || s.total) || 0;
+      const score = Number(s.correctAnswers || s.score) || 0;
       if (total <= 0) return best;
       return Math.max(best, Math.round((score / total) * 100));
     }, 0);
@@ -224,19 +239,19 @@ function Dashboard() {
             <h2>Learning stats</h2>
             <div className="stat-grid">
               <div>
-                <span className="stat-label">Lessons completed</span>
+                <span className="dash-stat-label">Lessons completed</span>
                 <span className="stat-value">{totals.completedLessons}</span>
               </div>
               <div>
-                <span className="stat-label">Total lessons</span>
+                <span className="dash-stat-label">Total lessons</span>
                 <span className="stat-value">{totals.totalLessons}</span>
               </div>
               <div>
-                <span className="stat-label">Completion rate</span>
+                <span className="dash-stat-label">Completion rate</span>
                 <span className="stat-value">{totals.completionRate}%</span>
               </div>
               <div>
-                <span className="stat-label">Quizzes taken</span>
+                <span className="dash-stat-label">Quizzes taken</span>
                 <span className="stat-value">{myScores.length}</span>
               </div>
             </div>
@@ -287,15 +302,23 @@ function Dashboard() {
               <p className="empty-state">No quiz scores yet. Try your first quiz!</p>
             ) : (
               <div className="scores-list">
-                {myScores.slice(0, 5).map((score) => (
-                  <div key={score.id} className="score-item">
-                    <div>
-                      <span className="score-title">{score.quiz}</span>
-                      <span className="score-meta">{new Date(score.date).toLocaleDateString()}</span>
+                {myScores.slice(0, 5).map((score, index) => {
+                  const quizName = score.quizTitle || score.quiz || 'Quiz';
+                  const dateValue = score.timestamp || score.date;
+                  const displayDate = dateValue ? new Date(dateValue).toLocaleDateString() : 'N/A';
+                  const scoreValue = score.correctAnswers || score.score || 0;
+                  const totalValue = score.totalQuestions || score.total || 0;
+                  
+                  return (
+                    <div key={score._id || score.id || index} className="score-item">
+                      <div>
+                        <span className="score-title">{quizName}</span>
+                        <span className="score-meta">{displayDate}</span>
+                      </div>
+                      <span className="score-value">{scoreValue}/{totalValue}</span>
                     </div>
-                    <span className="score-value">{score.score}/{score.total}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

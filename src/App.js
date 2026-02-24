@@ -266,7 +266,7 @@ function AnimatedRoutes() {
             </AdminProtectedRoute>
           }
         />
-        <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+        <Route path="/login" element={<PageTransition><Login/></PageTransition>} />
         <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
         <Route path="/admin/login" element={<PageTransition><AdminLogin /></PageTransition>} />
         <Route path="/blocked" element={<PageTransition><BlockedUser /></PageTransition>} />

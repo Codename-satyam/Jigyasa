@@ -22,11 +22,20 @@ function Register() {
       return;
     }
 
+    console.log('🔵 [Register] Starting registration process');
+    console.log('📝 [Register] Form data:', { name, email, role, avatarId: selectedAvatar });
+
     try {
-      await auth.register({ name, email, password, avatarId: selectedAvatar, role });
+      console.log('📤 [Register] Calling auth.register...');
+      const result = await auth.register({ name, email, password, avatarId: selectedAvatar, role });
+      console.log('✅ [Register] Registration successful!', result);
+      console.log('📍 [Register] Redirecting to dashboard...');
       // Redirect to dashboard
       navigate('/dashboard');
     } catch (err) {
+      console.error('❌ [Register] Registration failed:', err);
+      console.error('❌ [Register] Error message:', err.message);
+      console.error('❌ [Register] Error stack:', err.stack);
       setError(err.message || 'Registration failed');
     }
   };

@@ -55,18 +55,24 @@ function QuizPage() {
     const user = auth.getCurrentUser();
     const categoryObj = categories.find((c) => String(c.id) === String(categoryId));
     const categoryName = categoryObj ? categoryObj.name : (categoryId ? String(categoryId) : 'Any');
+    const quizTitle = `Category: ${categoryName} | Difficulty: ${difficulty} | Amount: ${amount}`;
     try {
       addScore({
         name: user?.name || 'Guest',
         email: user?.email || '',
-        quiz: `Category: ${categoryName} | Difficulty: ${difficulty} | Amount: ${amount}`,
+        quizTitle: quizTitle,
+        quiz: quizTitle,
         score: score,
         total: questions.length,
+        totalQuestions: questions.length,
+        correctAnswers: score,
+        percentage: Math.round((score / questions.length) * 100),
+        timeSpent: 0,
         date: new Date().toISOString(),
       });
       setSaved(true);
     } catch (e) {
-      // ignore
+      console.error('Failed to save score:', e);
     }
   }, [showScore, saved, categories, categoryId, difficulty, amount, score, questions.length]);
 
@@ -76,6 +82,7 @@ function QuizPage() {
     setShowScore(false);
     setCurrentQuestion(0);
     setScore(0);
+    setSaved(false);
     try {
       const qs = await fetchQuiz({ amount, category: categoryId, difficulty });
       setQuestions(qs);
@@ -100,9 +107,7 @@ function QuizPage() {
   };
 
   const handleRestart = () => {
-    setCurrentQuestion(0);
-    setScore(0);
-    setShowScore(false);
+    startQuiz();
   };
 
   return (

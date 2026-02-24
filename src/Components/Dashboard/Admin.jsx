@@ -9,6 +9,7 @@ import * as scoreApi from '../../api/scores';
 import * as progressApi from '../../api/progressTracker';
 import * as gamesTrackerApi from '../../api/gamesTracker';
 import * as quizManagerApi from '../../api/quizManager.js';
+import { apiCall } from '../../api/client';
 
 // Component imports
 import PageTransition from '../PageTransition.jsx';
@@ -336,18 +337,39 @@ function Admin() {
     const loadData = async () => {
       setLoading(true);
       try {
-        const fetchedUsers = await fetchAllUsers();
-        const fetchedQuizzes = await fetchAllQuizzes();
-        const fetchedScores = JSON.parse(localStorage.getItem('qq_scores') || '[]');
-        const fetchedFlags = await getFlaggedContent();
+        console.log('📊 [Admin] Fetching admin data from backend...');
+        
+        // Fetch all users from backend
+        const usersResponse = await apiCall('/api/users', 'GET');
+        console.log('👥 [Admin] Users response:', usersResponse);
+        const fetchedUsers = usersResponse.success ? usersResponse.users : [];
+
+        // Fetch all quizzes from backend
+        const quizzesResponse = await apiCall('/api/quizzes/all', 'GET');
+        console.log('📝 [Admin] Quizzes response:', quizzesResponse);
+        const fetchedQuizzes = quizzesResponse.success ? quizzesResponse.quizzes : [];
+
+        // Fetch all scores from backend
+        const scoresResponse = await apiCall('/api/scores', 'GET');
+        console.log('📊 [Admin] Scores response:', scoresResponse);
+        const fetchedScores = scoresResponse.success ? scoresResponse.scores : [];
+
+        // Fetch flagged content from localStorage for now
+        const fetchedFlags = JSON.parse(localStorage.getItem('qq_flagged') || '[]');
+
+        console.log('✅ [Admin] All data fetched successfully');
+        console.log('  - Users:', fetchedUsers.length);
+        console.log('  - Quizzes:', fetchedQuizzes.length);
+        console.log('  - Scores:', fetchedScores.length);
+        console.log('  - Flagged:', fetchedFlags.length);
 
         setUsers(fetchedUsers);
         setQuizzes(fetchedQuizzes);
         setScores(fetchedScores);
         setFlaggedContent(fetchedFlags);
       } catch (e) {
-        console.error("Error loading admin data:", e);
-        setMessage('Error loading data');
+        console.error("❌ Error loading admin data:", e);
+        setMessage('Error loading data: ' + (e.message || 'Unknown error'));
       } finally {
         setLoading(false);
       }

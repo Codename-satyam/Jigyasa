@@ -242,10 +242,6 @@ function Game2048() {
         }
     }, [gameOver, score]);
 
-    const getScorePercentage = () => {
-        const maxPossible = 131072; // 2^17
-        return Math.min((score / maxPossible) * 100, 100);
-    };
 
     return (
         <div className="game-container">
@@ -276,24 +272,13 @@ function Game2048() {
                         </button>
 
                         <div className="stat-box large">
-                            <div className="stat-label">Current Score</div>
+                            <div className="g5-stat-label">Current Score</div>
                             <div className="stat-value-large">{score}</div>
                         </div>
 
                         <div className="stat-box">
-                            <div className="stat-label">Highest Tile</div>
-                            <div className="stat-value">{highestTile}</div>
-                        </div>
-
-                        <div className="score-meter-container">
-                            <div className="meter-label">Progress</div>
-                            <div className="score-meter">
-                                <div 
-                                    className="score-meter-fill"
-                                    style={{ width: `${getScorePercentage()}%` }}
-                                ></div>
-                            </div>
-                            <div className="meter-info">{Math.round(getScorePercentage())}%</div>
+                            <div className="g5-stat-label">Highest Tile</div>
+                            <div className="stat-value-large">{highestTile}</div>
                         </div>
 
                         <div className="controls-info">

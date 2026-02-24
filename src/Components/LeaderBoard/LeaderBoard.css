@@ -13,7 +13,7 @@
 
 .leaderboard-title {
     font-size: 28px;
-    margin-bottom: 40px;
+    margin-bottom: 10px;
     text-transform: uppercase;
     color: #00f5ff;
     text-shadow: 
@@ -21,6 +21,14 @@
         0 0 15px #00f5ff,
         0 0 30px #00f5ff;
     animation: glow 1.5s infinite alternate;
+}
+
+.leaderboard-subtitle {
+    font-size: 10px;
+    color: #ff00cc;
+    margin-bottom: 40px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 @keyframes glow {
@@ -89,6 +97,44 @@
     padding: 30px;
     font-size: 12px;
     color: #ff4d6d;
+}
+
+.rank-cell {
+    font-size: 16px !important;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.score-cell {
+    color: #00ff00;
+    font-weight: bold;
+    font-size: 12px !important;
+}
+
+.quiz-cell {
+    color: #ff9500;
+    font-size: 10px !important;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rank-1 {
+    animation: pulse-gold 1s infinite;
+}
+
+.rank-2, .rank-3 {
+    animation: pulse-silver 1s infinite;
+}
+
+@keyframes pulse-gold {
+    0%, 100% { box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.3); }
+    50% { box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.6); }
+}
+
+@keyframes pulse-silver {
+    0%, 100% { box-shadow: inset 0 0 10px rgba(192, 192, 192, 0.2); }
+    50% { box-shadow: inset 0 0 20px rgba(192, 192, 192, 0.4); }
 }
 
 .loading {

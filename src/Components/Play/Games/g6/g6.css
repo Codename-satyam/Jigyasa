@@ -206,7 +206,7 @@
   height: 22px;
 }
 
-.stat-label {
+.g6-stat-label {
   width: 40px;
   flex-shrink: 0;
   font-weight: bold;
@@ -769,7 +769,7 @@
     margin-bottom: 2px;
   }
 
-  .stat-label {
+  .g6-stat-label {
     width: 35px;
     font-size: 0.45rem;
   }
