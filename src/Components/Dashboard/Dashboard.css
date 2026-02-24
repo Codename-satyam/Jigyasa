@@ -207,7 +207,7 @@
   gap: 40px;
 }
 
-.dash-stats .stat-label {
+.dash-stats .dash-stat-label {
   display: block;
   font-size: 0.8rem;
   color: var(--dash-subtle);
@@ -550,7 +550,7 @@
   background: rgba(0, 255, 255, 0.1);
 }
 
-.stat-label {
+.dash-stat-label {
   font-size: 0.9em;
   opacity: 0.8;
   margin-bottom: 10px;

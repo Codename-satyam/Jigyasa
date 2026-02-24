@@ -1,13 +1,5 @@
 
-const OPEN_TRIVIA_BASE = "https://opentdb.com";
-
-function decodeHTMLEntities(str) {
-  try {
-    return decodeURIComponent(str);
-  } catch (e) {
-    return str;
-  }
-}
+const QUIZ_API_BASE = process.env.REACT_APP_QUIZ_API_BASE || "http://localhost:4000";
 
 function shuffle(arr) {
   return arr
@@ -15,6 +7,24 @@ function shuffle(arr) {
     .sort((a, b) => a.r - b.r)
     .map((x) => x.v);
 }
+
+const localCategories = [
+  { id: 9, name: "General Knowledge" },
+  { id: 17, name: "Science & Nature" },
+  { id: 18, name: "Science: Computers" },
+  { id: 19, name: "Science: Mathematics" },
+  { id: 22, name: "Geography" },
+  { id: 23, name: "History" },
+  { id: 24, name: "Politics" },
+  { id: 21, name: "Sports" },
+  { id: 25, name: "Art" },
+  { id: 10, name: "Books" },
+  { id: 11, name: "Film" },
+  { id: 12, name: "Music" },
+  { id: 14, name: "Television" },
+  { id: 15, name: "Video Games" },
+  { id: 27, name: "Animals" },
+];
 
 const localFallback = [
   {
@@ -35,52 +45,67 @@ const localFallback = [
 ];
 
 export async function fetchCategories() {
-  try {
-    const resp = await fetch(`${OPEN_TRIVIA_BASE}/api_category.php`);
-    const data = await resp.json();
-    return data.trivia_categories || [];
-  } catch (e) {
-    return [];
+  return localCategories;
+}
+
+function normalizeQuizItem(item) {
+  const question = (item?.question || "").toString().trim();
+  const correct = (item?.correct || item?.correct_answer || "").toString().trim();
+  let options = Array.isArray(item?.options) ? item.options.filter(Boolean).map((o) => String(o).trim()) : [];
+
+  if (correct && !options.includes(correct)) {
+    options.push(correct);
   }
+
+  options = shuffle(options).slice(0, 4);
+
+  if (!question || !correct || options.length < 2) {
+    return null;
+  }
+
+  return {
+    question,
+    correct_answer: correct,
+    options,
+  };
 }
 
 export async function fetchQuiz(options = {}) {
-  const { amount = 5, category = null, difficulty = null, type = 'multiple' } = options;
-  const params = new URLSearchParams();
-  params.set('amount', String(amount));
-  if (category) params.set('category', String(category));
-  if (difficulty) params.set('difficulty', difficulty);
-  if (type) params.set('type', type);
-  params.set('encode', 'url3986');
+  const { amount = 5, category = null, difficulty = "easy", type = "mcq" } = options;
+  const categoryName = category
+    ? (localCategories.find((c) => String(c.id) === String(category))?.name || String(category))
+    : "General knowledge";
+
+  const fallback = localFallback.map((q) => ({
+    question: q.question,
+    correct_answer: q.correct_answer,
+    options: shuffle([q.correct_answer, ...q.incorrect_answers]),
+  }));
 
   try {
-    const resp = await fetch(`${OPEN_TRIVIA_BASE}/api.php?${params.toString()}`);
+    const resp = await fetch(`${QUIZ_API_BASE}/api/generate-quiz`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        topic: categoryName,
+        count: amount,
+        difficulty,
+        type,
+      }),
+    });
+
     const json = await resp.json();
-    if (!json || json.response_code !== 0 || !Array.isArray(json.results) || json.results.length === 0) {
-      return localFallback.map((q) => ({
-        question: q.question,
-        correct_answer: q.correct_answer,
-        options: shuffle([q.correct_answer, ...q.incorrect_answers]),
-      }));
+    if (!resp.ok || !json || !json.success || !Array.isArray(json.quiz)) {
+      return fallback;
     }
 
-    return json.results.map((r) => {
-      const question = decodeHTMLEntities(r.question);
-      const correct = decodeHTMLEntities(r.correct_answer);
-      const incorrect = (r.incorrect_answers || []).map((s) => decodeHTMLEntities(s));
-      const optionsArr = shuffle([correct, ...incorrect]);
-      return {
-        question,
-        correct_answer: correct,
-        options: optionsArr,
-      };
-    });
+    const normalized = json.quiz
+      .map((item) => normalizeQuizItem(item))
+      .filter(Boolean);
+
+    return normalized.length > 0 ? normalized : fallback;
   } catch (err) {
-    return localFallback.map((q) => ({
-      question: q.question,
-      correct_answer: q.correct_answer,
-      options: shuffle([q.correct_answer, ...q.incorrect_answers]),
-    }));
+    return fallback;
   }
 }
 

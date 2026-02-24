@@ -10,8 +10,13 @@
 .home-page {
   padding-top: 90px;
   position: relative;
-  height: 100vh;
+  min-height: 100vh;
+  box-sizing: border-box;
   overflow-x: hidden;
+  overflow-y: visible;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
   text-align: center;
   color: white;
   font-family: "Pixelify Sans", sans-serif;
@@ -37,9 +42,8 @@
 } */
 
 .right {
-  position: absolute;
-  top: 2%;
-  right: 5%;
+  position: relative;
+  margin: 2% 5% 40px 0;
   text-align: left; 
   border: 3px solid #fff;
   padding: 30px;
@@ -51,7 +55,7 @@
 }
 
 .home-page h1 {
-  font-size: 4rem;
+  font-size: 3rem;
   margin-top: 5vh;
   text-shadow: 2px 2px 0 #000, 4px 4px 0 #ff00ff; 
 }

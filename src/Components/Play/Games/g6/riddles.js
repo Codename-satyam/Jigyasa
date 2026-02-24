@@ -99,5 +99,67 @@ const riddles = [
     {
         question: "What is so fragile that saying its name breaks it?",
         answer: "Silence"
+    },
+     {
+        question: "What has a heart that doesn’t beat?",
+        answer: "An artichoke"
+    },
+    {
+        question: "What has a neck but no head, two arms but no hands?",
+        answer: "A shirt"
+    },
+    {
+        question: "What can fill a room but takes up no space?",
+        answer: "Light"
+    },
+    {
+        question: "What gets sharper the more you use it?",
+        answer: "Your brain"
+    },
+    {
+        question: "What has legs but doesn’t walk?",
+        answer: "A table"
+    },
+    {
+        question: "What comes once in a minute, twice in a moment, but never in a thousand years?",
+        answer: "The letter M"
+    },
+    {
+        question: "What has a ring but no finger?",
+        answer: "A phone"
+    },
+    {
+        question: "What has a face and two hands, but no arms or legs?",
+        answer: "A clock"
+    },
+    {
+        question: "What building has the most stories?",
+        answer: "A library"
+    },
+    {
+        question: "What is full of holes but still holds water?",
+        answer: "A sponge"
+    },
+    {
+        question: "What can you hold in your right hand, but never in your left hand?",
+        answer: "Your left hand"
+    },
+    {
+        question: "What begins with an E, ends with an E, but only has one letter in it?",
+        answer: "An envelope"
+    },
+    {
+        question: "What goes through cities and fields, but never moves?",
+        answer: "A road"
+    },
+    {
+        question: "What has a thumb and four fingers but is not alive?",
+        answer: "A glove"
+    },
+    {
+        question: "What kind of band never plays music?",
+        answer: "A rubber band"
     }
 ];
+
+export { riddles };

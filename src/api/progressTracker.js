@@ -1,5 +1,6 @@
 // Progress tracking utility for video completion
 import { getCurrentUser } from './auth.js';
+import { apiCall } from './client.js';
 
 const PROGRESS_KEY = "qq_userProgress";
 
@@ -34,7 +35,21 @@ function saveProgressData(data) {
   }
 }
 
-export function trackVideoCompletion(subject, topicIndex, videoIndex) {
+// Save progress to MongoDB
+async function syncProgressToMongoDB(subject, videoIndex) {
+  try {
+    const response = await apiCall(`/api/progress/${subject}/mark-video`, 'POST', { 
+      videoIndex 
+    });
+    console.log('✅ Progress synced to MongoDB:', response);
+    return response;
+  } catch (error) {
+    console.error('❌ Failed to sync progress to MongoDB:', error);
+    // Still save to localStorage as fallback
+  }
+}
+
+export async function trackVideoCompletion(subject, topicIndex, videoIndex) {
   if (!subject || topicIndex === null || topicIndex === undefined || videoIndex === null || videoIndex === undefined) {
     console.error("Invalid parameters: subject, topicIndex, and videoIndex are required");
     return;
@@ -65,7 +80,11 @@ export function trackVideoCompletion(subject, topicIndex, videoIndex) {
   progress[subject][topicIndex].lastViewed = videoIndex;
   progress[subject][topicIndex].lastViewedTime = new Date().toISOString();
   
+  // Save to localStorage (for quick access)
   saveProgressData(progress);
+  
+  // Sync to MongoDB (for persistence across devices)
+  await syncProgressToMongoDB(subject, videoIndex);
 }
 
 export function getSubjectProgress(subject, totalTopics, topicsData) {
@@ -151,6 +170,54 @@ export function isVideoCompleted(subject, topicIndex, videoIndex) {
   const progress = getProgressData();
   const completed = progress[subject]?.[topicIndex]?.completed;
   return Array.isArray(completed) ? completed.includes(videoIndex) : false;
+}
+
+// Load progress from MongoDB and merge with localStorage
+export async function loadProgressFromMongoDB() {
+  try {
+    const response = await apiCall('/api/progress', 'GET');
+    if (response.success && response.progress) {
+      console.log('✅ Loaded progress from MongoDB:', response.progress);
+      
+      // Merge MongoDB data with localStorage
+      const localProgress = getProgressData();
+      const user = getCurrentUser();
+      
+      if (user) {
+        // Convert MongoDB format to localStorage format
+        response.progress.forEach(prog => {
+          const subject = prog.subject;
+          if (!localProgress[subject]) {
+            localProgress[subject] = {};
+          }
+          
+          // Merge completed videos
+          if (prog.completedVideos && Array.isArray(prog.completedVideos)) {
+            prog.completedVideos.forEach(videoIdx => {
+              const topicIdx = prog.topicIndex || 0;
+              if (!localProgress[subject][topicIdx]) {
+                localProgress[subject][topicIdx] = {
+                  completed: [],
+                  lastViewed: null,
+                  timestamp: Date.now()
+                };
+              }
+              if (!localProgress[subject][topicIdx].completed.includes(videoIdx)) {
+                localProgress[subject][topicIdx].completed.push(videoIdx);
+              }
+            });
+          }
+        });
+        
+        saveProgressData(localProgress);
+      }
+      
+      return response.progress;
+    }
+  } catch (error) {
+    console.error('Failed to load progress from MongoDB:', error);
+  }
+  return [];
 }
 
 export function clearAllProgress() {

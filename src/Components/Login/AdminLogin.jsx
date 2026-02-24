@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import * as auth from "../../api/auth";
+import { apiCall } from "../../api/client";
 import "./admin-login.css";
 
 function AdminLogin() {
@@ -12,56 +13,36 @@ function AdminLogin() {
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
-  // Default admin credentials
-  const ADMIN_CODE = "ADMIN123456";
-  const ADMIN_EMAIL = "admin@quizy.com";
-  const ADMIN_PASSWORD = "Admin@12345";
-
   const handleAdminLogin = async (e) => {
     e.preventDefault();
     setError(null);
     
     try {
+      // Validate credentials against backend
+      const response = await apiCall('/api/users/admin/validate', 'POST', {
+        email,
+        password,
+        adminCode
+      });
 
-      if (adminCode !== ADMIN_CODE) {
-        setError("Invalid admin code. Please contact system administrator.");
+      if (!response.success) {
+        setError(response.error || 'Invalid admin credentials');
         return;
       }
 
-      // Check credentials
-      if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
-        setError("Invalid admin credentials");
-        return;
-      }
-
-      // Check if admin user exists, if not create it
-      const users = auth.getAllUsers?.() || [];
-      let adminUser = users.find(u => u.email === ADMIN_EMAIL);
-
-      if (!adminUser) {
-        // Create admin user if doesn't exist
-        try {
-          auth.register({
-            name: "Admin",
-            email: ADMIN_EMAIL,
-            password: ADMIN_PASSWORD,
-            avatarId: 1,
-            role: "admin",
-            approved: true
-          });
-        } catch (err) {
-          // Admin already exists, continue
+      // Store the token and user info from the backend response
+      if (response.token) {
+        localStorage.setItem('token', response.token);
+        if (response.user) {
+          localStorage.setItem('qq_currentUser', JSON.stringify(response.user));
         }
-      }
-
-      // Login
-      const user = auth.login({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD });
-      
-      if (user) {
+        
         setSuccess(true);
         setTimeout(() => {
           navigate('/admin');
         }, 1500);
+      } else {
+        setError('No token received from server');
       }
     } catch (err) {
       setError(err.message || 'Admin login failed');

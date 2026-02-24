@@ -109,14 +109,15 @@
   padding: 25px;
 }
 
-.stat-label {
-  color: #d0d0d0;
-  font-size: 0.8em;
+.g5-stat-label {
+  color: #ffd700;
+  font-size: 20px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 2px;
   display: block;
   margin-bottom: 8px;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
 }
 
 .stat-value {
@@ -528,17 +529,20 @@
     padding: 12px;
   }
 
-  .stat-label {
+  .g5-stat-label {
     font-size: 0.7em;
     margin-bottom: 6px;
   }
 
   .stat-value {
     font-size: 1.4em;
+    font-family: 'Press-start-2p', cursive;
+    
   }
 
   .stat-value-large {
     font-size: 2.2em;
+    font-family: 'Press-start-2p', cursive;
   }
 
   .restart-btn {
@@ -651,7 +655,7 @@
     padding: 12px;
   }
 
-  .stat-label {
+  .g5-stat-label {
     font-size: 0.65em;
     margin-bottom: 4px;
     letter-spacing: 1px;

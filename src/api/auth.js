@@ -1,6 +1,8 @@
-// Simple auth helper using localStorage for demo purposes
-const USERS_KEY = "qq_users";
+// Auth helper - connects to backend API with JWT tokens
+import { apiCall } from './client';
+
 const CURRENT_KEY = "qq_currentUser";
+const TOKEN_KEY = "token";
 
 // Avatar options
 export const AVATAR_OPTIONS = [
@@ -18,78 +20,93 @@ export const AVATAR_OPTIONS = [
   { id: 12, emoji: '🦚', name: 'Peacock' }
 ];
 
-function loadUsers() {
+export async function register({ name, email, password, avatarId, role = 'student' }) {
+  console.log('🔷 [auth.js] register() called');
+  console.log('📋 [auth.js] Parameters:', { name, email, role, avatarId });
+  
   try {
-    const raw = localStorage.getItem(USERS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    return [];
+    console.log('📡 [auth.js] Making API call to /api/users/register');
+    const response = await apiCall('/api/users/register', 'POST', {
+      name,
+      email,
+      password,
+      role
+    });
+
+    console.log('📨 [auth.js] API response received:', response);
+
+    if (response.success) {
+      console.log('✅ [auth.js] Registration successful');
+      const token = response.token;
+      const userData = {
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        role: response.user.role,
+        avatarId: avatarId || 1,
+      };
+
+      console.log('💾 [auth.js] Storing token in localStorage');
+      console.log('💾 [auth.js] Storing user data:', userData);
+      
+      // Store token and user data
+      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(CURRENT_KEY, JSON.stringify(userData));
+      
+      console.log('✅ [auth.js] Data saved to localStorage');
+      return userData;
+    } else {
+      console.warn('⚠️ [auth.js] Registration failed - response.success is false');
+      console.warn('⚠️ [auth.js] Error from server:', response.error);
+      throw new Error(response.error || 'Registration failed');
+    }
+  } catch (error) {
+    console.error('❌ [auth.js] Exception caught in register()');
+    console.error('❌ [auth.js] Error:', error);
+    console.error('❌ [auth.js] Error message:', error.message);
+    throw error;
   }
 }
 
+export async function login({ email, password }) {
+  try {
+    const response = await apiCall('/api/users/login', 'POST', {
+      email,
+      password
+    });
 
-function saveUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
+    if (response.success) {
+      const token = response.token;
+      const userData = {
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        role: response.user.role,
+        avatarId: response.user.avatarId || 1,
+        blocked: response.user.blocked || false,
+        approved: response.user.approved || false
+      };
 
-export function register({ name, email, password, avatarId, role = 'student' }) {
-  const users = loadUsers();
-  if (users.find((u) => u.email === email)) {
-    throw new Error("User already exists");
+      if (userData.blocked) {
+        throw new Error("ACCOUNT_BLOCKED");
+      }
+
+      // Store token and user data
+      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(CURRENT_KEY, JSON.stringify(userData));
+      
+      return userData;
+    } else {
+      throw new Error(response.error || 'Login failed');
+    }
+  } catch (error) {
+    throw error;
   }
-  
-  const avatar = AVATAR_OPTIONS.find(a => a.id === avatarId) || AVATAR_OPTIONS[0];
-  
-  const user = { 
-    id: Date.now(), 
-    name, 
-    email, 
-    password,
-    avatarId: avatar.id,
-    avatar: avatar.emoji,
-    role: role // 'student' or 'teacher'
-  };
-  users.push(user);
-  saveUsers(users);
-  
-  // auto-login after register
-  localStorage.setItem(CURRENT_KEY, JSON.stringify({ 
-    id: user.id, 
-    name: user.name, 
-    email: user.email,
-    avatarId: user.avatarId,
-    avatar: user.avatar,
-    role: user.role
-  }));
-  return user;
-}
-
-export function login({ email, password }) {
-  const users = loadUsers();
-  const u = users.find((x) => x.email === email && x.password === password);
-  if (!u) throw new Error("Invalid credentials");
-  
-  // Check if user is blocked
-  if (u.blocked) {
-    throw new Error("ACCOUNT_BLOCKED");
-  }
-  
-  const userData = { 
-    id: u.id, 
-    name: u.name, 
-    email: u.email,
-    avatarId: u.avatarId || 1,
-    avatar: u.avatar || '🦁',
-    role: u.role || 'student',
-    blocked: u.blocked || false
-  };
-  
-  localStorage.setItem(CURRENT_KEY, JSON.stringify(userData));
-  return userData;
 }
 
 export function logout() {
   localStorage.removeItem(CURRENT_KEY);
+  localStorage.removeItem(TOKEN_KEY);
 }
 
 export function getCurrentUser() {
@@ -99,13 +116,10 @@ export function getCurrentUser() {
     
     const currentUser = JSON.parse(raw);
     
-    // Check if user is still blocked in the database
-    const users = loadUsers();
-    const dbUser = users.find(u => u.id === currentUser.id);
-    
-    if (dbUser && dbUser.blocked) {
-      // User has been blocked, logout immediately
+    // Check if user is blocked
+    if (currentUser.blocked) {
       localStorage.removeItem(CURRENT_KEY);
+      localStorage.removeItem(TOKEN_KEY);
       return null;
     }
     
@@ -116,17 +130,22 @@ export function getCurrentUser() {
 }
 
 export function isUserBlocked(userId) {
-  const users = loadUsers();
-  const user = users.find(u => u.id === userId);
-  return user ? user.blocked || false : false;
+  const currentUser = getCurrentUser();
+  return currentUser ? currentUser.blocked || false : false;
 }
 
 export function isAuthenticated() {
-  return !!getCurrentUser();
+  return !!getCurrentUser() && !!localStorage.getItem(TOKEN_KEY);
 }
 
-export function getAllUsers() {
-  return loadUsers();
+export async function getAllUsers() {
+  try {
+    const response = await apiCall('/api/users', 'GET');
+    return response.success ? response.users : [];
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    return [];
+  }
 }
 
 const auth = { register, login, logout, getCurrentUser, isAuthenticated, isUserBlocked, getAllUsers, AVATAR_OPTIONS };

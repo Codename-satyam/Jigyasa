@@ -102,17 +102,17 @@ function Courses() {
         <div className="hero-stats">
           <div className="stat-card">
             <div className="stat-value1">{subjects.length}</div>
-            <div className="stat-label">Subjects</div>
+            <div className="course-stat-label">Subjects</div>
           </div>
           <div className="stat-card">
             <div className="stat-value1">
               {subjects.reduce((total, subject) => total + (data[subject]?.length || 0), 0)}
             </div>
-            <div className="stat-label">Video Lessons</div>
+            <div className="course-stat-label">Video Lessons</div>
           </div>
           <div className="stat-card">
             <div className="stat-value1">{notesPacks.length}</div>
-            <div className="stat-label">Notes Packs</div>
+            <div className="course-stat-label">Notes Packs</div>
           </div>
         </div>
       </header>
