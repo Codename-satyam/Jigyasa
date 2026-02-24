@@ -62,7 +62,7 @@ function BlockedUser() {
           </p>
           <p>
             If you believe this is an error, please contact the administrator at{" "}
-            <span className="contact-link">support@quizy.com</span>
+            <span className="contact-link">support@jigyasa.com</span>
           </p>
         </motion.div>
 

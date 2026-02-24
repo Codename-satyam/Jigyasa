@@ -8,7 +8,7 @@ function Footer() {
     <footer className="footer">
       <div className="footer-content pixelify-sans-font">
         <div className="footer-left">
-          <h3>Quizy</h3>
+          <h3>Jigyasa</h3>
           <p>Empowering young minds through fun and interactive quizzes!</p>
         </div>
 

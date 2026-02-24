@@ -226,7 +226,7 @@ router.post('/admin/validate', async (req, res) => {
     
     // Admin credentials from environment or defaults
     const ADMIN_CODE = process.env.ADMIN_CODE || 'ADMIN123456';
-    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@quizy.com';
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@jigyasa.com';
     const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin@12345';
     
     console.log('🔐 Admin login attempt received');
