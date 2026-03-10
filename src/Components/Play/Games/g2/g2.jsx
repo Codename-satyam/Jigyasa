@@ -35,6 +35,7 @@ function QuizGame() {
   const [reveal, setReveal] = useState(false);
 
   const question = randomizedQuestions[current];
+  const progressPercent = Math.round(((current + 1) / randomizedQuestions.length) * 100);
 
   useEffect(() => {
     if (timeLeft === 0 && !selected) {
@@ -126,11 +127,21 @@ function QuizGame() {
           </span>
         </div>
 
-        <img
-          src={question.image}
-          alt="quiz"
-          className={`g2-image ${reveal ? "reveal" : ""}`}
-        />
+        <div className="g2-progress-wrap" aria-label="quiz progress">
+          <div className="g2-progress-track">
+            <div className="g2-progress-fill" style={{ width: `${progressPercent}%` }}></div>
+          </div>
+          <span>{progressPercent}%</span>
+        </div>
+
+        <div className="g2-image-frame">
+          <img
+            src={question.image}
+            alt="quiz"
+            className={`g2-image ${reveal ? "reveal" : ""}`}
+            loading="eager"
+          />
+        </div>
 
         <h3 className="g2-question">{question.question}</h3>
 

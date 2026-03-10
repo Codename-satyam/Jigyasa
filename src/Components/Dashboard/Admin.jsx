@@ -20,8 +20,11 @@ import FadeInWhenVisible from '../FadeInWhenVisible.jsx';
 // USER MANAGEMENT FUNCTIONS
 async function fetchAllUsers() {
   try {
-    const users = authApi.getAllUsers?.() || [];
-    return Array.isArray(users) ? users : [];
+    const response = await apiCall('/api/users', 'GET');
+    const users = response?.success ? response.users : [];
+    return Array.isArray(users)
+      ? users.map((u) => ({ ...u, id: u._id || u.id }))
+      : [];
   } catch (e) {
     console.error("Error fetching users:", e);
     return [];
@@ -41,14 +44,8 @@ async function toggleUserStatus(userId, blocked) {
 
 async function changeUserRole(userId, newRole) {
   try {
-    const users = authApi.getAllUsers?.() || [];
-    const userIndex = users.findIndex(u => u.id === userId);
-    if (userIndex !== -1) {
-      users[userIndex].role = newRole;
-      localStorage.setItem('jq_users', JSON.stringify(users));
-      return true;
-    }
-    return false;
+    const response = await apiCall(`/api/users/${userId}`, 'PUT', { role: newRole });
+    return response.success || false;
   } catch (e) {
     console.error("Error changing user role:", e);
     return false;
@@ -57,10 +54,8 @@ async function changeUserRole(userId, newRole) {
 
 async function deleteUserAccount(userId) {
   try {
-    let users = authApi.getAllUsers?.() || [];
-    users = users.filter(u => u.id !== userId);
-    localStorage.setItem('jq_users', JSON.stringify(users));
-    return true;
+    const response = await apiCall(`/api/users/${userId}`, 'DELETE');
+    return response.success || false;
   } catch (e) {
     console.error("Error deleting user:", e);
     return false;
@@ -79,9 +74,15 @@ function searchUsers(users, searchTerm) {
 // QUIZ MANAGEMENT FUNCTIONS
 async function fetchAllQuizzes() {
   try {
-    // Get all quizzes directly from localStorage (admin needs all, not just published)
-    const quizzes = JSON.parse(localStorage.getItem('jq_quizzes') || '[]');
-    return Array.isArray(quizzes) ? quizzes : [];
+    const response = await apiCall('/api/quizzes/all', 'GET');
+    const quizzes = response?.success ? response.quizzes : [];
+    return Array.isArray(quizzes)
+      ? quizzes.map((q) => ({
+          ...q,
+          id: q._id || q.id,
+          isPublished: typeof q.isPublished === 'boolean' ? q.isPublished : !!q.ispublished,
+        }))
+      : [];
   } catch (e) {
     console.error("Error fetching quizzes:", e);
     return [];
@@ -90,14 +91,9 @@ async function fetchAllQuizzes() {
 
 async function toggleQuizPublication(quizId, published) {
   try {
-    const quizzes = JSON.parse(localStorage.getItem('jq_quizzes') || '[]');
-    const quizIndex = quizzes.findIndex(q => q.id === quizId);
-    if (quizIndex !== -1) {
-      quizzes[quizIndex].isPublished = published;
-      localStorage.setItem('jq_quizzes', JSON.stringify(quizzes));
-      return true;
-    }
-    return false;
+    const endpoint = published ? `/api/quizzes/${quizId}/publish` : `/api/quizzes/${quizId}/unpublish`;
+    const response = await apiCall(endpoint, 'POST');
+    return response.success || false;
   } catch (e) {
     console.error("Error toggling quiz publication:", e);
     return false;
@@ -106,10 +102,8 @@ async function toggleQuizPublication(quizId, published) {
 
 async function deleteQuiz(quizId) {
   try {
-    let quizzes = JSON.parse(localStorage.getItem('jq_quizzes') || '[]');
-    quizzes = quizzes.filter(q => q.id !== quizId);
-    localStorage.setItem('jq_quizzes', JSON.stringify(quizzes));
-    return true;
+    const response = await apiCall(`/api/quizzes/${quizId}`, 'DELETE');
+    return response.success || false;
   } catch (e) {
     console.error("Error deleting quiz:", e);
     return false;
@@ -184,7 +178,11 @@ async function flagContent(contentId, contentType, reason) {
 
 async function getFlaggedContent() {
   try {
-    return JSON.parse(localStorage.getItem('jq_flagged') || '[]');
+    const response = await apiCall('/api/flags', 'GET');
+    const flags = response?.success ? response.flags : [];
+    return Array.isArray(flags)
+      ? flags.map((f) => ({ ...f, id: f._id || f.id }))
+      : [];
   } catch (e) {
     console.error("Error retrieving flagged content:", e);
     return [];
@@ -193,16 +191,12 @@ async function getFlaggedContent() {
 
 async function moderateContent(flagId, action, feedback) {
   try {
-    let flags = JSON.parse(localStorage.getItem('jq_flagged') || '[]');
-    const flagIndex = flags.findIndex(f => f.id === flagId);
-    if (flagIndex !== -1) {
-      flags[flagIndex].status = action;
-      flags[flagIndex].feedback = feedback;
-      flags[flagIndex].moderatedAt = new Date().toISOString();
-      localStorage.setItem('jq_flagged', JSON.stringify(flags));
-      return true;
-    }
-    return false;
+    const status = action === 'approved' ? 'resolved' : 'rejected';
+    const response = await apiCall(`/api/flags/${flagId}/review`, 'POST', {
+      status,
+      resolution: feedback,
+    });
+    return response.success || false;
   } catch (e) {
     console.error("Error moderating content:", e);
     return false;
@@ -221,15 +215,8 @@ async function getPendingTeacherRequests(users) {
 
 async function approveTeacher(teacherId) {
   try {
-    const users = authApi.getAllUsers?.() || [];
-    const userIndex = users.findIndex(u => u.id === teacherId);
-    if (userIndex !== -1) {
-      users[userIndex].approved = true;
-      users[userIndex].approvedAt = new Date().toISOString();
-      localStorage.setItem('jq_users', JSON.stringify(users));
-      return true;
-    }
-    return false;
+    const response = await apiCall(`/api/users/${teacherId}/approve`, 'POST');
+    return response.success || false;
   } catch (e) {
     console.error("Error approving teacher:", e);
     return false;
@@ -238,15 +225,11 @@ async function approveTeacher(teacherId) {
 
 async function rejectTeacher(teacherId, reason) {
   try {
-    const users = authApi.getAllUsers?.() || [];
-    const userIndex = users.findIndex(u => u.id === teacherId);
-    if (userIndex !== -1) {
-      users[userIndex].approved = false;
-      users[userIndex].rejectionReason = reason;
-      localStorage.setItem('jq_users', JSON.stringify(users));
-      return true;
-    }
-    return false;
+    const response = await apiCall(`/api/users/${teacherId}`, 'PUT', {
+      approved: false,
+      rejectionReason: reason || '',
+    });
+    return response.success || false;
   } catch (e) {
     console.error("Error rejecting teacher:", e);
     return false;
@@ -334,23 +317,24 @@ function Admin() {
       try {
         console.log('📊 [Admin] Fetching admin data from backend...');
         
-        // Fetch all users from backend
-        const usersResponse = await apiCall('/api/users', 'GET');
-        console.log('👥 [Admin] Users response:', usersResponse);
-        const fetchedUsers = usersResponse.success ? usersResponse.users.map(u => ({ ...u, id: u._id })) : [];
-
-        // Fetch all quizzes from backend
-        const quizzesResponse = await apiCall('/api/quizzes/all', 'GET');
-        console.log('📝 [Admin] Quizzes response:', quizzesResponse);
-        const fetchedQuizzes = quizzesResponse.success ? quizzesResponse.quizzes : [];
+        // Fetch all users and quizzes from backend
+        const fetchedUsers = await fetchAllUsers();
+        const fetchedQuizzes = await fetchAllQuizzes();
 
         // Fetch all scores from backend
         const scoresResponse = await apiCall('/api/scores', 'GET');
         console.log('📊 [Admin] Scores response:', scoresResponse);
-        const fetchedScores = scoresResponse.success ? scoresResponse.scores : [];
+        const fetchedScores = scoresResponse.success
+          ? scoresResponse.scores.map((s) => ({
+              ...s,
+              id: s._id || s.id,
+              quizId: s.quizId?._id || s.quizId,
+              userId: s.userId?._id || s.userId,
+            }))
+          : [];
 
-        // Fetch flagged content from localStorage for now
-        const fetchedFlags = JSON.parse(localStorage.getItem('jq_flagged') || '[]');
+        // Fetch flagged content from backend
+        const fetchedFlags = await getFlaggedContent();
 
         console.log('✅ [Admin] All data fetched successfully');
         console.log('  - Users:', fetchedUsers.length);
@@ -464,12 +448,17 @@ function Admin() {
                 <td>
                   <select
                     value={user.role || 'student'}
-                    onChange={(e) => {
-                      changeUserRole(user.id, e.target.value);
-                      const updatedUsers = users.map(u => 
-                        u.id === user.id ? { ...u, role: e.target.value } : u
-                      );
-                      setUsers(updatedUsers);
+                    onChange={async (e) => {
+                      const nextRole = e.target.value;
+                      const ok = await changeUserRole(user.id, nextRole);
+                      if (!ok) {
+                        setMessage('Failed to change user role');
+                        return;
+                      }
+                      setUsers((prev) => prev.map((u) =>
+                        u.id === user.id ? { ...u, role: nextRole } : u
+                      ));
+                      setMessage('User role updated');
                     }}
                     className="role-select"
                   >
@@ -485,21 +474,31 @@ function Admin() {
                 </td>
                 <td>
                   <button
-                    onClick={() => {
-                      toggleUserStatus(user.id, !user.blocked);
-                      const updatedUsers = users.map(u =>
-                        u.id === user.id ? { ...u, blocked: !u.blocked } : u
-                      );
-                      setUsers(updatedUsers);
+                    onClick={async () => {
+                      const nextBlocked = !user.blocked;
+                      const ok = await toggleUserStatus(user.id, nextBlocked);
+                      if (!ok) {
+                        setMessage('Failed to update user status');
+                        return;
+                      }
+                      setUsers((prev) => prev.map((u) =>
+                        u.id === user.id ? { ...u, blocked: nextBlocked } : u
+                      ));
+                      setMessage(nextBlocked ? 'User blocked' : 'User unblocked');
                     }}
                     className="btn-small btn-secondary"
                   >
                     {user.blocked ? 'Unblock' : 'Block'}
                   </button>
                   <button
-                    onClick={() => {
-                      deleteUserAccount(user.id);
-                      setUsers(users.filter(u => u.id !== user.id));
+                    onClick={async () => {
+                      const ok = await deleteUserAccount(user.id);
+                      if (!ok) {
+                        setMessage('Failed to delete user');
+                        return;
+                      }
+                      setUsers((prev) => prev.filter((u) => u.id !== user.id));
+                      setMessage('User deleted');
                     }}
                     className="btn-small btn-danger"
                   >
@@ -530,21 +529,31 @@ function Admin() {
             </div>
             <div className="quiz-actions">
               <button
-                onClick={() => {
-                  toggleQuizPublication(quiz.id, !quiz.isPublished);
-                  const updatedQuizzes = quizzes.map(q =>
-                    q.id === quiz.id ? { ...q, isPublished: !q.isPublished } : q
-                  );
-                  setQuizzes(updatedQuizzes);
+                onClick={async () => {
+                  const nextPublished = !quiz.isPublished;
+                  const ok = await toggleQuizPublication(quiz.id, nextPublished);
+                  if (!ok) {
+                    setMessage('Failed to update quiz publication status');
+                    return;
+                  }
+                  setQuizzes((prev) => prev.map((q) =>
+                    q.id === quiz.id ? { ...q, isPublished: nextPublished } : q
+                  ));
+                  setMessage(nextPublished ? 'Quiz published' : 'Quiz unpublished');
                 }}
                 className={`btn-small ${quiz.isPublished ? 'btn-secondary' : 'btn-primary'}`}
               >
                 {quiz.isPublished ? 'Unpublish' : 'Publish'}
               </button>
               <button
-                onClick={() => {
-                  deleteQuiz(quiz.id);
-                  setQuizzes(quizzes.filter(q => q.id !== quiz.id));
+                onClick={async () => {
+                  const ok = await deleteQuiz(quiz.id);
+                  if (!ok) {
+                    setMessage('Failed to delete quiz');
+                    return;
+                  }
+                  setQuizzes((prev) => prev.filter((q) => q.id !== quiz.id));
+                  setMessage('Quiz deleted');
                 }}
                 className="btn-small btn-danger"
               >
@@ -628,9 +637,17 @@ function Admin() {
                 <div className="request-actions">
                   <button
                     onClick={() => {
-                      approveTeacher(teacher.id);
-                      setPendingTeachers(pendingTeachers.filter(t => t.id !== teacher.id));
-                      setMessage('Teacher approved successfully');
+                      approveTeacher(teacher.id).then((ok) => {
+                        if (!ok) {
+                          setMessage('Failed to approve teacher');
+                          return;
+                        }
+                        setUsers((prev) => prev.map((u) =>
+                          u.id === teacher.id ? { ...u, approved: true } : u
+                        ));
+                        setPendingTeachers((prev) => prev.filter((t) => t.id !== teacher.id));
+                        setMessage('Teacher approved successfully');
+                      });
                     }}
                     className="btn-primary"
                   >
@@ -645,9 +662,19 @@ function Admin() {
                   />
                   <button
                     onClick={() => {
-                      rejectTeacher(teacher.id, rejectReason[teacher.id] || '');
-                      setPendingTeachers(pendingTeachers.filter(t => t.id !== teacher.id));
-                      setMessage('Teacher request rejected');
+                      rejectTeacher(teacher.id, rejectReason[teacher.id] || '').then((ok) => {
+                        if (!ok) {
+                          setMessage('Failed to reject teacher');
+                          return;
+                        }
+                        setUsers((prev) => prev.map((u) =>
+                          u.id === teacher.id
+                            ? { ...u, approved: false, rejectionReason: rejectReason[teacher.id] || '' }
+                            : u
+                        ));
+                        setPendingTeachers((prev) => prev.filter((t) => t.id !== teacher.id));
+                        setMessage('Teacher request rejected');
+                      });
                     }}
                     className="btn-danger"
                   >
@@ -674,24 +701,34 @@ function Admin() {
           flaggedContent.map(flag => (
             <div key={flag.id} className="flag-card">
               <div className="flag-info">
-                <h4>{flag.contentType.toUpperCase()}</h4>
-                <p>Reason: {flag.reason}</p>
-                <small>Flagged: {new Date(flag.flaggedAt).toLocaleString()}</small>
+                <h4>{(flag.contentType || 'content').toUpperCase()}</h4>
+                <p>Reason: {flag.reason || 'No reason provided'}</p>
+                <small>Flagged: {new Date(flag.timestamp || flag.flaggedAt || Date.now()).toLocaleString()}</small>
               </div>
               <div className="flag-actions">
                 <button
-                  onClick={() => {
-                    moderateContent(flag.id, 'approved', 'Approved');
-                    setFlaggedContent(flaggedContent.filter(f => f.id !== flag.id));
+                  onClick={async () => {
+                    const ok = await moderateContent(flag.id, 'approved', 'Approved by admin');
+                    if (!ok) {
+                      setMessage('Failed to approve flagged content');
+                      return;
+                    }
+                    setFlaggedContent((prev) => prev.filter((f) => f.id !== flag.id));
+                    setMessage('Flag marked as resolved');
                   }}
                   className="btn-primary"
                 >
                   Approve
                 </button>
                 <button
-                  onClick={() => {
-                    moderateContent(flag.id, 'rejected', 'Rejected');
-                    setFlaggedContent(flaggedContent.filter(f => f.id !== flag.id));
+                  onClick={async () => {
+                    const ok = await moderateContent(flag.id, 'rejected', 'Rejected by admin');
+                    if (!ok) {
+                      setMessage('Failed to reject flagged content');
+                      return;
+                    }
+                    setFlaggedContent((prev) => prev.filter((f) => f.id !== flag.id));
+                    setMessage('Flag marked as rejected');
                   }}
                   className="btn-danger"
                 >

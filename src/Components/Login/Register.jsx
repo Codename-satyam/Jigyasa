@@ -4,21 +4,102 @@ import { motion } from "framer-motion";
 import auth, { AVATAR_OPTIONS } from "../../api/auth";
 import "./auth.css";
 
+const PASSWORD_RULES = {
+  minLength: 8,
+  upper: /[A-Z]/,
+  lower: /[a-z]/,
+  number: /[0-9]/,
+  special: /[^A-Za-z0-9]/,
+};
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isStrongPassword(value) {
+  return (
+    value.length >= PASSWORD_RULES.minLength &&
+    PASSWORD_RULES.upper.test(value) &&
+    PASSWORD_RULES.lower.test(value) &&
+    PASSWORD_RULES.number.test(value) &&
+    PASSWORD_RULES.special.test(value)
+  );
+}
+
 function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState("weak");
   const [selectedAvatar, setSelectedAvatar] = useState(1);
   const [role, setRole] = useState("student"); // 'student' or 'teacher'
   const [error, setError] = useState(null);
+  const [warning, setWarning] = useState(null);
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+  const [touched, setTouched] = useState({
+    name: false,
+    email: false,
+    password: false,
+  });
   const navigate = useNavigate();
+
+
+
+  function checkPasswordStrength(password) {
+    let score = 0;
+    if (password.length >= 8) {
+      score++;
+    }
+    if (/[A-Z]/.test(password)) {
+      score++;
+    }
+    if (/[0-9]/.test(password)) {
+      score++;
+    }
+    if (/[^A-Za-z0-9]/.test(password)) {
+      score++;
+    }
+    if (score === 4) {
+      return "strong";
+    } else if (score >= 2) {
+      return "medium";
+    } else {
+      return "weak";
+    }
+  }
+
+  function getValidationWarnings() {
+    const warnings = [];
+
+    if (!name.trim()) warnings.push("Name is required");
+    if (!email.trim()) warnings.push("Email is required");
+    if (email.trim() && !EMAIL_REGEX.test(email.trim())) warnings.push("Enter a valid email address");
+    if (!password) warnings.push("Password is required");
+    if (password && !isStrongPassword(password)) {
+      warnings.push("Password must include uppercase, lowercase, number, special character and 8+ length");
+    }
+
+    return warnings;
+  }
 
   const submit = async (e) => {
     e.preventDefault();
+    setAttemptedSubmit(true);
     setError(null);
+    setWarning(null);
+
+    const warnings = getValidationWarnings();
+    if (warnings.length > 0) {
+      setWarning(`Please fix: ${warnings.join(" | ")}`);
+      return;
+    }
 
     if (!name.trim()) {
       setError("Please enter your name");
+      return;
+    }
+
+    if (!isStrongPassword(password)) {
+      setError(
+        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character"
+      );
       return;
     }
 
@@ -36,7 +117,11 @@ function Register() {
       console.error('❌ [Register] Registration failed:', err);
       console.error('❌ [Register] Error message:', err.message);
       console.error('❌ [Register] Error stack:', err.stack);
-      setError(err.message || 'Registration failed');
+      const msg = err.message || 'Registration failed';
+      setError(msg);
+      if (/email|password|invalid|exists/i.test(msg)) {
+        setWarning(`Please review your details: ${msg}`);
+      }
     }
   };
 
@@ -71,6 +156,23 @@ function Register() {
           </motion.div>
         )}
 
+        {warning && (
+          <motion.div
+            className="auth-error"
+            style={{
+              background: 'rgba(255, 165, 0, 0.12)',
+              borderColor: '#ffb74d',
+              color: '#ffe0b2',
+              marginTop: '8px'
+            }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ type: "spring", stiffness: 200 }}
+          >
+            Warning: {warning}
+          </motion.div>
+        )}
+
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -82,10 +184,20 @@ function Register() {
             type="text"
             placeholder="Enter your name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              if (attemptedSubmit) {
+                const warnings = getValidationWarnings();
+                setWarning(warnings.length ? `Please fix: ${warnings.join(" | ")}` : null);
+              }
+            }}
+            onBlur={() => setTouched((prev) => ({ ...prev, name: true }))}
             required
             whileFocus={{ scale: 1.02 }}
           />
+          {(touched.name || attemptedSubmit) && !name.trim() && (
+            <small style={{ color: '#ffb74d' }}>Name cannot be empty</small>
+          )}
         </motion.div>
 
         <motion.div
@@ -99,10 +211,20 @@ function Register() {
             type="email"
             placeholder="your@email.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (attemptedSubmit) {
+                const warnings = getValidationWarnings();
+                setWarning(warnings.length ? `Please fix: ${warnings.join(" | ")}` : null);
+              }
+            }}
+            onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
             required
             whileFocus={{ scale: 1.02 }}
           />
+          {(touched.email || attemptedSubmit) && email.trim() && !EMAIL_REGEX.test(email.trim()) && (
+            <small style={{ color: '#ffb74d' }}>Enter a valid email format</small>
+          )}
         </motion.div>
 
         <motion.div
@@ -116,10 +238,47 @@ function Register() {
             type="password"
             placeholder="Enter password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setPasswordStrength(checkPasswordStrength(e.target.value));
+              if (attemptedSubmit) {
+                const warnings = getValidationWarnings();
+                setWarning(warnings.length ? `Please fix: ${warnings.join(" | ")}` : null);
+              }
+            }}
+            onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
             required
             whileFocus={{ scale: 1.02 }}
           />
+          {(touched.password || attemptedSubmit) && password && !isStrongPassword(password) && (
+            <small style={{ color: '#ffb74d' }}>
+              Use 8+ chars with uppercase, lowercase, number, and special character
+            </small>
+          )}
+        </motion.div>
+        {passwordStrength && (
+          <motion.div
+            className={`password-strength ${passwordStrength}`}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.42 }}
+          >
+            Password Strength: {passwordStrength}
+          </motion.div>
+        )}
+
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.44 }}
+          className="password-requirements"
+          style={{ fontSize: '0.82rem', color: '#cfd8dc', marginTop: '8px', marginBottom: '12px' }}
+        >
+          <div>{password.length >= 8 ? '✓' : '•'} At least 8 characters</div>
+          <div>{/[A-Z]/.test(password) ? '✓' : '•'} One uppercase letter</div>
+          <div>{/[a-z]/.test(password) ? '✓' : '•'} One lowercase letter</div>
+          <div>{/[0-9]/.test(password) ? '✓' : '•'} One number</div>
+          <div>{/[^A-Za-z0-9]/.test(password) ? '✓' : '•'} One special character</div>
         </motion.div>
 
         <motion.div
@@ -207,6 +366,7 @@ function Register() {
         <motion.button
           type="submit"
           className="submit-btn"
+          disabled={!isStrongPassword(password)}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}

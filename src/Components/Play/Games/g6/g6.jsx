@@ -35,8 +35,24 @@ function RiddleRPG() {
     /* ================= ENEMY ================= */
 
     const getEnemy = (level, playerMaxHp = 100) => {
+        // Force ADMIN at levels 4 and 8
+        if (level === 4 || level === 8) {
+            const adminData = enemyPool.find(e => e.name === "ADMIN");
+            if (adminData) {
+                const maxHp = adminData.baseHp + adminData.hpPerLevel * (level - 1);
+                return {
+                    ...adminData,
+                    level,
+                    maxHp,
+                    hp: maxHp,
+                    damage: adminData.baseDamage + (adminData.damagePerLevel || 0) * (level - 1)
+                };
+            }
+        }
+
+        // Regular enemy spawning for other levels
         const pool = enemyPool.filter(
-            e => e.baseHp + e.hpPerLevel * (level - 1) <= playerMaxHp * 1.5
+            e => e.name !== "ADMIN" && e.baseHp + e.hpPerLevel * (level - 1) <= playerMaxHp * 1.5
         );
 
         const enemyData =
@@ -69,8 +85,12 @@ function RiddleRPG() {
     const [damagePopup, setDamagePopup] = useState(null);
     const [victoryScreen, setVictoryScreen] = useState(false);
     const [playerDamaged, setPlayerDamaged] = useState(false);
+    const [playerAttacking, setPlayerAttacking] = useState(false);
+    const [adminPopup, setAdminPopup] = useState(false);
+    const [gameCompleted, setGameCompleted] = useState(false);
 
     const playerDamageTimerRef = useRef(null);
+    const playerAttackTimerRef = useRef(null);
     const xpAwardedRef = useRef(false);
 
     const isVictory = enemy.hp <= 0;
@@ -165,6 +185,13 @@ function RiddleRPG() {
         attackSoundRef.current.currentTime = 0;
         attackSoundRef.current.play().catch(e => console.log("Audio play failed:", e));
 
+        setPlayerAttacking(true);
+        clearTimeout(playerAttackTimerRef.current);
+        playerAttackTimerRef.current = setTimeout(
+            () => setPlayerAttacking(false),
+            200
+        );
+
         const baseDamage = power ? 40 : 20;
         const damage =
             Math.random() < 0.2 ? baseDamage * 2 : baseDamage;
@@ -200,7 +227,13 @@ function RiddleRPG() {
     useEffect(() => {
         if (isVictory && !xpAwardedRef.current) {
             gainXP(40);
-            setVictoryScreen(true);
+            
+            // Check if defeated enemy was ADMIN
+            if (enemy.name === "ADMIN") {
+                setGameCompleted(true);
+            } else {
+                setVictoryScreen(true);
+            }
             
             // Play victory sound when player wins
             victorySoundRef.current.currentTime = 0;
@@ -208,7 +241,7 @@ function RiddleRPG() {
             
             xpAwardedRef.current = true;
         }
-    }, [isVictory]);
+    }, [isVictory, enemy.name]);
 
     useEffect(() => {
         if (!message) return;
@@ -217,8 +250,15 @@ function RiddleRPG() {
     }, [message]);
 
     useEffect(() => {
+        if (!adminPopup) return;
+        const timer = setTimeout(() => setAdminPopup(false), 3000);
+        return () => clearTimeout(timer);
+    }, [adminPopup]);
+
+    useEffect(() => {
         return () => {
             clearTimeout(playerDamageTimerRef.current);
+            clearTimeout(playerAttackTimerRef.current);
         };
     }, []);
 
@@ -226,7 +266,14 @@ function RiddleRPG() {
 
     const continueGame = () => {
         setVictoryScreen(false);
-        setEnemy(getEnemy(player.level, player.maxHp));
+        const newEnemy = getEnemy(player.level, player.maxHp);
+        setEnemy(newEnemy);
+        
+        // Show ADMIN popup if it's ADMIN
+        if (newEnemy.name === "ADMIN") {
+            setAdminPopup(true);
+        }
+        
         xpAwardedRef.current = false;
     };
 
@@ -242,6 +289,7 @@ function RiddleRPG() {
         });
         setEnemy(getEnemy(1, 100));
         setVictoryScreen(false);
+        setGameCompleted(false);
         xpAwardedRef.current = false;
     };
 
@@ -258,17 +306,19 @@ function RiddleRPG() {
         <div className="g6-body">
             <div className={`riddle-container ${shake ? "shake" : ""}`}>
                 <h1>Riddle RPG ⚔️</h1>
+                <p className="g6-subtitle">ANSWER THE RIDDLE · DEFEAT YOUR FOE · CLAIM GLORY</p>
 
                 <div className="battle-area">
                     <div className="character player-card1">
                         <div className="character-header">
+                            <span className="hero-tag">HERO</span>
                             <h3 className="level-badge">
-                                LEVEL {player.level}
+                                LV {player.level}
                             </h3>
                         </div>
 
                         <img
-                            src={playerDamaged ? knightdamage : knight}
+                            src={playerAttacking ? knightattack : (playerDamaged ? knightdamage : knight)}
                             alt="Player"
                             className="character-portrait"
                         />
@@ -293,12 +343,15 @@ function RiddleRPG() {
                             </div>
 
                             <div className="stat-row">
-                                <span className="g6-stat-label">MANA</span>
+                                <span className="g6-stat-label">MP</span>
                                 <div className="healthbar-track">
                                     <div
                                         className="mana-fill"
                                         style={{ width: `${manaPercent}%` }}
                                     />
+                                    <span className="hp-text">
+                                        {player.mana}/{player.maxMana}
+                                    </span>
                                 </div>
                             </div>
 
@@ -309,12 +362,18 @@ function RiddleRPG() {
                                         className="xp-fill"
                                         style={{ width: `${xpPercent}%` }}
                                     />
+                                    <span className="hp-text">
+                                        {player.xp}/{player.xpToLevel}
+                                    </span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="vs-divider">VS</div>
+                    <div className="vs-divider">
+                        <span>VS</span>
+                        <div className="vs-sparks">✦</div>
+                    </div>
 
                     <div className="character enemy-card">
                         <div className="character-header">
@@ -363,7 +422,8 @@ function RiddleRPG() {
                 {!isDefeat && !victoryScreen && (
                     <>
                         <div className="riddle-box">
-                            {riddles[current].question}
+                            <span className="riddle-label">◈ RIDDLE ◈</span>
+                            <p className="riddle-text">{riddles[current].question}</p>
                         </div>
 
                         <input
@@ -376,22 +436,24 @@ function RiddleRPG() {
                                 if (e.key === "Enter")
                                     attack(false);
                             }}
-                            placeholder="Answer the riddle..."
+                            placeholder="► Type your answer here..."
                         />
 
-                        <div>
+                        <div className="g6-action-row">
                             <button
-                                className="g6-button"
+                                className="g6-button g6-btn-attack"
                                 onClick={() => attack(false)}
                             >
-                                Attack
+                                ⚔ ATTACK
                             </button>
 
                             <button
-                                className="g6-button"
+                                className="g6-button g6-btn-power"
                                 onClick={() => attack(true)}
+                                disabled={player.mana < 20}
                             >
-                                Power Attack (20 Mana)
+                                💥 POWER STRIKE
+                                <span className="btn-cost">20 MP</span>
                             </button>
                         </div>
                     </>
@@ -431,6 +493,30 @@ function RiddleRPG() {
                             >
                                 Continue
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {gameCompleted && (
+                    <div className="victory-screen game-completed">
+                        <div className="victory-content">
+                            <h1 className="game-completed-title">🎮 GAME COMPLETED 🎮</h1>
+                            <p className="admin-defeated-text">You defeated ADMIN!</p>
+                            <p>Final Level: {player.level}</p>
+                            <button
+                                className="g6-button"
+                                onClick={restartGame}
+                            >
+                                Play Again
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {adminPopup && (
+                    <div className="admin-popup-overlay">
+                        <div className="admin-popup-content">
+                            <h1 className="admin-popup-text">ADMIN HAS ARRIVED</h1>
                         </div>
                     </div>
                 )}
