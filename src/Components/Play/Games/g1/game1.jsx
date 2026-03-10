@@ -15,27 +15,27 @@ const levelConfig = {
     easy: {
         pairs: 4,
         cols: 4,
-        colors: ["#9bbc0f", "#8bac0f", "#306230", "#0f380f"],
+        colors: ["#ff6b6b", "#ffd166", "#4ecdc4", "#5e60ce"],
     },
     medium: {
         pairs: 6,
         cols: 4,
-        colors: ["#9bbc0f", "#8bac0f", "#306230", "#0f380f", "#7aa021", "#4f772d"],
+        colors: ["#ff6b6b", "#ffd166", "#4ecdc4", "#5e60ce", "#f15bb5", "#00bbf9"],
     },
     hard: {
         pairs: 10,
         cols: 5,
         colors: [
-            "#9bbc0f",
-            "#8bac0f",
-            "#306230",
-            "#0f380f",
-            "#7aa021",
-            "#4f772d",
-            "#3a5a40",
-            "#588157",
-            "#a0d070",
-            "#6baa39",
+            "#ff6b6b",
+            "#ffd166",
+            "#4ecdc4",
+            "#5e60ce",
+            "#f15bb5",
+            "#00bbf9",
+            "#ff9f1c",
+            "#2ec4b6",
+            "#9b5de5",
+            "#ff8fab",
         ],
     },
 };
@@ -50,6 +50,9 @@ function MemoryGame() {
     const [turns, setTurns] = useState(0);
     const [resultText, setResultText] = useState("");
     const [showResult, setShowResult] = useState(false);
+
+    const maxPairs = levelConfig[difficulty].pairs;
+    const progressPercent = Math.round((score / maxPairs) * 100);
 
     const shuffleCards = (level = difficulty) => {
         const selectedColors = levelConfig[level].colors.slice(
@@ -144,8 +147,15 @@ function MemoryGame() {
 
     return (
         <div className="game1-page">
+            <div className="atmosphere-layer" aria-hidden="true"></div>
             <div className="gameboy-shell">
-                <h2 className="game-title">MEMORY GAME</h2>
+                <div className="hud-head">
+                    <div>
+                        <p className="hud-subtitle">Neural Match System</p>
+                        <h2 className="game-title">MEMORY CORE</h2>
+                    </div>
+                    <span className={`difficulty-pill level-${difficulty}`}>{difficulty.toUpperCase()}</span>
+                </div>
 
                 <div className="difficulty-bar">
                     {Object.keys(levelConfig).map(level => (
@@ -162,6 +172,13 @@ function MemoryGame() {
                 <div className="stats">
                     <span>SCORE: {score}</span>
                     <span>TURNS: {turns}</span>
+                </div>
+
+                <div className="progress-wrap" aria-label="Match progress">
+                    <div className="progress-track">
+                        <div className="progress-fill" style={{ width: `${progressPercent}%` }}></div>
+                    </div>
+                    <span>{score}/{maxPairs} MATCHES</span>
                 </div>
 
                 <div
@@ -187,7 +204,7 @@ function MemoryGame() {
                 {showResult && (
                     <div className="modal-overlay">
                         <div className="modal-content">
-                            <h3>STAGE CLEAR</h3>
+                            <h3>SYSTEM CLEAR</h3>
                             <p>TURNS: {turns}</p>
                             <p>{resultText}</p>
                             <button className="res-but" onClick={() => shuffleCards(difficulty)}>RESTART</button>

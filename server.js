@@ -18,6 +18,7 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:4001',
+  'http://192.168.100.22:3000',
   process.env.CLIENT_ORIGIN
 ].filter(Boolean);
 
@@ -54,12 +55,12 @@ if (MONGO_URI) {
 }
 
 // ==================== IMPORT ROUTES ====================
-const userRoutes = require('./src/server/routes/user');
-const quizzesRoutes = require('./src/server/routes/quizzes');
-const scoresRoutes = require('./src/server/routes/scores');
-const progressRoutes = require('./src/server/routes/progress');
-const gameRoutes = require('./src/server/routes/game');
-const flagsRoutes = require('./src/server/routes/flags');
+const userRoutes = require('./server/routes/user');
+const quizzesRoutes = require('./server/routes/quizzes');
+const scoresRoutes = require('./server/routes/scores');
+const progressRoutes = require('./server/routes/progress');
+const gameRoutes = require('./server/routes/game');
+const flagsRoutes = require('./server/routes/flags');
 
 // ==================== REGISTER ROUTES ====================
 app.use('/api/users', userRoutes);

@@ -36,6 +36,7 @@ function QuizGame() {
   const [reveal, setReveal] = useState(false);
 
   const question = randomizedQuestions[current];
+  const progressPercent = Math.round(((current + 1) / randomizedQuestions.length) * 100);
 
   const moveNext = useCallback(() => {
     if (current + 1 < randomizedQuestions.length) {
@@ -127,11 +128,21 @@ function QuizGame() {
           </span>
         </div>
 
-        <img
-          src={question.image}
-          alt="quiz"
-          className={`g3-image ${reveal ? "reveal" : ""}`}
-        />
+        <div className="g3-progress-wrap" aria-label="quiz progress">
+          <div className="g3-progress-track">
+            <div className="g3-progress-fill" style={{ width: `${progressPercent}%` }}></div>
+          </div>
+          <span>{progressPercent}%</span>
+        </div>
+
+        <div className="g3-image-frame">
+          <img
+            src={question.image}
+            alt="quiz"
+            className={`g3-image ${reveal ? "reveal" : ""}`}
+            loading="eager"
+          />
+        </div>
 
         <h3 className="g3-question">{question.question}</h3>
 

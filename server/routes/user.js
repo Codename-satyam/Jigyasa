@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
 // Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
@@ -25,6 +26,13 @@ router.post('/register', async (req, res) => {
     
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, error: 'Missing required fields' });
+    }
+
+    if (!PASSWORD_REGEX.test(password)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character',
+      });
     }
 
     const existingUser = await User.findOne({ email });
@@ -140,6 +148,13 @@ router.put('/:id', verifyToken, async (req, res) => {
       if (requestingUser.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Can only update your own profile' });
       }
+    }
+
+    if (req.body.password && !PASSWORD_REGEX.test(req.body.password)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character',
+      });
     }
 
     const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true }).select('-password');
