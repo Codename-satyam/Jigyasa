@@ -67,6 +67,9 @@ import LeaderBoard from "./Components/LeaderBoard/LeaderBoard.jsx";
 //transitions
 import PageTransition from "./Components/PageTransition.jsx";
 
+//404
+import NotFound from "./Components/Error/Error404.jsx";
+
 function AnimatedRoutes() {
   const location = useLocation();
 
@@ -301,8 +304,7 @@ function AnimatedRoutes() {
               <About />
             </PageTransition>
           }
-        />
-      </Routes>
+        />        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />      </Routes>
     </AnimatePresence>
   );
 }

@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.retro-container {
+  background-color: #111; /* Deep dark grey/black */
+  color: #39ff14; /* Classic terminal neon green */
+  font-family: 'Press Start 2P', monospace;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* CRT Scanline effect */
+.scanlines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0) 50%,
+    rgba(0, 0, 0, 0.25) 50%,
+    rgba(0, 0, 0, 0.25)
+  );
+  background-size: 100% 4px;
+  pointer-events: none; /* Allows clicking through the overlay */
+  z-index: 10;
+}
+
+.content {
+  z-index: 1;
+  padding: 20px;
+  max-width: 800px;
+}
+
+/* Glitch typography effect */
+.glitch {
+  font-size: 6rem;
+  margin: 0;
+  position: relative;
+  color: #fff;
+  text-shadow: 4px 4px #ff003c, -4px -4px #00e1ff; /* Cyan and Magenta offset */
+  animation: glitch-anim 1.5s infinite linear alternate-reverse;
+}
+
+.pixel-text {
+  font-size: 2rem;
+  margin-top: 20px;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  color: #ffcc00; /* Arcade yellow */
+}
+
+.pixel-text.small {
+  font-size: 0.8rem;
+  line-height: 1.8;
+  color: #ccc;
+  margin-bottom: 50px;
+}
+
+/* Blinking arcade button */
+.retro-btn {
+  display: inline-block;
+  padding: 15px 30px;
+  border: 4px solid #39ff14;
+  color: #39ff14;
+  text-decoration: none;
+  font-size: 1rem;
+  text-transform: uppercase;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  animation: blink 1.2s step-end infinite;
+}
+
+.retro-btn:hover {
+  background: #39ff14;
+  color: #111;
+  animation: none; /* Stop blinking on hover */
+  transform: scale(1.05);
+}
+
+/* --- Animations --- */
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes glitch-anim {
+  0% { clip-path: inset(20% 0 80% 0); }
+  20% { clip-path: inset(60% 0 10% 0); }
+  40% { clip-path: inset(40% 0 50% 0); }
+  60% { clip-path: inset(80% 0 5% 0); }
+  80% { clip-path: inset(10% 0 70% 0); }
+  100% { clip-path: inset(30% 0 20% 0); }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .glitch { font-size: 4rem; }
+  .pixel-text { font-size: 1.2rem; }
+  .pixel-text.small { font-size: 0.6rem; }
+  .retro-btn { font-size: 0.8rem; padding: 10px 20px; }
+}
