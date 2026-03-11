@@ -1,0 +1,181 @@
+/* Ensure the font is imported if not already in your global CSS */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.reviews-container {
+  font-family: 'Press Start 2P', monospace;
+  background-color: var(--retro-bg, #111122);
+  color: var(--retro-text, #e0e0e0);
+  min-height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.reviews-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  border-bottom: 4px solid var(--retro-gold, #ffd700);
+  padding-bottom: 1rem;
+}
+
+.gold-text {
+  color: var(--retro-gold, #ffd700);
+}
+
+.filter-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.active-filter {
+  transform: translateY(2px);
+  box-shadow: none !important; /* Makes it look 'pressed' */
+  border: 2px solid white;
+}
+
+/* RPG Dialogue Box Styling */
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.rpg-dialogue-box {
+  background-color: #0000aa; /* Classic Final Fantasy blue background */
+  border: 4px solid #ffffff;
+  border-radius: 4px; /* Slight rounding for anti-aliasing feel */
+  padding: 20px;
+  position: relative;
+  box-shadow: 
+    inset 0 0 0 2px #0000aa,
+    inset 0 0 0 4px #aaaaff, /* Inner highlight border */
+    6px 6px 0px rgba(0,0,0,0.5); /* Drop shadow */
+  image-rendering: pixelated;
+}
+
+.dialogue-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  border-bottom: 2px dashed #aaaaff;
+  padding-bottom: 10px;
+}
+
+.avatar-placeholder {
+  font-size: 24px;
+  background: #000;
+  padding: 10px;
+  border: 2px solid white;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 5px;
+}
+
+.user-name {
+  color: #ffffff;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.role-badge {
+  font-size: 8px;
+  padding: 4px 6px;
+  display: inline-block;
+  width: max-content;
+  text-transform: uppercase;
+}
+
+.badge-student { background-color: var(--retro-green, #39ff14); color: #000; }
+.badge-parent { background-color: var(--retro-purple, #b000ff); color: #fff; }
+
+.star-rating {
+  font-size: 14px;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.dialogue-body p {
+  color: #ffffff;
+  text-shadow: 2px 2px 0px #000;
+  line-height: 1.8;
+  margin: 0;
+}
+
+.dialogue-footer {
+  margin-top: 15px;
+  text-align: right;
+  color: #aaaaff;
+  font-size: 8px;
+}
+
+/* Submission Form Area */
+.review-submission-area {
+  background-color: #222244;
+  padding: 2rem;
+  border: 4px solid #555;
+  box-shadow: var(--pixel-border, 4px 4px 0 0 #000);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.retro-form .form-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.retro-form label {
+  color: var(--retro-blue, #00f0ff);
+}
+
+/* Reusing some styles from Admin if needed, or explicitly defining them */
+.pixel-btn {
+  font-family: inherit;
+  font-size: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  background-color: #555;
+  color: white;
+  border: 2px solid #fff;
+  box-shadow: 4px 4px 0 0 #000;
+  transition: transform 0.1s;
+}
+
+.pixel-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0px 0px 0 0 #000;
+}
+
+.btn-blue { background-color: #1e90ff; }
+.btn-green { background-color: #2e8b57; }
+.btn-purple { background-color: #8a2be2; }
+.btn-orange { background-color: #cd5c5c; }
+.btn-dark { background-color: #111; color: #fff; border-color: #555;}
+
+.pixel-select, .pixel-textarea {
+  font-family: inherit;
+  background-color: #000;
+  color: var(--retro-text, #e0e0e0);
+  border: 2px solid #fff;
+  padding: 10px;
+  font-size: 12px;
+}
+
+.pixel-textarea:focus, .pixel-select:focus {
+  outline: none;
+  border-color: var(--retro-gold, #ffd700);
+}
