@@ -1,0 +1,179 @@
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
+
+.pixelify-sans-font {
+  font-family: "Pixelify Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.home-page {
+  padding-top: 90px;
+  position: relative;
+  min-height: 100vh;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: visible;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  text-align: center;
+  color: white;
+  font-family: "Pixelify Sans", sans-serif;
+}
+
+.background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1; 
+}
+
+/* .left {
+  position: absolute;
+  top: 15%;
+  left: 5%;
+  text-align: left;
+  max-width: 40%;
+  z-index: 1;
+} */
+
+.right {
+  position: relative;
+  margin: 2% 5% 40px 0;
+  text-align: left; 
+  border: 3px solid #fff;
+  padding: 30px;
+  width: 35%;
+  background: rgba(0, 0, 0, 0.6); 
+  box-shadow: 3px 3px 0 #00ffff;
+  border-radius: 8px;
+  z-index: 1;
+}
+
+.home-page h1 {
+  font-size: 3rem;
+  margin-top: 5vh;
+  text-shadow: 2px 2px 0 #000, 4px 4px 0 #ff00ff; 
+}
+
+.home-page p {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 20px 0;
+  /* text-shadow: 1px 1px 0 #000, 2px 2px 0 #00ffff;  */
+}
+
+.right h2, .right h3 {
+  color: #ff00ff;
+  text-shadow: 1px 1px 0 #000, 2px 2px 0 #00ffff;
+}
+
+.right ul {
+  margin-top: 10px;
+  padding-left: 20px;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.pixel-button {
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 1.1rem;
+  background: #000;
+  color: #fff;
+  border: 3px solid #fff;
+  box-shadow: 3px 3px 0 #ff00ff;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-family: "Pixelify Sans", sans-serif;
+  transition: all 0.05s steps(1, end);
+}
+
+.pixel-button:hover {
+  background: #fff;
+  color: #000;
+  box-shadow: 3px 3px 0 #00ffff;
+  transform: translate(-2px, -2px);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .right {
+    width: 45%;
+    padding: 20px;
+  }
+
+  .home-page h1 {
+    font-size: 3rem;
+  }
+
+  .home-page p {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .right {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+  }
+
+  .home-page h1 {
+    font-size: 2.5rem;
+    margin-top: 3vh;
+  }
+
+  .home-page p {
+    font-size: 1rem;
+  }
+
+  .right h2, .right h3 {
+    font-size: 1.3rem;
+  }
+
+  .right ul {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-page {
+    overflow-y: auto;
+  }
+
+  .right {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .home-page h1 {
+    font-size: 2rem;
+    margin-top: 2vh;
+  }
+
+  .home-page p {
+    font-size: 0.9rem;
+  }
+
+  .right h2, .right h3 {
+    font-size: 1.1rem;
+  }
+
+  .right ul {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  .pixel-button {
+    font-size: 1rem;
+    padding: 8px 16px;
+  }
+}

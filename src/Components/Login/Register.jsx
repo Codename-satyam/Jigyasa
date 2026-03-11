@@ -40,34 +40,20 @@ function Register() {
   });
   const navigate = useNavigate();
 
-
-
   function checkPasswordStrength(password) {
     let score = 0;
-    if (password.length >= 8) {
-      score++;
-    }
-    if (/[A-Z]/.test(password)) {
-      score++;
-    }
-    if (/[0-9]/.test(password)) {
-      score++;
-    }
-    if (/[^A-Za-z0-9]/.test(password)) {
-      score++;
-    }
-    if (score === 4) {
-      return "strong";
-    } else if (score >= 2) {
-      return "medium";
-    } else {
-      return "weak";
-    }
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+
+    if (score === 4) return "strong";
+    else if (score >= 2) return "medium";
+    else return "weak";
   }
 
   function getValidationWarnings() {
     const warnings = [];
-
     if (!name.trim()) warnings.push("Name is required");
     if (!email.trim()) warnings.push("Email is required");
     if (email.trim() && !EMAIL_REGEX.test(email.trim())) warnings.push("Enter a valid email address");
@@ -75,7 +61,6 @@ function Register() {
     if (password && !isStrongPassword(password)) {
       warnings.push("Password must include uppercase, lowercase, number, special character and 8+ length");
     }
-
     return warnings;
   }
 
@@ -111,12 +96,9 @@ function Register() {
       const result = await auth.register({ name, email, password, avatarId: selectedAvatar, role });
       console.log('✅ [Register] Registration successful!', result);
       console.log('📍 [Register] Redirecting to dashboard...');
-      // Redirect to dashboard
       navigate('/dashboard');
     } catch (err) {
       console.error('❌ [Register] Registration failed:', err);
-      console.error('❌ [Register] Error message:', err.message);
-      console.error('❌ [Register] Error stack:', err.stack);
       const msg = err.message || 'Registration failed';
       setError(msg);
       if (/email|password|invalid|exists/i.test(msg)) {
@@ -124,7 +106,6 @@ function Register() {
       }
     }
   };
-
 
   const selectedAvatarEmoji = AVATAR_OPTIONS.find(a => a.id === selectedAvatar)?.emoji || '🦁';
 
@@ -142,7 +123,7 @@ function Register() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          Create Account
+          Character Creation
         </motion.h2>
 
         {error && (
@@ -162,8 +143,7 @@ function Register() {
             style={{
               background: 'rgba(255, 165, 0, 0.12)',
               borderColor: '#ffb74d',
-              color: '#ffe0b2',
-              marginTop: '8px'
+              color: '#ffe0b2'
             }}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
@@ -173,215 +153,201 @@ function Register() {
           </motion.div>
         )}
 
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-          className="form-group"
-        >
-          <label>Name</label>
-          <motion.input
-            type="text"
-            placeholder="Enter your name"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              if (attemptedSubmit) {
-                const warnings = getValidationWarnings();
-                setWarning(warnings.length ? `Please fix: ${warnings.join(" | ")}` : null);
-              }
-            }}
-            onBlur={() => setTouched((prev) => ({ ...prev, name: true }))}
-            required
-            whileFocus={{ scale: 1.02 }}
-          />
-          {(touched.name || attemptedSubmit) && !name.trim() && (
-            <small style={{ color: '#ffb74d' }}>Name cannot be empty</small>
-          )}
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.35 }}
-          className="form-group"
-        >
-          <label>Email</label>
-          <motion.input
-            type="email"
-            placeholder="your@email.com"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (attemptedSubmit) {
-                const warnings = getValidationWarnings();
-                setWarning(warnings.length ? `Please fix: ${warnings.join(" | ")}` : null);
-              }
-            }}
-            onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
-            required
-            whileFocus={{ scale: 1.02 }}
-          />
-          {(touched.email || attemptedSubmit) && email.trim() && !EMAIL_REGEX.test(email.trim()) && (
-            <small style={{ color: '#ffb74d' }}>Enter a valid email format</small>
-          )}
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4 }}
-          className="form-group"
-        >
-          <label>Password</label>
-          <motion.input
-            type="password"
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setPasswordStrength(checkPasswordStrength(e.target.value));
-              if (attemptedSubmit) {
-                const warnings = getValidationWarnings();
-                setWarning(warnings.length ? `Please fix: ${warnings.join(" | ")}` : null);
-              }
-            }}
-            onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
-            required
-            whileFocus={{ scale: 1.02 }}
-          />
-          {(touched.password || attemptedSubmit) && password && !isStrongPassword(password) && (
-            <small style={{ color: '#ffb74d' }}>
-              Use 8+ chars with uppercase, lowercase, number, and special character
-            </small>
-          )}
-        </motion.div>
-        {passwordStrength && (
-          <motion.div
-            className={`password-strength ${passwordStrength}`}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.42 }}
-          >
-            Password Strength: {passwordStrength}
-          </motion.div>
-        )}
-
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.44 }}
-          className="password-requirements"
-          style={{ fontSize: '0.82rem', color: '#cfd8dc', marginTop: '8px', marginBottom: '12px' }}
-        >
-          <div>{password.length >= 8 ? '✓' : '•'} At least 8 characters</div>
-          <div>{/[A-Z]/.test(password) ? '✓' : '•'} One uppercase letter</div>
-          <div>{/[a-z]/.test(password) ? '✓' : '•'} One lowercase letter</div>
-          <div>{/[0-9]/.test(password) ? '✓' : '•'} One number</div>
-          <div>{/[^A-Za-z0-9]/.test(password) ? '✓' : '•'} One special character</div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.42 }}
-          className="form-group"
-        >
-          <label>Account Type</label>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <motion.button
-              type="button"
-              className={`role-btn ${role === 'student' ? 'active' : ''}`}
-              onClick={() => setRole('student')}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              style={{
-                flex: 1,
-                padding: '10px',
-                border: '2px solid',
-                borderColor: role === 'student' ? '#00ffff' : '#666',
-                background: role === 'student' ? 'rgba(0,255,255,0.1)' : 'transparent',
-                color: '#fff',
-                borderRadius: '5px',
-                cursor: 'pointer'
-              }}
+        {/* Start Landscape Grid Wrap */}
+        <div className="register-landscape-grid">
+          
+          {/* LEFT COLUMN: Player Stats */}
+          <div className="reg-col-left">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="form-group"
             >
-              👨‍🎓 Student
-            </motion.button>
-            <motion.button
-              type="button"
-              className={`role-btn ${role === 'teacher' ? 'active' : ''}`}
-              onClick={() => setRole('teacher')}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              style={{
-                flex: 1,
-                padding: '10px',
-                border: '2px solid',
-                borderColor: role === 'teacher' ? '#00ffff' : '#666',
-                background: role === 'teacher' ? 'rgba(0,255,255,0.1)' : 'transparent',
-                color: '#fff',
-                borderRadius: '5px',
-                cursor: 'pointer'
-              }}
-            >
-              👨‍🏫 Teacher
-            </motion.button>
-          </div>
-        </motion.div>
+              <label>Name</label>
+              <motion.input
+                type="text"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (attemptedSubmit) {
+                    const warnings = getValidationWarnings();
+                    setWarning(warnings.length ? `Please fix: ${warnings.join(" | ")}` : null);
+                  }
+                }}
+                onBlur={() => setTouched((prev) => ({ ...prev, name: true }))}
+                required
+                whileFocus={{ scale: 1.02 }}
+              />
+              {(touched.name || attemptedSubmit) && !name.trim() && (
+                <small>Name cannot be empty</small>
+              )}
+            </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
-          className="avatar-section"
-        >
-          <label>Choose Your Avatar</label>
-          <motion.div
-            className="avatar-preview"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.5, type: "spring", stiffness: 120 }}
-          >
-            {selectedAvatarEmoji}
-          </motion.div>
-          <div className="avatar-grid">
-            {AVATAR_OPTIONS.map((avatar) => (
-              <motion.button
-                key={avatar.id}
-                type="button"
-                className={`avatar-btn ${selectedAvatar === avatar.id ? 'active' : ''}`}
-                onClick={() => setSelectedAvatar(avatar.id)}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                title={avatar.name}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.35 }}
+              className="form-group"
+            >
+              <label>Email</label>
+              <motion.input
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (attemptedSubmit) {
+                    const warnings = getValidationWarnings();
+                    setWarning(warnings.length ? `Please fix: ${warnings.join(" | ")}` : null);
+                  }
+                }}
+                onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
+                required
+                whileFocus={{ scale: 1.02 }}
+              />
+              {(touched.email || attemptedSubmit) && email.trim() && !EMAIL_REGEX.test(email.trim()) && (
+                <small>Enter a valid email format</small>
+              )}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+              className="form-group"
+            >
+              <label>Password</label>
+              <motion.input
+                type="password"
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setPasswordStrength(checkPasswordStrength(e.target.value));
+                  if (attemptedSubmit) {
+                    const warnings = getValidationWarnings();
+                    setWarning(warnings.length ? `Please fix: ${warnings.join(" | ")}` : null);
+                  }
+                }}
+                onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
+                required
+                whileFocus={{ scale: 1.02 }}
+              />
+              {(touched.password || attemptedSubmit) && password && !isStrongPassword(password) && (
+                <small>Use 8+ chars with uppercase, lowercase, number, & special character</small>
+              )}
+            </motion.div>
+
+            {passwordStrength && (
+              <motion.div
+                className={`password-strength ${passwordStrength}`}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.42 }}
               >
-                {avatar.emoji}
-              </motion.button>
-            ))}
+                Password Strength: {passwordStrength}
+              </motion.div>
+            )}
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.44 }}
+              className="password-requirements"
+            >
+              <div>{password.length >= 8 ? '✓' : '•'} At least 8 characters</div>
+              <div>{/[A-Z]/.test(password) ? '✓' : '•'} One uppercase letter</div>
+              <div>{/[a-z]/.test(password) ? '✓' : '•'} One lowercase letter</div>
+              <div>{/[0-9]/.test(password) ? '✓' : '•'} One number</div>
+              <div>{/[^A-Za-z0-9]/.test(password) ? '✓' : '•'} One special character</div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.42 }}
+              className="form-group"
+            >
+              <label>Account Class</label>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <motion.button
+                  type="button"
+                  className={`role-btn ${role === 'student' ? 'active' : ''}`}
+                  onClick={() => setRole('student')}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  👨‍🎓 Student
+                </motion.button>
+                <motion.button
+                  type="button"
+                  className={`role-btn ${role === 'teacher' ? 'active' : ''}`}
+                  onClick={() => setRole('teacher')}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  👨‍🏫 Teacher
+                </motion.button>
+              </div>
+            </motion.div>
           </div>
 
-        </motion.div>
+          {/* RIGHT COLUMN: Character Model & Submit */}
+          <div className="reg-col-right">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.45 }}
+              className="avatar-section"
+            >
+              <label>Choose Your Avatar</label>
+              <motion.div
+                className="avatar-preview"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.5, type: "spring", stiffness: 120 }}
+              >
+                {selectedAvatarEmoji}
+              </motion.div>
+              <div className="avatar-grid">
+                {AVATAR_OPTIONS.map((avatar) => (
+                  <motion.button
+                    key={avatar.id}
+                    type="button"
+                    className={`avatar-btn ${selectedAvatar === avatar.id ? 'active' : ''}`}
+                    onClick={() => setSelectedAvatar(avatar.id)}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    title={avatar.name}
+                  >
+                    {avatar.emoji}
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
 
-        <motion.button
-          type="submit"
-          className="submit-btn"
-          disabled={!isStrongPassword(password)}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(0,255,255,0.5)" }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Register
-        </motion.button>
+            <motion.button
+              type="submit"
+              className="submit-btn"
+              disabled={!isStrongPassword(password)}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(0,255,255,0.5)" }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Start Game
+            </motion.button>
+          </div>
+        </div>
+        {/* End Landscape Grid Wrap */}
 
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.65 }}
         >
-          Already have an account? <a href="/login">Login here</a>
+          Already have an account? <a href="/login">Load Save File</a>
         </motion.p>
       </motion.form>
     </div>

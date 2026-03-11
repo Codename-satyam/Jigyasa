@@ -104,7 +104,7 @@ function Login() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
         >
-          No account? <Link to="/register">Register</Link>
+          New Warrior ? <Link to="/register">Register</Link>
         </motion.p>
       </motion.form>
     </div>

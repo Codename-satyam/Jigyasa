@@ -1,21 +1,21 @@
 const mongoose = require('mongoose');
 
 const QuizSchema = new mongoose.Schema({
-    title: String,
+    title: { type: String, required: true },
     description: String,
-    topic: String,
+    topic: { type: String, required: true, index: true },
     difficulty: String,
     type: String,
     questions:[{
         id: String,
-        question: String,
-        options: [String],
-        correct: String,
+        question: { type: String, required: true },
+        options: { type: [String], required: true },
+        correct: { type: String, required: true },
         explanation: String,
     }],
-    createdBy: mongoose.Schema.Types.ObjectId,
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
     createdByName: String,
-    ispublished: { type: Boolean, default: false },
+    ispublished: { type: Boolean, default: false, index: true },
     createdAt: { type: Date, default: Date.now },
 });
 

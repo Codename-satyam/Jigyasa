@@ -1,191 +1,223 @@
-@import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
+/* =========================================================
+   PlayLanding.css - Modern Retro RPG Menu Style
+========================================================= */
 
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
 
-/* ---------- GLOBAL CONTAINER ---------- */
+:root {
+  --bg-void: #050505;
+  --menu-bg: rgba(8, 27, 51, 0.85); /* Deep RPG Blue */
+  --border-light: #d4d4d4;
+  --gold: #f8c522;
+  --neon-cyan: #00e5ff;
+  --neon-magenta: #ff00ff;
+  --text-white: #f0f0f0;
+  --text-green: #39ff14;
+}
+
+/* ================= CONTAINER & CRT EFFECT ================= */
 
 .play-landing {
+  position: relative;
   min-height: 100vh;
-  background: repeating-linear-gradient(
-      0deg,
-      #1a1a1a,
-      #1a1a1a 8px,
-      #111 8px,
-      #111 16px
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-void);
+  background-image: 
+    radial-gradient(circle at center, #111827 0%, #000000 100%);
+  padding: 40px 20px;
+  box-sizing: border-box;
+  font-family: 'VT323', monospace;
+  overflow-x: hidden;
+}
+
+/* Subtle CRT Scanline Overlay */
+.play-landing::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.1) 50%
   );
-  font-family: 'Press Start 2P', monospace;
-  color: #e4e4e4;
-  padding: 40px 16px;
-  text-align: center;
-
-  animation: crt-flicker 3s infinite alternate;
+  background-size: 100% 4px;
+  pointer-events: none; /* Lets you click through the overlay */
+  z-index: 100;
+  opacity: 0.6;
 }
 
-@keyframes crt-flicker {
-  0% { opacity: 0.92; }
-  100% { opacity: 1; }
-}
-
-/* ---------- HEADER ---------- */
+/* ================= HEADER & DIALOGUE BOX ================= */
 
 .pl-header {
-  margin-bottom: 40px;
+  text-align: center;
+  margin-bottom: 50px;
+  z-index: 2;
+  width: 100%;
+  max-width: 800px;
 }
 
 .pl-title {
-  font-size:12vh;
-  color: #a66bff; 
-  text-shadow: 0px 0px 10px #a020f0, 0px 0px 14px #a020f0;
-  margin-bottom: 12px;
-  animation: title-glow 1.5s infinite;
+  font-family: 'Press Start 2P', cursive;
+  color: var(--gold);
+  font-size: 3rem;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  text-shadow: 
+    4px 4px 0px #000,
+    0 0 20px rgba(248, 197, 34, 0.4);
+  letter-spacing: 4px;
+  animation: float-title 3s ease-in-out infinite;
 }
 
-@keyframes title-glow {
-  0% { text-shadow: 0 0 4px #a020f0; }
-  50% { text-shadow: 0 0 14px #a020f0; }
-  100% { text-shadow: 0 0 4px #a020f0; }
-}
-
+/* Classic RPG Dialogue Box for the Quote */
 .pl-sub {
-  color: #8fbfff;
-  font-size: 20px;
-  text-shadow: 0px 0px 5px #3366ff;
-  max-width: 60%;
-  margin: 0 auto;
-  font-family:'Bungee', cursive;
+  background-color: var(--menu-bg);
+  color: var(--text-green);
+  font-size: 1.8rem;
+  line-height: 1.4;
+  padding: 25px 30px;
+  border: 4px solid var(--border-light);
+  border-radius: 4px;
+  box-shadow: 
+    inset 0 0 0 4px #000, 
+    0 10px 20px rgba(0,0,0,0.8);
+  text-align: left;
+  min-height: 120px; /* Prevents layout jumping while typing */
+  position: relative;
+  text-shadow: 1px 1px 0px #000;
 }
 
-/* ---------- GRID ---------- */
+/* Blinking cursor effect at the end of the typing text */
+.pl-sub::after {
+  content: '█';
+  animation: blink 1s step-end infinite;
+  margin-left: 5px;
+}
+
+/* ================= NAVIGATION GRID ================= */
 
 .pl-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 24px;
-  padding: 12px;
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  flex-wrap: wrap;
+  z-index: 2;
+  max-width: 900px;
 }
 
-/* ---------- CARD ---------- */
+/* ================= MENU CARDS ================= */
 
 .pl-card {
+  text-decoration: none;
+  background-color: #111;
+  border: 4px solid #444;
+  padding: 30px 20px;
+  width: 200px;
   display: flex;
   flex-direction: column;
-  background: #0d0d0d;
-
-  /* tri-color neon border (alternating) */
-  border: 4px solid;
-  border-image: linear-gradient(45deg, #ff2e63, #3368ff, #b041ff) 1;
-
-  padding: 20px 10px;
-  text-decoration: none;
-  color: #e9e2ff;
-  border-radius: 0;
-  cursor: pointer;
-
-  box-shadow: 4px 4px 0px #3d1a3d, 8px 8px 0px #240f33;
-
-  transition: transform 0.15s, box-shadow 0.15s, filter 0.2s;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  transition: all 0.2s ease;
+  position: relative;
+  box-shadow: 6px 6px 0px #000;
 }
 
-.pl-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 4px 4px 0px #6a2f6a, 8px 8px 0px #3d1e6a;
-  filter: brightness(1.3);
-
-  animation: shake 0.15s linear infinite;
+/* Pseudo-element for the "Selection Cursor" (hidden by default) */
+.pl-card::before {
+  content: '►';
+  font-family: 'Press Start 2P', cursive;
+  color: var(--gold);
+  position: absolute;
+  left: -30px;
+  font-size: 1.2rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+  animation: point 0.5s infinite alternate;
 }
-
-@keyframes shake {
-  0% { transform: translate(1px, -2px); }
-  50% { transform: translate(-1px, 1px); }
-  100% { transform: translate(1px, -1px); }
-}
-
-/* ---------- ICON ---------- */
 
 .pl-icon {
-  font-size: 38px;
-  margin-bottom: 12px;
-  color: #ff4d6d; /* neon red */
-  text-shadow: 0px 0px 10px #ff0033;
+  font-size: 3.5rem;
+  color: var(--text-white);
+  transition: all 0.2s ease;
+  filter: drop-shadow(3px 3px 0 #000);
 }
-
-/* ---------- LABEL ---------- */
 
 .pl-label {
-  font-size: 13px;
-  letter-spacing: 1px;
-  color: #b59dff; /* soft purple */
-  text-shadow: 0px 0px 6px #7a22ff;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.9rem;
+  color: var(--text-white);
+  text-transform: uppercase;
+  text-shadow: 2px 2px 0px #000;
+  transition: color 0.2s;
 }
 
-.pl-sub::after {
-    content: "|";
-    margin-left: 4px;
-    animation: blink 1s infinite;
+/* --- Hover & Active States --- */
+
+.pl-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--gold);
+  background-color: var(--menu-bg);
+  box-shadow: 
+    6px 11px 0px #000,
+    0 0 15px rgba(248, 197, 34, 0.3);
+}
+
+.pl-card:hover::before {
+  opacity: 1; /* Show the selection cursor */
+}
+
+.pl-card:hover .pl-icon {
+  color: var(--neon-cyan);
+  transform: scale(1.1);
+}
+
+.pl-card:hover .pl-label {
+  color: var(--gold);
+}
+
+.pl-card:active {
+  transform: translate(4px, 4px);
+  box-shadow: 2px 2px 0px #000;
+}
+
+/* ================= ANIMATIONS ================= */
+
+@keyframes float-title {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 @keyframes blink {
-    0%, 50%, 100% { opacity: 1; }
-    25%, 75% { opacity: 0; }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
-/* Responsive Design */
+@keyframes point {
+  from { transform: translateX(0); }
+  to { transform: translateX(5px); }
+}
+
+/* ================= RESPONSIVE ================= */
+
 @media (max-width: 768px) {
-  .play-landing {
-    padding: 30px 12px;
-  }
-
   .pl-title {
-    font-size: 8vh;
+    font-size: 2rem;
   }
-
+  
   .pl-sub {
-    font-size: 16px;
-    max-width: 80%;
-  }
-
-  .pl-grid {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 18px;
+    font-size: 1.4rem;
+    padding: 15px 20px;
   }
 
   .pl-card {
-    padding: 16px 8px;
+    width: 160px;
+    padding: 20px 15px;
   }
-}
-
-@media (max-width: 480px) {
-  .play-landing {
-    padding: 20px 8px;
-  }
-
-  .pl-header {
-    margin-bottom: 30px;
-  }
-
-  .pl-title {
-    font-size: 6vh;
-  }
-
-  .pl-sub {
-    font-size: 14px;
-    max-width: 90%;
-  }
-
-  .pl-grid {
-    grid-template-columns: 1fr;
-    gap: 15px;
-    padding: 8px;
-  }
-
-  .pl-card {
-    padding: 14px 8px;
-  }
-
-  .pl-icon {
-    font-size: 32px;
-  }
-
-  .pl-label {
-    font-size: 11px;
+  
+  .pl-card::before {
+    display: none; /* Hide cursor on mobile to save space */
   }
 }

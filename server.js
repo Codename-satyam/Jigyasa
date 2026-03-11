@@ -41,6 +41,12 @@ const GEMINI_KEY = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || '
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const MONGO_URI = process.env.MONGO_URI || '';
 
+// Validate required environment variables
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET environment variable is required');
+  process.exit(1);
+}
+
 console.log('GEMINI_API_KEY present:', !!GEMINI_KEY);
 console.log('Using model:', GEMINI_MODEL);
 console.log('MongoDB URI present:', !!MONGO_URI);
@@ -73,7 +79,7 @@ app.use('/api/flags', flagsRoutes);
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Express error:', err);
-  res.status(500).json({ success: false, error: err.message });
+  res.status(500).json({ success: false, error: 'Internal server error' });
 });
 
 function tryParseJsonMaybe(text) {

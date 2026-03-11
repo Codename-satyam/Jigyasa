@@ -2,45 +2,54 @@ const express = require('express');
 const router = express.Router();
 const Score = require('../models/Score');
 const User = require('../models/User');
-const jwt = require('jsonwebtoken');
+const { verifyToken } = require('../middleware/auth');
+const { isValidPositiveInt, isValidString, sanitizeString, safeMax } = require('../middleware/validate');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-
-// Middleware to verify JWT token
-const verifyToken = (req, res, next) => {
-  const token = req.headers['authorization']?.split(' ')[1];
-  if (!token) return res.status(401).json({ success: false, error: 'No token provided' });
-  
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
-    if (err) return res.status(401).json({ success: false, error: 'Token invalid' });
-    req.userId = decoded.userId;
-    next();
-  });
-};
-
-// Save score
+// Save score (with server-side validation)
 router.post('/', verifyToken, async (req, res) => {
   try {
-    const { quizId, quizTitle, name, email, score, percentage, totalQuestions, correctAnswers, timeSpent, total, quiz } = req.body;
-    
+    const { quizId, quizTitle, score, totalQuestions, correctAnswers, timeSpent, total, quiz } = req.body;
+
+    // Validate numeric fields server-side to prevent score manipulation
+    const validTotal = Number(totalQuestions || total);
+    const validScore = Number(score);
+    const validCorrect = Number(correctAnswers || score);
+
+    if (!isValidPositiveInt(validTotal, 1000) || validTotal < 1) {
+      return res.status(400).json({ success: false, error: 'Invalid totalQuestions value' });
+    }
+    if (!isValidPositiveInt(validScore, 1000) || validScore > validTotal) {
+      return res.status(400).json({ success: false, error: 'Invalid score (must be 0 to totalQuestions)' });
+    }
+    if (!isValidPositiveInt(validCorrect, 1000) || validCorrect > validTotal) {
+      return res.status(400).json({ success: false, error: 'Invalid correctAnswers value' });
+    }
+
+    // Server-side percentage calculation (don't trust client)
+    const validPercentage = Math.round((validScore / validTotal) * 100);
+
+    // Get user info server-side (don't trust client-sent name/email)
+    const user = await User.findById(req.userId).select('name email');
+    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+
     const scoreRecord = new Score({
       userId: req.userId,
       quizId: quizId || null,
-      quizTitle: quizTitle || quiz,
-      name: name,
-      email: email,
-      score: score,
-      percentage: percentage || (totalQuestions ? Math.round((score / totalQuestions) * 100) : Math.round((score / (total || 1)) * 100)),
-      totalQuestions: totalQuestions || total,
-      correctAnswers: correctAnswers || score,
-      timeSpent: timeSpent || 0,
+      quizTitle: sanitizeString(quizTitle || quiz || 'Untitled', 200),
+      name: user.name,
+      email: user.email,
+      score: validScore,
+      percentage: validPercentage,
+      totalQuestions: validTotal,
+      correctAnswers: validCorrect,
+      timeSpent: isValidPositiveInt(Number(timeSpent), 86400) ? Number(timeSpent) : 0,
     });
 
     await scoreRecord.save();
     res.json({ success: true, message: 'Score saved', score: scoreRecord });
   } catch (err) {
     console.error('Save score error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to save score' });
   }
 });
 
@@ -65,7 +74,7 @@ router.get('/', verifyToken, async (req, res) => {
     res.json({ success: true, scores });
   } catch (err) {
     console.error('Get scores error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to get scores' });
   }
 });
 
@@ -75,14 +84,14 @@ router.get('/:id', verifyToken, async (req, res) => {
     const score = await Score.findById(req.params.id).populate('quizId').populate('userId', 'name email');
     if (!score) return res.status(404).json({ success: false, error: 'Score not found' });
     
-    if (score.userId._id.toString() !== req.userId) {
+    if (score.userId._id.toString() !== req.userId.toString()) {
       return res.status(403).json({ success: false, error: 'Can only view your own scores' });
     }
 
     res.json({ success: true, score });
   } catch (err) {
     console.error('Get score error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to get score' });
   }
 });
 
@@ -93,7 +102,7 @@ router.get('/quiz/:quizId', verifyToken, async (req, res) => {
     res.json({ success: true, scores });
   } catch (err) {
     console.error('Get quiz scores error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to get quiz scores' });
   }
 });
 
@@ -107,7 +116,7 @@ router.get('/leaderboard/public/all', async (req, res) => {
     res.json({ success: true, leaderboard });
   } catch (err) {
     console.error('Get global leaderboard error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to get leaderboard' });
   }
 });
 
@@ -121,7 +130,7 @@ router.get('/leaderboard/:quizId', async (req, res) => {
     res.json({ success: true, leaderboard });
   } catch (err) {
     console.error('Get leaderboard error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to get leaderboard' });
   }
 });
 
@@ -134,7 +143,7 @@ router.get('/stats/personal', verifyToken, async (req, res) => {
       totalQuizzes: scores.length,
       averageScore: scores.length > 0 ? (scores.reduce((a, b) => a + b.score, 0) / scores.length).toFixed(2) : 0,
       averagePercentage: scores.length > 0 ? (scores.reduce((a, b) => a + b.percentage, 0) / scores.length).toFixed(2) : 0,
-      highestScore: scores.length > 0 ? Math.max(...scores.map(s => s.score)) : 0,
+      highestScore: safeMax(scores.map(s => s.score)),
       totalCorrect: scores.reduce((a, b) => a + b.correctAnswers, 0),
       totalQuestions: scores.reduce((a, b) => a + b.totalQuestions, 0),
     };
@@ -142,7 +151,7 @@ router.get('/stats/personal', verifyToken, async (req, res) => {
     res.json({ success: true, stats });
   } catch (err) {
     console.error('Get stats error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to get stats' });
   }
 });
 
@@ -152,7 +161,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
     const score = await Score.findById(req.params.id);
     if (!score) return res.status(404).json({ success: false, error: 'Score not found' });
     
-    if (score.userId.toString() !== req.userId) {
+    if (score.userId.toString() !== req.userId.toString()) {
       return res.status(403).json({ success: false, error: 'Can only delete your own scores' });
     }
 
@@ -160,7 +169,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
     res.json({ success: true, message: 'Score deleted' });
   } catch (err) {
     console.error('Delete score error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to delete score' });
   }
 });
 

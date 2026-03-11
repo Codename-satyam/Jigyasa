@@ -1,5 +1,5 @@
 /* =========================================================
-   Auth.css - Retro RPG "Start/New Game" Screen
+   Auth.css - Retro RPG "Start/Load Game" Screen
 ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
@@ -31,6 +31,7 @@
   overflow-x: hidden;
 }
 
+/* CRT Scanlines Overlay */
 .auth-root::after {
   content: "";
   position: absolute;
@@ -54,42 +55,18 @@
   flex-direction: column;
   gap: 15px;
   
+  /* Classic RPG Menu Borders */
   border: 4px solid var(--border-light);
   box-shadow: 
     inset 0 0 0 4px #000, 
     0 15px 30px rgba(0, 0, 0, 0.9);
   z-index: 2;
+  animation: drop-in 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* Wider box for the landscape registration form */
 .register-box {
-  max-width: 850px;
+  max-width: 520px;
 }
-
-/* ================= LANDSCAPE GRID LAYOUT ================= */
-
-.register-landscape-grid {
-  display: flex;
-  gap: 40px;
-  margin-top: 10px;
-}
-
-.reg-col-left {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.reg-col-right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  justify-content: space-between; /* Pushes submit button to bottom */
-}
-
-/* ================= TYPOGRAPHY & LABELS ================= */
 
 .form-group {
   display: flex;
@@ -98,8 +75,9 @@
   margin: 0;
 }
 
+/* Title */
 .auth-box h2 {
-  margin: 0 0 5px 0;
+  margin: 0 0 10px 0;
   font-family: 'Press Start 2P', cursive;
   font-size: 1.4rem;
   text-align: center;
@@ -109,6 +87,7 @@
   letter-spacing: 2px;
 }
 
+/* Labels */
 .auth-box label {
   font-family: 'Press Start 2P', cursive;
   font-size: 0.65rem;
@@ -116,14 +95,6 @@
   letter-spacing: 1px;
   margin: 0;
   text-transform: uppercase;
-}
-
-.form-group small {
-  font-family: 'VT323', monospace;
-  font-size: 1.1rem;
-  color: #ffaa00 !important;
-  margin-top: -4px;
-  text-shadow: 1px 1px 0 #000;
 }
 
 /* ================= INPUT FIELDS ================= */
@@ -135,88 +106,35 @@
   width: 100%;
   box-sizing: border-box;
   font-family: 'VT323', monospace;
-  font-size: 1.5rem; 
+  font-size: 1.5rem; /* Larger for retro terminal feel */
   padding: 10px 15px;
   border-radius: 0;
   border: 2px solid #555;
   background: #000;
-  color: var(--text-green); 
+  color: var(--text-green); /* Terminal green text */
   outline: none;
   box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8);
   transition: all 0.2s;
 }
 
-.auth-box input::placeholder {
-  color: #335533;
+.auth-box input::placeholder,
+.auth-box textarea::placeholder,
+.auth-box select::placeholder {
+  color: #335533; /* Dim green */
 }
 
-.auth-box input:focus {
+.auth-box input:focus,
+.auth-box textarea:focus,
+.auth-box select:focus {
   border-color: var(--gold);
   box-shadow: 0 0 10px rgba(248, 197, 34, 0.3), inset 2px 2px 5px rgba(0,0,0,0.8);
 }
 
-/* ================= PASSWORD STRENGTH & REQS ================= */
+/* ================= BUTTONS ================= */
 
-.password-strength {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 0.55rem;
-  text-transform: uppercase;
-  margin-top: -5px;
-  text-shadow: 1px 1px 0 #000;
-}
-
-.password-strength.weak { color: #ff4444; }
-.password-strength.medium { color: #ffaa00; }
-.password-strength.strong { color: var(--text-green); }
-
-.password-requirements {
-  font-family: 'VT323', monospace;
-  font-size: 1.2rem !important; 
-  color: #a0aab5 !important;
-  line-height: 1.4;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 10px;
-  border: 2px dashed #444;
-}
-
-/* ================= ROLE SELECTION BUTTONS ================= */
-
-.role-btn {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 0.7rem;
-  background: #111 !important; 
-  border: 2px solid #555 !important;
-  color: #fff !important;
-  padding: 12px !important;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-transform: uppercase;
-  box-shadow: 3px 3px 0 #000;
-  flex: 1;
-}
-
-.role-btn:hover {
-  border-color: var(--border-light) !important;
-  transform: translateY(-2px);
-}
-
-.role-btn:active {
-  transform: translate(2px, 2px);
-  box-shadow: 0 0 0 #000;
-}
-
-.role-btn.active {
-  background: var(--menu-bg) !important;
-  border-color: var(--gold) !important;
-  color: var(--gold) !important;
-  box-shadow: 0 0 15px rgba(248, 197, 34, 0.3);
-}
-
-/* ================= SUBMIT BUTTONS ================= */
-
-.auth-box button[type="submit"],
+.auth-box button,
 .submit-btn {
-  margin-top: auto;
+  margin-top: 15px;
   padding: 15px 0;
   background-color: var(--button-red);
   color: #fff;
@@ -230,24 +148,16 @@
   width: 100%;
 }
 
-.auth-box button[type="submit"]:hover:not(:disabled),
-.submit-btn:hover:not(:disabled) {
+.auth-box button:hover,
+.submit-btn:hover {
   background-color: var(--button-hover);
   color: var(--gold);
 }
 
-.auth-box button[type="submit"]:active:not(:disabled),
-.submit-btn:active:not(:disabled) {
-  transform: translate(4px, 4px) !important; 
-  box-shadow: 0 0 0 #000 !important;
-}
-
-.submit-btn:disabled {
-  background-color: #333;
-  border-color: #555;
-  color: #777;
-  cursor: not-allowed;
-  box-shadow: 4px 4px 0 #000;
+.auth-box button:active,
+.submit-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 #000;
 }
 
 /* ================= AVATAR (CHARACTER SELECT) ================= */
@@ -256,25 +166,25 @@
   display: flex;
   flex-direction: column;
   gap: 15px;
+  margin: 10px 0;
   padding: 15px;
   border: 2px dashed #555;
   background: rgba(0, 0, 0, 0.4);
-  height: 100%; 
 }
 
 .avatar-preview {
-  font-size: 5rem;
+  font-size: 4rem;
   text-align: center;
   padding: 10px;
   background: #000;
-  border: 4px solid var(--gold);
+  border: 4px solid var(--gold); /* Selected Character Frame */
   box-shadow: inset 0 0 15px #000, 4px 4px 0 #000;
-  height: 110px;
+  height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto;
-  width: 110px;
+  width: 90px;
   image-rendering: pixelated;
 }
 
@@ -282,7 +192,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
   gap: 10px;
-  margin-top: 10px;
 }
 
 .avatar-btn {
@@ -296,7 +205,7 @@
   align-items: center;
   justify-content: center;
   min-height: 45px;
-  filter: grayscale(100%) brightness(0.5); 
+  filter: grayscale(100%) brightness(0.5); /* Dimmed unselected characters */
 }
 
 .avatar-btn:hover {
@@ -316,11 +225,11 @@
 /* ================= ALERTS & LINKS ================= */
 
 .auth-error {
-  background: #550000 !important;
-  color: #ffaa00 !important;
+  background: #550000;
+  color: #ffaa00;
   font-family: 'Press Start 2P', cursive;
   font-size: 0.6rem;
-  border: 2px dashed #ff4444 !important;
+  border: 2px dashed #ff4444;
   padding: 12px;
   text-align: center;
   text-transform: uppercase;
@@ -332,7 +241,7 @@
 .auth-box p { 
   font-size: 1.3rem; 
   text-align: center; 
-  margin: 15px 0 0 0; 
+  margin: 10px 0 0 0; 
   color: var(--border-light);
 }
 
@@ -348,14 +257,21 @@
   border-bottom: 1px solid var(--gold);
 }
 
-/* ================= RESPONSIVE ================= */
-
-@media (max-width: 768px) {
-  .register-landscape-grid {
-    flex-direction: column; /* Stacks vertically on mobile */
-    gap: 20px;
-  }
+.register-box .password-requirements,
+.register-box small,
+.register-box .password-strength {
+  font-size: 1.1rem !important;
+  color: #888;
 }
+
+/* ================= ANIMATIONS ================= */
+
+@keyframes drop-in {
+  0% { transform: translateY(-30px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* ================= RESPONSIVE ================= */
 
 @media (max-width: 480px) {
   .auth-root { padding: 20px 10px; }
@@ -373,15 +289,10 @@
     font-size: 1.3rem;
   }
   
-  .auth-box button[type="submit"],
+  .auth-box button,
   .submit-btn {
     font-size: 0.8rem;
     padding: 12px 0;
-  }
-
-  .role-btn {
-    font-size: 0.6rem;
-    padding: 10px !important;
   }
 
   .avatar-preview {
