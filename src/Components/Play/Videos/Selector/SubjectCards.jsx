@@ -1,5 +1,5 @@
 import "./SubjectCards.css";
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import data from "../data.js";
 import ThreeDBackground from "../../Games/ThreeDBackground.jsx";
@@ -7,7 +7,6 @@ import { getSubjectProgress } from "../../../../api/progressTracker.js";
 
 function SubjectCards(){
 
-const[selectedSubject, setSelectedSubject] = useState(null);
 const[progress, setProgress] = useState({});
 const navigate = useNavigate();
 
@@ -24,7 +23,6 @@ useEffect(() => {
 }, [subjects]);
 
 const handleCardClick = (subject) => {
-    setSelectedSubject(subject);
     navigate(`/videos/subject/${subject}`);
 };
 

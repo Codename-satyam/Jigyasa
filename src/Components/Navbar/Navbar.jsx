@@ -68,18 +68,14 @@ const Navbar = () => {
               <span className="nav-user">Hello, {user.name}</span>
             </li>
             <li>
-              <a
-                href="#"
+              <button
+                type="button"
                 className="nav-logout"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleLogout();
-                }}
-                role="button"
+                onClick={handleLogout}
                 aria-label="Logout"
               >
                 Logout
-              </a>
+              </button>
             </li>
           </>
         )}

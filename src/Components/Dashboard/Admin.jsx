@@ -1,14 +1,9 @@
 import './Admin.css';
-import { useState, useEffect, useCallback, useReducer } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // API imports
 import * as authApi from '../../api/auth';
-import * as quizApi from '../../api/quizApi';
-import * as scoreApi from '../../api/scores';
-import * as progressApi from '../../api/progressTracker';
-import * as gamesTrackerApi from '../../api/gamesTracker';
-import * as quizManagerApi from '../../api/quizManager.js';
 import { apiCall } from '../../api/client';
 
 // Component imports
@@ -124,21 +119,6 @@ function getOverallStats(users, quizzes, scores) {
   };
 }
 
-function getUserPerformanceReport(userId, scores) {
-  const userScores = scores?.filter(s => s.userId === userId) || [];
-  const scores_array = userScores.map(s => s.score || 0);
-  return {
-    userId,
-    totalAttempts: userScores.length,
-    averageScore: userScores.length
-      ? Math.round((userScores.reduce((sum, s) => sum + (s.score || 0), 0) / userScores.length) * 100) / 100
-      : 0,
-    bestScore: scores_array.length ? Math.max(...scores_array) : 0,
-    worstScore: scores_array.length ? Math.min(...scores_array) : 0,
-    lastAttempt: userScores[userScores.length - 1]?.timestamp || null,
-  };
-}
-
 function getQuizPerformanceReport(quizId, scores) {
   const quizScores = scores?.filter(s => s.quizId === quizId) || [];
   const scores_array = quizScores.map(s => s.score || 0);
@@ -157,25 +137,6 @@ function getQuizPerformanceReport(quizId, scores) {
 }
 
 // MODERATION FUNCTIONS
-async function flagContent(contentId, contentType, reason) {
-  try {
-    const flags = JSON.parse(localStorage.getItem('jq_flagged') || '[]');
-    flags.push({
-      id: Date.now(),
-      contentId,
-      contentType,
-      reason,
-      flaggedAt: new Date().toISOString(),
-      status: 'pending'
-    });
-    localStorage.setItem('jq_flagged', JSON.stringify(flags));
-    return true;
-  } catch (e) {
-    console.error("Error flagging content:", e);
-    return false;
-  }
-}
-
 async function getFlaggedContent() {
   try {
     const response = await apiCall('/api/flags', 'GET');
@@ -204,13 +165,8 @@ async function moderateContent(flagId, action, feedback) {
 }
 
 // TEACHER APPROVAL FUNCTIONS
-async function getPendingTeacherRequests(users) {
-  try {
-    return users?.filter(u => u.role === 'teacher' && !u.approved) || [];
-  } catch (e) {
-    console.error("Error fetching teacher requests:", e);
-    return [];
-  }
+function getPendingTeacherRequests(users) {
+  return users?.filter(u => u.role === 'teacher' && !u.approved) || [];
 }
 
 async function approveTeacher(teacherId) {
@@ -290,11 +246,10 @@ function Admin() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [flaggedContent, setFlaggedContent] = useState([]);
   const [notificationMessage, setNotificationMessage] = useState('');
   const [message, setMessage] = useState('');
+  const [rejectReason, setRejectReason] = useState({}); // Moved up to prevent hook errors
   const navigate = useNavigate();
 
   // ==================== ADMIN VERIFICATION ====================
@@ -337,11 +292,7 @@ function Admin() {
         const fetchedFlags = await getFlaggedContent();
 
         console.log('✅ [Admin] All data fetched successfully');
-        console.log('  - Users:', fetchedUsers.length);
-        console.log('  - Quizzes:', fetchedQuizzes.length);
-        console.log('  - Scores:', fetchedScores.length);
-        console.log('  - Flagged:', fetchedFlags.length);
-
+        
         setUsers(fetchedUsers);
         setQuizzes(fetchedQuizzes);
         setScores(fetchedScores);
@@ -365,77 +316,76 @@ function Admin() {
   });
 
   const stats = getOverallStats(users, quizzes, scores);
+  const pendingTeachers = getPendingTeacherRequests(users);
 
-  // ==================== UI SECTIONS ====================
+  // ==================== UI RENDER FUNCTIONS ====================
 
-  // OVERVIEW SECTION
-  const OverviewSection = () => (
-    <div className="admin-section overview-section">
-      <h2>Dashboard Overview</h2>
+  const renderOverview = () => (
+    <div className="retro-panel">
+      <h2 className="pixel-title">Command Center</h2>
       <div className="stats-grid">
-        <div className="stat-card">
-          <h3>Total Users</h3>
+        <div className="pixel-card">
+          <h3>Players</h3>
           <p className="stat-number">{stats.totalUsers}</p>
-          <small>{stats.totalStudents} Students | {stats.totalTeachers} Teachers</small>
+          <small className="pixel-text-small">Lvl 1 Students: {stats.totalStudents} | Guild Masters: {stats.totalTeachers}</small>
         </div>
-        <div className="stat-card">
-          <h3>Total Quizzes</h3>
+        <div className="pixel-card">
+          <h3>Active Quests</h3>
           <p className="stat-number">{stats.totalQuizzes}</p>
         </div>
-        <div className="stat-card">
-          <h3>Quiz Attempts</h3>
+        <div className="pixel-card">
+          <h3>Quests Attempted</h3>
           <p className="stat-number">{stats.totalAttempts}</p>
         </div>
-        <div className="stat-card">
-          <h3>Average Score</h3>
+        <div className="pixel-card">
+          <h3>Global EXP (Avg)</h3>
           <p className="stat-number">{stats.averageScore.toFixed(1)}%</p>
         </div>
       </div>
 
-      <div className="recent-activity">
-        <h3>Quick Actions</h3>
+      <div className="recent-activity mt-4">
+        <h3 className="pixel-subtitle">Quick Commands</h3>
         <div className="action-buttons">
-          <button onClick={() => setCurrentSection('users')} className="btn-primary">Manage Users</button>
-          <button onClick={() => setCurrentSection('quizzes')} className="btn-primary">Manage Quizzes</button>
-          <button onClick={() => setCurrentSection('analytics')} className="btn-primary">View Analytics</button>
-          <button onClick={() => setCurrentSection('moderation')} className="btn-warning">Moderation</button>
+          <button onClick={() => setCurrentSection('users')} className="pixel-btn btn-blue">Manage Players</button>
+          <button onClick={() => setCurrentSection('quizzes')} className="pixel-btn btn-green">Manage Quests</button>
+          <button onClick={() => setCurrentSection('analytics')} className="pixel-btn btn-purple">High Scores</button>
+          <button onClick={() => setCurrentSection('moderation')} className="pixel-btn btn-red">Banishment Zone</button>
         </div>
       </div>
     </div>
   );
 
-  // USER MANAGEMENT SECTION
-  const UserManagementSection = () => (
-    <div className="admin-section user-section">
-      <h2>User Management</h2>
+  const renderUserManagement = () => (
+    <div className="retro-panel">
+      <h2 className="pixel-title">Player Roster</h2>
       
       <div className="filter-bar">
         <input
           type="text"
-          placeholder="Search users..."
+          placeholder="Find player..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-input"
+          className="pixel-input"
         />
         <select
           value={filterRole}
           onChange={(e) => setFilterRole(e.target.value)}
-          className="filter-select"
+          className="pixel-select"
         >
-          <option value="all">All Roles</option>
+          <option value="all">All Classes</option>
           <option value="student">Students</option>
           <option value="teacher">Teachers</option>
           <option value="admin">Admins</option>
         </select>
       </div>
 
-      <div className="users-table">
-        <table>
+      <div className="pixel-table-wrapper">
+        <table className="pixel-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
+              <th>Avatar ID</th>
+              <th>Comms Link</th>
+              <th>Class</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -443,7 +393,7 @@ function Admin() {
           <tbody>
             {filteredUsers.map(user => (
               <tr key={user.id}>
-                <td>{user.name || 'N/A'}</td>
+                <td>{user.name || 'Unknown'}</td>
                 <td>{user.email || 'N/A'}</td>
                 <td>
                   <select
@@ -460,7 +410,7 @@ function Admin() {
                       ));
                       setMessage('User role updated');
                     }}
-                    className="role-select"
+                    className="pixel-select-small"
                   >
                     <option value="student">Student</option>
                     <option value="teacher">Teacher</option>
@@ -468,11 +418,11 @@ function Admin() {
                   </select>
                 </td>
                 <td>
-                  <span className={`status ${user.blocked ? 'blocked' : 'active'}`}>
-                    {user.blocked ? 'Blocked' : 'Active'}
+                  <span className={`status-badge ${user.blocked ? 'badge-red' : 'badge-green'}`}>
+                    {user.blocked ? 'BANISHED' : 'ACTIVE'}
                   </span>
                 </td>
-                <td>
+                <td className="action-cell">
                   <button
                     onClick={async () => {
                       const nextBlocked = !user.blocked;
@@ -486,9 +436,9 @@ function Admin() {
                       ));
                       setMessage(nextBlocked ? 'User blocked' : 'User unblocked');
                     }}
-                    className="btn-small btn-secondary"
+                    className={`pixel-btn-small ${user.blocked ? 'btn-green' : 'btn-orange'}`}
                   >
-                    {user.blocked ? 'Unblock' : 'Block'}
+                    {user.blocked ? 'Revive' : 'Banish'}
                   </button>
                   <button
                     onClick={async () => {
@@ -500,9 +450,9 @@ function Admin() {
                       setUsers((prev) => prev.filter((u) => u.id !== user.id));
                       setMessage('User deleted');
                     }}
-                    className="btn-small btn-danger"
+                    className="pixel-btn-small btn-red"
                   >
-                    Delete
+                    Delete File
                   </button>
                 </td>
               </tr>
@@ -513,18 +463,17 @@ function Admin() {
     </div>
   );
 
-  // QUIZ MANAGEMENT SECTION
-  const QuizManagementSection = () => (
-    <div className="admin-section quiz-section">
-      <h2>Quiz Management</h2>
+  const renderQuizManagement = () => (
+    <div className="retro-panel">
+      <h2 className="pixel-title">Quest Log</h2>
       
       <div className="quizzes-grid">
         {quizzes.map(quiz => (
-          <div key={quiz.id} className="quiz-card">
-            <h3>{quiz.title || 'Untitled Quiz'}</h3>
-            <p>{quiz.description || 'No description'}</p>
+          <div key={quiz.id} className="pixel-card quest-card">
+            <h3>{quiz.title || 'Mystery Quest'}</h3>
+            <p className="pixel-text-small">{quiz.description || 'No lore provided.'}</p>
             <div className="quiz-meta">
-              <span>Questions: {quiz.questions?.length || 0}</span>
+              <span>Stages: {quiz.questions?.length || 0}</span>
               <span>Difficulty: {quiz.difficulty || 'N/A'}</span>
             </div>
             <div className="quiz-actions">
@@ -539,11 +488,11 @@ function Admin() {
                   setQuizzes((prev) => prev.map((q) =>
                     q.id === quiz.id ? { ...q, isPublished: nextPublished } : q
                   ));
-                  setMessage(nextPublished ? 'Quiz published' : 'Quiz unpublished');
+                  setMessage(nextPublished ? 'Quest published' : 'Quest recalled');
                 }}
-                className={`btn-small ${quiz.isPublished ? 'btn-secondary' : 'btn-primary'}`}
+                className={`pixel-btn ${quiz.isPublished ? 'btn-orange' : 'btn-green'}`}
               >
-                {quiz.isPublished ? 'Unpublish' : 'Publish'}
+                {quiz.isPublished ? 'Recall Quest' : 'Launch Quest'}
               </button>
               <button
                 onClick={async () => {
@@ -553,11 +502,11 @@ function Admin() {
                     return;
                   }
                   setQuizzes((prev) => prev.filter((q) => q.id !== quiz.id));
-                  setMessage('Quiz deleted');
+                  setMessage('Quest destroyed');
                 }}
-                className="btn-small btn-danger"
+                className="pixel-btn btn-red"
               >
-                Delete
+                Destroy
               </button>
             </div>
           </div>
@@ -566,42 +515,39 @@ function Admin() {
     </div>
   );
 
-  // ANALYTICS SECTION
-  const AnalyticsSection = () => (
-    <div className="admin-section analytics-section">
-      <h2>Analytics & Reports</h2>
+  const renderAnalytics = () => (
+    <div className="retro-panel">
+      <h2 className="pixel-title">Hall of Fame & High Scores</h2>
       
-      <div className="analytics-tabs">
-        <div className="tab-content">
-          <h3>Top Performers</h3>
-          <div className="performers-list">
-            {scores
-              .filter(s => s.score >= 80)
-              .sort((a, b) => b.score - a.score)
-              .slice(0, 10)
-              .map((score, idx) => {
-                const user = users.find(u => u.id === score.userId);
-                return (
-                  <div key={idx} className="performer-item">
-                    <span>{user?.name || 'Unknown'}</span>
-                    <span className="score-badge">{score.score}%</span>
-                  </div>
-                );
-              })}
+      <div className="analytics-grid">
+        <div className="pixel-box">
+          <h3 className="gold-text">Top Players</h3>
+          <div className="leaderboard">
+            {scores.filter(s => s.score >= 80).sort((a, b) => b.score - a.score).slice(0, 10).map((score, idx) => {
+              const user = users.find(u => u.id === score.userId);
+              return (
+                <div key={idx} className="leaderboard-row">
+                  <span className="rank">#{idx + 1}</span>
+                  <span className="name">{user?.name || 'Player 1'}</span>
+                  <span className="score">{score.score} PTS</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        <div className="tab-content">
-          <h3>Quiz Performance</h3>
-          <div className="quiz-performance">
+        <div className="pixel-box">
+          <h3 className="blue-text">Quest Difficulty Stats</h3>
+          <div className="quest-stats">
             {quizzes.slice(0, 5).map(quiz => {
               const report = getQuizPerformanceReport(quiz.id, scores);
               return (
-                <div key={quiz.id} className="performance-item">
-                  <p><strong>{quiz.title || 'Quiz'}</strong></p>
-                  <p>Attempts: {report.totalAttempts}</p>
-                  <p>Avg Score: {report.averageScore.toFixed(1)}%</p>
-                  <p>Pass Rate: {report.passRate}%</p>
+                <div key={quiz.id} className="stat-row">
+                  <p><strong>{quiz.title || 'Quest'}</strong></p>
+                  <div className="stat-bars">
+                    <span>Clear Rate: {report.passRate}%</span>
+                    <span>Tries: {report.totalAttempts}</span>
+                  </div>
                 </div>
               );
             })}
@@ -611,128 +557,63 @@ function Admin() {
     </div>
   );
 
-  // TEACHER APPROVAL SECTION
-  const TeacherApprovalSection = () => {
-    const [pendingTeachers, setPendingTeachers] = useState([]);
-    const [rejectReason, setRejectReason] = useState({});
-
-    useEffect(() => {
-      getPendingTeacherRequests(users).then(setPendingTeachers);
-    }, [users]);
-
-    return (
-      <div className="admin-section teacher-section">
-        <h2>Teacher Approval Requests</h2>
-        
-        <div className="requests-list">
-          {pendingTeachers.length === 0 ? (
-            <p className="no-data">No pending teacher requests</p>
-          ) : (
-            pendingTeachers.map(teacher => (
-              <div key={teacher.id} className="request-card">
-                <div className="request-info">
-                  <h3>{teacher.name}</h3>
-                  <p>Email: {teacher.email}</p>
-                </div>
-                <div className="request-actions">
-                  <button
-                    onClick={() => {
-                      approveTeacher(teacher.id).then((ok) => {
-                        if (!ok) {
-                          setMessage('Failed to approve teacher');
-                          return;
-                        }
-                        setUsers((prev) => prev.map((u) =>
-                          u.id === teacher.id ? { ...u, approved: true } : u
-                        ));
-                        setPendingTeachers((prev) => prev.filter((t) => t.id !== teacher.id));
-                        setMessage('Teacher approved successfully');
-                      });
-                    }}
-                    className="btn-primary"
-                  >
-                    Approve
-                  </button>
-                  <input
-                    type="text"
-                    placeholder="Rejection reason (optional)"
-                    value={rejectReason[teacher.id] || ''}
-                    onChange={(e) => setRejectReason({ ...rejectReason, [teacher.id]: e.target.value })}
-                    className="input-small"
-                  />
-                  <button
-                    onClick={() => {
-                      rejectTeacher(teacher.id, rejectReason[teacher.id] || '').then((ok) => {
-                        if (!ok) {
-                          setMessage('Failed to reject teacher');
-                          return;
-                        }
-                        setUsers((prev) => prev.map((u) =>
-                          u.id === teacher.id
-                            ? { ...u, approved: false, rejectionReason: rejectReason[teacher.id] || '' }
-                            : u
-                        ));
-                        setPendingTeachers((prev) => prev.filter((t) => t.id !== teacher.id));
-                        setMessage('Teacher request rejected');
-                      });
-                    }}
-                    className="btn-danger"
-                  >
-                    Reject
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // MODERATION SECTION
-  const ModerationSection = () => (
-    <div className="admin-section moderation-section">
-      <h2>Content Moderation</h2>
+  const renderTeacherApproval = () => (
+    <div className="retro-panel">
+      <h2 className="pixel-title">Guild Master Applications</h2>
       
-      <div className="flagged-content">
-        {flaggedContent.length === 0 ? (
-          <p className="no-data">No flagged content</p>
+      <div className="requests-list">
+        {pendingTeachers.length === 0 ? (
+          <p className="pixel-text blink">No pending applications...</p>
         ) : (
-          flaggedContent.map(flag => (
-            <div key={flag.id} className="flag-card">
-              <div className="flag-info">
-                <h4>{(flag.contentType || 'content').toUpperCase()}</h4>
-                <p>Reason: {flag.reason || 'No reason provided'}</p>
-                <small>Flagged: {new Date(flag.timestamp || flag.flaggedAt || Date.now()).toLocaleString()}</small>
+          pendingTeachers.map(teacher => (
+            <div key={teacher.id} className="pixel-card flex-row">
+              <div className="request-info">
+                <h3>{teacher.name}</h3>
+                <p className="pixel-text-small">{teacher.email}</p>
               </div>
-              <div className="flag-actions">
+              <div className="request-actions">
                 <button
-                  onClick={async () => {
-                    const ok = await moderateContent(flag.id, 'approved', 'Approved by admin');
-                    if (!ok) {
-                      setMessage('Failed to approve flagged content');
-                      return;
-                    }
-                    setFlaggedContent((prev) => prev.filter((f) => f.id !== flag.id));
-                    setMessage('Flag marked as resolved');
+                  onClick={() => {
+                    approveTeacher(teacher.id).then((ok) => {
+                      if (!ok) {
+                        setMessage('Failed to approve Guild Master');
+                        return;
+                      }
+                      setUsers((prev) => prev.map((u) =>
+                        u.id === teacher.id ? { ...u, approved: true } : u
+                      ));
+                      setMessage('Guild Master approved successfully');
+                    });
                   }}
-                  className="btn-primary"
+                  className="pixel-btn btn-green"
                 >
-                  Approve
+                  Grant Rank
                 </button>
+                <input
+                  type="text"
+                  placeholder="Denial Reason..."
+                  value={rejectReason[teacher.id] || ''}
+                  onChange={(e) => setRejectReason({ ...rejectReason, [teacher.id]: e.target.value })}
+                  className="pixel-input-small"
+                />
                 <button
-                  onClick={async () => {
-                    const ok = await moderateContent(flag.id, 'rejected', 'Rejected by admin');
-                    if (!ok) {
-                      setMessage('Failed to reject flagged content');
-                      return;
-                    }
-                    setFlaggedContent((prev) => prev.filter((f) => f.id !== flag.id));
-                    setMessage('Flag marked as rejected');
+                  onClick={() => {
+                    rejectTeacher(teacher.id, rejectReason[teacher.id] || '').then((ok) => {
+                      if (!ok) {
+                        setMessage('Failed to deny Guild Master');
+                        return;
+                      }
+                      setUsers((prev) => prev.map((u) =>
+                        u.id === teacher.id
+                          ? { ...u, approved: false, rejectionReason: rejectReason[teacher.id] || '' }
+                          : u
+                      ));
+                      setMessage('Guild Master request denied');
+                    });
                   }}
-                  className="btn-danger"
+                  className="pixel-btn btn-red"
                 >
-                  Reject
+                  Deny
                 </button>
               </div>
             </div>
@@ -742,29 +623,77 @@ function Admin() {
     </div>
   );
 
-  // SETTINGS SECTION
-  const SettingsSection = () => (
-    <div className="admin-section settings-section">
-      <h2>System Settings</h2>
+  const renderModeration = () => (
+    <div className="retro-panel">
+      <h2 className="pixel-title">The Banishment Zone</h2>
+      <p className="pixel-subtitle">Review reported anomalies.</p>
       
-      <div className="settings-panel">
-        <div className="setting-group">
-          <h3>Backup & Export</h3>
-          <button
-            onClick={() => backupSystemData(users, quizzes, scores)}
-            className="btn-primary"
-          >
-            Download Backup
+      <div className="flagged-content">
+        {flaggedContent.length === 0 ? (
+          <p className="pixel-text blink">Sector is clear.</p>
+        ) : (
+          flaggedContent.map(flag => (
+            <div key={flag.id} className="pixel-card error-border">
+              <h4>Anomaly: {(flag.contentType || 'DATA').toUpperCase()}</h4>
+              <p className="pixel-text-small">Log: {flag.reason || 'Unknown error code'}</p>
+              <div className="flag-actions mt-2">
+                <button
+                  onClick={async () => {
+                    const ok = await moderateContent(flag.id, 'approved', 'Approved by admin');
+                    if (!ok) {
+                      setMessage('Failed to clear anomaly');
+                      return;
+                    }
+                    setFlaggedContent((prev) => prev.filter((f) => f.id !== flag.id));
+                    setMessage('Anomaly cleared and marked safe');
+                  }}
+                  className="pixel-btn btn-green"
+                >
+                  Pardon
+                </button>
+                <button
+                  onClick={async () => {
+                    const ok = await moderateContent(flag.id, 'rejected', 'Rejected by admin');
+                    if (!ok) {
+                      setMessage('Failed to reject anomaly');
+                      return;
+                    }
+                    setFlaggedContent((prev) => prev.filter((f) => f.id !== flag.id));
+                    setMessage('Anomaly successfully purged');
+                  }}
+                  className="pixel-btn btn-red"
+                >
+                  Execute
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+
+  const renderSettings = () => (
+    <div className="retro-panel">
+      <h2 className="pixel-title">System Options</h2>
+      
+      <div className="settings-grid">
+        <div className="pixel-box">
+          <h3>Save State</h3>
+          <p className="pixel-text-small mb-2">Export current realm data to local storage.</p>
+          <button onClick={() => backupSystemData(users, quizzes, scores)} className="pixel-btn btn-blue">
+            Download Save File
           </button>
         </div>
 
-        <div className="setting-group">
-          <h3>Send Announcement</h3>
+        <div className="pixel-box">
+          <h3>Global Broadcast</h3>
+          <p className="pixel-text-small mb-2">Transmit a message to all players.</p>
           <textarea
             value={notificationMessage}
             onChange={(e) => setNotificationMessage(e.target.value)}
-            placeholder="Enter announcement message..."
-            className="textarea-input"
+            placeholder="Type transmission..."
+            className="pixel-textarea"
             rows={4}
           />
           <button
@@ -772,11 +701,11 @@ function Admin() {
               const userIds = users.map(u => u.id);
               sendNotification(userIds, notificationMessage);
               setNotificationMessage('');
-              setMessage('Announcement sent successfully');
+              setMessage('Transmission broadcasted successfully');
             }}
-            className="btn-primary"
+            className="pixel-btn btn-purple mt-2"
           >
-            Send to All Users
+            Transmit
           </button>
         </div>
       </div>
@@ -784,75 +713,56 @@ function Admin() {
   );
 
   if (loading) {
-    return <div className="admin-loading">Loading Admin Panel...</div>;
+    return (
+      <div className="crt-screen loading-screen">
+        <h1 className="pixel-title blink">LOADING SYSTEM...</h1>
+      </div>
+    );
   }
 
   return (
     <PageTransition>
       <FadeInWhenVisible>
-        <div className="admin-container">
+        <div className="admin-container crt-screen">
           <div className="admin-header">
-            <h1>Admin Control Panel</h1>
-            <button onClick={() => navigate('/dashboard')} className="btn-back">
-              Back to Dashboard
+            <h1 className="pixel-title gold-text">SYSTEM ADMIN</h1>
+            <button onClick={() => navigate('/dashboard')} className="pixel-btn btn-dark">
+              [ ESC ] Exit Menu
             </button>
           </div>
 
-          {message && <div className="alert alert-info">{message}</div>}
+          {message && <div className="pixel-alert blink">{message}</div>}
 
-          <div className="admin-nav">
-            <button
-              onClick={() => setCurrentSection('overview')}
-              className={`nav-btn ${currentSection === 'overview' ? 'active' : ''}`}
-            >
-              Overview
-            </button>
-            <button
-              onClick={() => setCurrentSection('users')}
-              className={`nav-btn ${currentSection === 'users' ? 'active' : ''}`}
-            >
-              Users
-            </button>
-            <button
-              onClick={() => setCurrentSection('quizzes')}
-              className={`nav-btn ${currentSection === 'quizzes' ? 'active' : ''}`}
-            >
-              Quizzes
-            </button>
-            <button
-              onClick={() => setCurrentSection('analytics')}
-              className={`nav-btn ${currentSection === 'analytics' ? 'active' : ''}`}
-            >
-              Analytics
-            </button>
-            <button
-              onClick={() => setCurrentSection('teachers')}
-              className={`nav-btn ${currentSection === 'teachers' ? 'active' : ''}`}
-            >
-              Teacher Approvals
-            </button>
-            <button
-              onClick={() => setCurrentSection('moderation')}
-              className={`nav-btn ${currentSection === 'moderation' ? 'active' : ''}`}
-            >
-              Moderation
-            </button>
-            <button
-              onClick={() => setCurrentSection('settings')}
-              className={`nav-btn ${currentSection === 'settings' ? 'active' : ''}`}
-            >
-              Settings
-            </button>
-          </div>
+          <div className="admin-layout">
+            <nav className="pixel-sidebar">
+              {[
+                { id: 'overview', label: 'Command Center' },
+                { id: 'users', label: 'Player Roster' },
+                { id: 'quizzes', label: 'Quest Log' },
+                { id: 'analytics', label: 'High Scores' },
+                { id: 'teachers', label: 'Guild Approvals' },
+                { id: 'moderation', label: 'Banishment Zone' },
+                { id: 'settings', label: 'Options' },
+              ].map(nav => (
+                <button
+                  key={nav.id}
+                  onClick={() => setCurrentSection(nav.id)}
+                  className={`pixel-nav-btn ${currentSection === nav.id ? 'active' : ''}`}
+                >
+                  {currentSection === nav.id ? '> ' : ''}{nav.label}
+                </button>
+              ))}
+            </nav>
 
-          <div className="admin-content">
-            {currentSection === 'overview' && <OverviewSection />}
-            {currentSection === 'users' && <UserManagementSection />}
-            {currentSection === 'quizzes' && <QuizManagementSection />}
-            {currentSection === 'analytics' && <AnalyticsSection />}
-            {currentSection === 'teachers' && <TeacherApprovalSection />}
-            {currentSection === 'moderation' && <ModerationSection />}
-            {currentSection === 'settings' && <SettingsSection />}
+            <main className="admin-content-area">
+              {currentSection === 'overview' && renderOverview()}
+              {currentSection === 'users' && renderUserManagement()}
+              {currentSection === 'quizzes' && renderQuizManagement()}
+              {currentSection === 'analytics' && renderAnalytics()}
+              {currentSection === 'teachers' && renderTeacherApproval()}
+              {currentSection === 'moderation' && renderModeration()}
+              {currentSection === 'settings' && renderSettings()}
+            </main>
           </div>
         </div>
       </FadeInWhenVisible>

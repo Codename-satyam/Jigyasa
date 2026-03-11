@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./g5.css";
 import gamesTracker from "../../../../api/gamesTracker";
 import auth from "../../../../api/auth";
@@ -77,7 +77,7 @@ function Game2048() {
         initGame();
     }, []);
 
-    const handleMove = (direction) => {
+    const handleMove = useCallback((direction) => {
         if (gameOver) return;
 
         let newBoard = JSON.parse(JSON.stringify(board));
@@ -139,7 +139,7 @@ function Game2048() {
         if (boardChanged) {
             newBoard = getRandomCell(newBoard);
             setBoard(newBoard);
-            setScore(score + totalScoreGain);
+            setScore((prevScore) => prevScore + totalScoreGain);
             
             // Update highest tile
             const maxTile = Math.max(...newBoard.flat());
@@ -150,7 +150,7 @@ function Game2048() {
                 setGameOver(true);
             }
         }
-    };
+    }, [board, gameOver]);
 
     useEffect(() => {
         const handleKey = (e) => {
@@ -174,7 +174,7 @@ function Game2048() {
         
         window.addEventListener("keydown", handleKey);
         return () => window.removeEventListener("keydown", handleKey);
-    }, [board, gameOver]);
+    }, [handleMove]);
 
     // Swipe Event Listeners
     useEffect(() => {
@@ -224,7 +224,7 @@ function Game2048() {
                 gameBoard.removeEventListener("touchend", handleTouchEnd);
             };
         }
-    }, [board, gameOver]);
+    }, [handleMove]);
 
     // Record game when it's over
     useEffect(() => {
