@@ -9,6 +9,8 @@ import Navbar from "./Components/Navbar/Navbar.jsx";
 import Page2 from "./Components/HomePage/Page2/Page2.jsx";
 import Page3 from "./Components/HomePage/Page3/Page3.jsx";
 import Page4 from "./Components/HomePage/Page4/Page4.jsx";
+import Page5 from "./Components/HomePage/Page5/Page5.jsx";
+import Page6 from "./Components/HomePage/Page6/Page6.jsx";
 import Footer from "./Components/HomePage/Footer/Footer.jsx";
 import Contact from "./Components/ContactUs/Contact.jsx";
 import About from "./Components/About/About.jsx";
@@ -87,6 +89,8 @@ function AnimatedRoutes() {
               <Page2 />
               <Page3 />
               <Page4 />
+              <Page5 />
+              <Page6 />
               <Footer />
             </PageTransition>
           }
