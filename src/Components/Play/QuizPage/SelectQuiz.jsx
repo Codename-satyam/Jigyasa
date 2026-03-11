@@ -19,7 +19,6 @@ const LoadingPage = ({ text = "Loading Categories..." }) => {
 
 function SelectQuiz() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -33,7 +32,6 @@ function SelectQuiz() {
       navigate("/login");
       return;
     }
-    setUser(currentUser);
   }, [navigate]);
 
   useEffect(() => {

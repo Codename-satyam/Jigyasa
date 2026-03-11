@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import quizData from "./data/data";
 import "./g2.css";
 import correctSound from "./data/sounds/correct.mp3";
@@ -26,7 +26,7 @@ const getRandomQuestions = () => {
 
 
 function QuizGame() {
-  const [randomizedQuestions] = useState(() => getRandomQuestions());
+  const [randomizedQuestions, setRandomizedQuestions] = useState(() => getRandomQuestions());
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState(null);
@@ -37,10 +37,33 @@ function QuizGame() {
   const question = randomizedQuestions[current];
   const progressPercent = Math.round(((current + 1) / randomizedQuestions.length) * 100);
 
+  const moveNext = useCallback((finalScore = score) => {
+    if (current + 1 < randomizedQuestions.length) {
+      setCurrent(prev => prev + 1);
+      setSelected(null);
+      setReveal(false);
+      setTimeLeft(10);
+      return;
+    }
+
+    setShowResult(true);
+
+    const user = auth.getCurrentUser();
+    if (user) {
+      gamesTracker.recordGamePlay({
+        email: user.email,
+        gameType: 'guess',
+        gameName: 'Guess the Guy',
+        score: finalScore,
+        date: new Date().toISOString()
+      });
+    }
+  }, [current, randomizedQuestions.length, score]);
+
   useEffect(() => {
     if (timeLeft === 0 && !selected) {
       TIMEOUT_SOUND.play().catch(() => {});
-      moveNext();
+      moveNext(score);
       return;
     }
 
@@ -54,7 +77,7 @@ function QuizGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, selected]);
+  }, [moveNext, score, selected, timeLeft]);
 
   const handleOptionClick = (option) => {
     if (selected) return;
@@ -62,40 +85,21 @@ function QuizGame() {
     setSelected(option);
     setReveal(true);
 
-    if (option === question.answer) {
+    const isCorrect = option === question.answer;
+    const nextScore = isCorrect ? score + 1 : score;
+
+    if (isCorrect) {
       CORRECT_SOUND.play().catch(() => {});
       setScore(prev => prev + 1);
     } else {
       WRONG_SOUND.play().catch(() => {});
     }
 
-    setTimeout(moveNext, 1500);
-  };
-
-  const moveNext = () => {
-    if (current + 1 < randomizedQuestions.length) {
-      setCurrent(prev => prev + 1);
-      setSelected(null);
-      setReveal(false);
-      setTimeLeft(10);
-    } else {
-      setShowResult(true);
-      
-      // Record game play
-      const user = auth.getCurrentUser();
-      if (user) {
-        gamesTracker.recordGamePlay({
-          email: user.email,
-          gameType: 'guess',
-          gameName: 'Guess the Guy',
-          score: score,
-          date: new Date().toISOString()
-        });
-      }
-    }
+    setTimeout(() => moveNext(nextScore), 1500);
   };
 
   const restartGame = () => {
+    setRandomizedQuestions(getRandomQuestions());
     setCurrent(0);
     setScore(0);
     setSelected(null);

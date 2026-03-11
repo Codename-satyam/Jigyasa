@@ -219,13 +219,13 @@ Create a `.env` file in the root directory if it doesn't exist:
 
 ```env
 # MongoDB Connection
-MONGO_URI=mongodb+srv://satyamanand643_db_user:ZYYumhPONsSEX91g@jigyasa.z70mk0g.mongodb.net/quizy
+MONGO_URI=your_mongodb_connection_string
 
 # API Keys
-GOOGLE_API_KEY=AIzaSyCi6lWcBPCwj5WepJXPrXXnouE6-ZJ8l1Q
+GOOGLE_API_KEY=your_google_api_key
 
 # JWT Secret
-JWT_SECRET=5fe1b350034cc8a22884340e42dabe80d8f1091ad89e26a6b3700714f925698923dfe1b445f19d524a8c0f33ae862fcecd58b58bc48b1800aa0a89915540cb6d
+JWT_SECRET=your_long_random_jwt_secret
 
 # Server Configuration
 PORT=4000

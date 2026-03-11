@@ -1,5 +1,5 @@
 import './TopicSelector.css';
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import data from '../data.js';
 import { getTopicProgress, getLastViewedTopic } from '../../../../api/progressTracker.js';
@@ -7,7 +7,6 @@ import { getTopicProgress, getLastViewedTopic } from '../../../../api/progressTr
 
 function TopicSelector() {
     const { subject } = useParams();
-    const [SelectedTopic,setSelectedTopic] = useState(null);
     const [topicProgress, setTopicProgress] = useState({});
     const [lastViewed, setLastViewed] = useState(null);
     const navigate = useNavigate();
@@ -28,7 +27,6 @@ function TopicSelector() {
     }, [subject, topicsForSubject]);
 
     const handleCardClick = (index) => {
-        setSelectedTopic(index);
         navigate(`/videos/subject/${subject}/topic/${index}`);
     };
 

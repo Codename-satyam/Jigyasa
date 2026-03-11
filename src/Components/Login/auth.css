@@ -348,6 +348,70 @@
   border-bottom: 1px solid var(--gold);
 }
 
+.admin-access-panel {
+  margin-top: 10px;
+  padding: 16px;
+  border: 2px dashed rgba(0, 229, 255, 0.45);
+  background: rgba(0, 0, 0, 0.42);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-access-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-access-kicker {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.55rem;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.admin-access-copy strong {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.72rem;
+  color: var(--gold);
+  line-height: 1.6;
+}
+
+.admin-access-copy p {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #d6eef3;
+}
+
+.auth-box .admin-access-link {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 14px;
+  border: 2px solid var(--neon-cyan);
+  background: rgba(0, 229, 255, 0.12);
+  color: var(--text-white);
+  text-decoration: none;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  box-shadow: 4px 4px 0 #000;
+  transition: all 0.1s steps(1, end);
+}
+
+.auth-box .admin-access-link:hover {
+  background: rgba(0, 229, 255, 0.22);
+  color: var(--gold);
+  border-bottom: 2px solid var(--neon-cyan);
+}
+
+.auth-box .admin-access-link:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 #000;
+}
+
 /* ================= RESPONSIVE ================= */
 
 @media (max-width: 768px) {
@@ -389,5 +453,11 @@
     width: 70px;
     font-size: 3rem;
     border-width: 3px;
+  }
+
+  .admin-access-kicker,
+  .admin-access-copy strong,
+  .auth-box .admin-access-link {
+    line-height: 1.6;
   }
 }

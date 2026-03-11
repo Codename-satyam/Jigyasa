@@ -129,6 +129,15 @@ export function getCurrentUser() {
   }
 }
 
+export function updateCurrentUser(updates) {
+  const currentUser = getCurrentUser();
+  if (!currentUser) return null;
+
+  const nextUser = { ...currentUser, ...updates };
+  localStorage.setItem(CURRENT_KEY, JSON.stringify(nextUser));
+  return nextUser;
+}
+
 export function isUserBlocked(userId) {
   const currentUser = getCurrentUser();
   return currentUser ? currentUser.blocked || false : false;
@@ -148,5 +157,5 @@ export async function getAllUsers() {
   }
 }
 
-const auth = { register, login, logout, getCurrentUser, isAuthenticated, isUserBlocked, getAllUsers, AVATAR_OPTIONS };
+const auth = { register, login, logout, getCurrentUser, updateCurrentUser, isAuthenticated, isUserBlocked, getAllUsers, AVATAR_OPTIONS };
 export default auth;

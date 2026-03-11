@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Card from "./Card";
 import "./game1.css";
 import gamesTracker from "../../../../api/gamesTracker";
@@ -54,7 +54,7 @@ function MemoryGame() {
     const maxPairs = levelConfig[difficulty].pairs;
     const progressPercent = Math.round((score / maxPairs) * 100);
 
-    const shuffleCards = (level = difficulty) => {
+    const shuffleCards = useCallback((level = difficulty) => {
         const selectedColors = levelConfig[level].colors.slice(
             0,
             levelConfig[level].pairs
@@ -75,7 +75,7 @@ function MemoryGame() {
         setTurns(0);
         setResultText("");
         setShowResult(false);
-    };
+    }, [difficulty]);
 
     const handleChoice = (card) => {
         if (!disabled && !card.matched && card !== firstChoice) {
@@ -115,7 +115,7 @@ function MemoryGame() {
 
     useEffect(() => {
         shuffleCards(difficulty);
-    }, [difficulty]);
+    }, [difficulty, shuffleCards]);
 
     useEffect(() => {
         if (turns === 0) return;

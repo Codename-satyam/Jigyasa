@@ -14,7 +14,7 @@ function Login() {
     e.preventDefault();
     setError(null);
     try {
-      const user = await auth.login({ email, password });
+      await auth.login({ email, password });
       navigate('/dashboard');
     } catch (err) {
       // Check if account is blocked
@@ -106,6 +106,21 @@ function Login() {
         >
           New Warrior ? <Link to="/register">Register</Link>
         </motion.p>
+        <motion.div
+          className="admin-access-panel"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+        >
+          <div className="admin-access-copy">
+            <span className="admin-access-kicker">Staff Access</span>
+            <strong>Need the admin portal?</strong>
+            <p>Use the secure admin sign-in for management tools and approval workflows.</p>
+          </div>
+          <Link to="/admin/login" className="admin-access-link">
+            Open Admin Login
+          </Link>
+        </motion.div>
       </motion.form>
     </div>
   );

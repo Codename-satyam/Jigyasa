@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import * as auth from "../../api/auth";
 import { apiCall } from "../../api/client";
 import "./admin-login.css";
 

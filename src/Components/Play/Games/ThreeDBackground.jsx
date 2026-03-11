@@ -5,10 +5,10 @@ const ThreeDBackground = () => {
   const containerRef = useRef(null);
   const sceneRef = useRef(null);
   const rendererRef = useRef(null);
-  const particlesRef = useRef([]);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
 
     // Scene setup
     const scene = new THREE.Scene();
@@ -27,7 +27,7 @@ const ThreeDBackground = () => {
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x0a0e27, 0.1);
-    containerRef.current.appendChild(renderer.domElement);
+    container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
     // Create particles
@@ -74,6 +74,7 @@ const ThreeDBackground = () => {
         opacity: 0.2,
       })
     );
+    scene.add(lines);
 
     // Create floating cubes
     const cubes = [];
@@ -112,8 +113,9 @@ const ThreeDBackground = () => {
     scene.add(ambientLight);
 
     // Animation loop
+    let animationFrameId;
     const animate = () => {
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
 
       // Update particles
       const positionAttribute = points.geometry.getAttribute('position');
@@ -160,7 +162,14 @@ const ThreeDBackground = () => {
     // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize);
-      containerRef.current?.removeChild(renderer.domElement);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      container?.removeChild(renderer.domElement);
+      geometry.dispose();
+      material.dispose();
+      lines.geometry.dispose();
+      lines.material.dispose();
       renderer.dispose();
     };
   }, []);

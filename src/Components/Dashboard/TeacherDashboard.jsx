@@ -9,7 +9,6 @@ import './TeacherDashboard.css';
 function TeacherDashboard() {
   const navigate = useNavigate();
   const [current, setCurrent] = useState(null);
-  const [allScores, setAllScores] = useState([]);
   const [myQuizzes, setMyQuizzes] = useState([]);
   const [activeTab, setActiveTab] = useState('scores');
   const [studentScoresSummary, setStudentScoresSummary] = useState([]);
@@ -25,9 +24,6 @@ function TeacherDashboard() {
 
   useEffect(() => {
     const loadData = async () => {
-      const scoresData = await scores.getScores();
-      setAllScores(scoresData || []);
-
       const summaryData = await scores.getAllStudentsScoresSummary();
       setStudentScoresSummary(summaryData || []);
 

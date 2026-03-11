@@ -15,6 +15,28 @@ const OPERATORS = ["+", "-", "*"];
 const MAX_QUESTIONS = 10;
 const TIME_LIMIT = 15;
 
+function evaluateExpression(numbers, operators) {
+  const collapsedNumbers = [numbers[0]];
+  const collapsedOperators = [];
+
+  operators.forEach((operator, index) => {
+    const nextNumber = numbers[index + 1];
+
+    if (operator === "*") {
+      collapsedNumbers[collapsedNumbers.length - 1] *= nextNumber;
+      return;
+    }
+
+    collapsedOperators.push(operator);
+    collapsedNumbers.push(nextNumber);
+  });
+
+  return collapsedOperators.reduce((total, operator, index) => {
+    const nextNumber = collapsedNumbers[index + 1];
+    return operator === "+" ? total + nextNumber : total - nextNumber;
+  }, collapsedNumbers[0]);
+}
+
 function MathGame() {
   const [targetNumber, setTargetNumber] = useState(0);
   const [options, setOptions] = useState([]);
@@ -27,29 +49,33 @@ function MathGame() {
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
 
-  const generateEquation = useCallback(() => {
+  const generateEquation = useCallback((currentQuestionCount) => {
     // Check if game is over
-    if (questionCount >= MAX_QUESTIONS) {
+    if (currentQuestionCount >= MAX_QUESTIONS) {
       setGameOver(true);
       return;
     }
 
     const createEquation = () => {
       const count = Math.floor(Math.random() * 2) + 2; // 2–3 numbers
-      let exp = "";
+      const numbers = [];
+      const operators = [];
 
       for (let i = 0; i < count; i++) {
         const num = Math.floor(Math.random() * 10) + 1;
-        exp += num;
+        numbers.push(num);
 
         if (i < count - 1) {
           const op = OPERATORS[Math.floor(Math.random() * OPERATORS.length)];
-          exp += ` ${op} `;
+          operators.push(op);
         }
       }
 
-      const result = Function(`return ${exp}`)();
-      return { equation: exp, answer: result };
+      const equation = numbers
+        .map((num, index) => index < operators.length ? `${num} ${operators[index]}` : `${num}`)
+        .join(" ");
+
+      return { equation, answer: evaluateExpression(numbers, operators) };
     };
 
     // Create the correct equation
@@ -78,13 +104,12 @@ function MathGame() {
     setSelectedValue(null);
     setFeedback(null);
     setTimer(TIME_LIMIT);
-    setQuestionCount(prev => prev + 1);
-  }, [questionCount]);
+    setQuestionCount(currentQuestionCount + 1);
+  }, []);
 
   useEffect(() => {
-    generateEquation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    generateEquation(0);
+  }, [generateEquation]);
 
   // Timer countdown
   useEffect(() => {
@@ -94,7 +119,7 @@ function MathGame() {
       setFeedback("wrong");
       setResult("⏰ Time's up!");
       TIMEOUT_SOUND.play();
-      setTimeout(generateEquation, 1200);
+      setTimeout(() => generateEquation(questionCount), 1200);
       return;
     }
 
@@ -103,7 +128,7 @@ function MathGame() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timer, feedback, gameOver, generateEquation]);
+  }, [timer, feedback, gameOver, generateEquation, questionCount]);
 
   // Record game when it's over
   useEffect(() => {
@@ -139,7 +164,7 @@ function MathGame() {
       WRONG_SOUND.play();
     }
 
-    setTimeout(generateEquation, 1200);
+    setTimeout(() => generateEquation(questionCount), 1200);
   };
 
   const restartGame = () => {
@@ -147,7 +172,7 @@ function MathGame() {
     setScore(0);
     setGameOver(false);
     setTimer(TIME_LIMIT);
-    generateEquation();
+    generateEquation(0);
   };
 
   return (
