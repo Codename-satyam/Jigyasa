@@ -1,82 +1,187 @@
-@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-:root{
-	--bg: #0f1724;
-	--accent: #00d4ff;
-	--accent2: #ff4db4;
-	--card: rgba(255,255,255,0.03);
-}
-body{background:var(--bg)}
-.contact-root{min-height:80vh;display:flex;align-items:center;justify-content:center;padding:40px 20px}
-.center{
-	display:flex;
-	align-items:center;
-	justify-content:center;
-    font-family: "Pixelify Sans", sans-serif;
-}
-.container{
-	width:720px;
-	background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-	border-radius:16px;
-	padding:34px;
-	box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-	position:relative;
-}
-.title{
-	font-size:28px;
-	color:var(--accent);
-	margin:0 0 20px 0;
-    letter-spacing: 0.3px;
-}
-.contact-form{margin-bottom:12px}
-.form{position:relative;margin-bottom:18px}
-.form__label{display:block;color:#cbd5e1;margin-bottom:6px}
-.form__input, .form__textarea{
-	width:100%;
-	padding:12px 14px;
-	border-radius:10px;
-	border:2px solid rgba(255,255,255,0.06);
-	background:transparent;color:#e6eef8;
-	outline:none;font-size:16px;transition:all .15s ease;resize:vertical
-}
-.form.active .form__input{border-color:var(--accent)}
-.form__btn{
-	display:inline-flex;align-items:center;gap:12px;padding:10px 18px;border-radius:12px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#041018;cursor:pointer;overflow:hidden;position:relative;margin-top:6px;font-family: "Pixelify Sans", sans-serif;
-    
-}
-.form__btn--visible{display:inline-flex;align-items:center;gap:8px}
-.form__btn--invisible{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(10px);transition:all .3s ease}
-.form__btn--invisible.visible{opacity:1;transform:translateY(0)}
-.form__btn--visible.invisible{opacity:0;transform:translateY(-10px)}
-
-.container-mail{position:absolute;right:-40px;top:30px;width:160px;height:140px}
-.mail{position:relative;width:100%;height:100%;transform:scale(.9)}
-.mail__back{position:absolute;inset:0;background:linear-gradient(180deg,#07303a,#04202a);border-radius:6px}
-.mail__top{position:absolute;left:10%;right:10%;top:6%;height:26%;background:linear-gradient(180deg,#0ce3ff,#ff6ec3);border-radius:6px 6px 0 0;transform-origin:top center;transition:all .6s cubic-bezier(.2,.9,.3,1)}
-.mail__top.closed{transform:translateY(-6px) rotateX(180deg)}
-.mail__letter{position:absolute;left:14%;right:14%;top:28%;bottom:22%;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:all .8s cubic-bezier(.22,.9,.3,1);}
-.mail__letter-square{width:24px;height:24px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px}
-.mail__letter.move{transform:translateY(-90px) rotate(-6deg)}
-
-/* small responsive */
-@media(max-width:800px){
-	.container{width:92%}
-	.container-mail{display:none}
+.rpg-container {
+  background-color: #222;
+  font-family: 'Press Start 2P', monospace;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
 }
 
-@media(max-width:600px){
-	.container{padding:24px}
-	.title{font-size:22px}
-	.form__label{font-size:14px}
-	.form__input, .form__textarea{font-size:14px;padding:10px 12px}
-	.form__btn{padding:8px 14px;font-size:14px}
+.game-screen {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-@media(max-width:480px){
-	.contact-root{padding:20px 10px}
-	.container{padding:20px}
-	.title{font-size:20px}
-	.form__label{font-size:13px}
-	.form__input, .form__textarea{font-size:13px;padding:8px 10px}
-	.form__btn{padding:8px 12px;font-size:13px}
+/* Classic JRPG UI Borders */
+.hud-panel, .dialogue-box, .inventory-slot input, .inventory-slot textarea {
+  background: linear-gradient(135deg, #000080, #000033); /* Deep royal blue background */
+  border: 4px solid #fff;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 2px #000, 0 0 0 2px #000, 4px 4px 0px rgba(0,0,0,0.5);
+  color: #fff;
+}
+
+/* Top HUD Styling */
+.hud-panel {
+  padding: 15px;
+}
+
+.hud-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 1rem;
+  color: #ffcc00;
+  text-shadow: 2px 2px #000;
+}
+
+.stat-bar-container {
+  font-size: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-bar-bg {
+  width: 100%;
+  height: 15px;
+  background-color: #333;
+  border: 2px solid #000;
+}
+
+.stat-bar-fill.blue {
+  height: 100%;
+  background-color: #00e1ff;
+  transition: width 0.4s ease-out;
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
+}
+
+/* Form / Play Area */
+.play-area {
+  padding: 0 10px;
+}
+
+.rpg-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.inventory-slot {
+  display: flex;
+  flex-direction: column;
+}
+
+.inventory-slot label {
+  font-size: 0.7rem;
+  color: #ccc;
+  margin-bottom: 5px;
+  text-shadow: 1px 1px #000;
+}
+
+.inventory-slot input, .inventory-slot textarea {
+  padding: 12px;
+  font-size: 0.8rem;
+  font-family: 'Press Start 2P', monospace;
+  outline: none;
+  transition: transform 0.1s;
+}
+
+.inventory-slot input:focus, .inventory-slot textarea:focus {
+  transform: scale(1.02);
+  border-color: #ffcc00;
+}
+
+/* Action Button */
+.cast-spell-btn {
+  margin-top: 10px;
+  padding: 15px;
+  background-color: #333;
+  color: #666;
+  border: 4px solid #666;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1rem;
+  cursor: not-allowed;
+  box-shadow: inset 0 0 0 2px #000, 0 0 0 2px #000;
+}
+
+/* The button lights up when Mana is 100% */
+.cast-spell-btn.ready {
+  background-color: #aa0000;
+  color: #fff;
+  border-color: #ff5555;
+  cursor: pointer;
+  animation: pulse 1s infinite alternate;
+}
+
+.cast-spell-btn.ready:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+/* JRPG Dialogue Box */
+.dialogue-box {
+  display: flex;
+  padding: 15px;
+  min-height: 120px;
+  gap: 20px;
+}
+
+/* NPC Portrait and Idle Animation */
+.npc-portrait {
+  width: 80px;
+  height: 80px;
+  background-color: #000;
+  border: 2px solid #fff;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.pixel-sprite {
+  width: 50px;
+  height: 60px;
+  background-color: #ffcc00; /* Placeholder for a sprite */
+  box-shadow: inset -10px -10px 0 rgba(0,0,0,0.3);
+  animation: idle-breathe 2s infinite ease-in-out;
+}
+
+.dialogue-text {
+  flex-grow: 1;
+}
+
+.npc-name {
+  color: #ffcc00;
+  margin: 0 0 10px 0;
+  font-size: 0.8rem;
+}
+
+.type-effect {
+  font-size: 0.8rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Animations */
+@keyframes pulse {
+  from { background-color: #880000; }
+  to { background-color: #cc0000; }
+}
+
+@keyframes idle-breathe {
+  0%, 100% { height: 60px; }
+  50% { height: 64px; }
+}
+
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+  .dialogue-box { flex-direction: column; align-items: center; text-align: center; }
+  .hud-panel h3 { font-size: 0.8rem; }
+  .cast-spell-btn { font-size: 0.8rem; }
+  .inventory-slot input, .inventory-slot textarea { font-size: 0.6rem; }
 }

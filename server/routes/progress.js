@@ -1,33 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const Progress = require('../models/Progress');
-const jwt = require('jsonwebtoken');
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-
-// Middleware to verify JWT token
-const verifyToken = (req, res, next) => {
-  const token = req.headers['authorization']?.split(' ')[1];
-  if (!token) return res.status(401).json({ success: false, error: 'No token provided' });
-  
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
-    if (err) return res.status(401).json({ success: false, error: 'Token invalid' });
-    req.userId = decoded.userId;
-    next();
-  });
-};
+const { verifyToken } = require('../middleware/auth');
+const { isValidString, isValidPositiveInt, sanitizeString } = require('../middleware/validate');
 
 // Create or get progress for a subject
 router.post('/', verifyToken, async (req, res) => {
   try {
     const { subject } = req.body;
     
-    let progress = await Progress.findOne({ userId: req.userId, subject });
+    if (!isValidString(subject, 100)) {
+      return res.status(400).json({ success: false, error: 'Invalid subject name' });
+    }
+    const safeSubject = sanitizeString(subject, 100);
+    
+    let progress = await Progress.findOne({ userId: req.userId, subject: safeSubject });
     
     if (!progress) {
       progress = new Progress({
         userId: req.userId,
-        subject,
+        subject: safeSubject,
         topicIndex: 0,
         completedVideos: [],
         lastViewed: 0,
@@ -38,7 +30,7 @@ router.post('/', verifyToken, async (req, res) => {
     res.json({ success: true, progress });
   } catch (err) {
     console.error('Create progress error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to create progress' });
   }
 });
 
@@ -49,7 +41,7 @@ router.get('/', verifyToken, async (req, res) => {
     res.json({ success: true, progress });
   } catch (err) {
     console.error('Get progress error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to get progress' });
   }
 });
 
@@ -61,7 +53,7 @@ router.get('/:subject', verifyToken, async (req, res) => {
     res.json({ success: true, progress });
   } catch (err) {
     console.error('Get progress error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to get progress' });
   }
 });
 
@@ -70,6 +62,12 @@ router.post('/:subject/mark-video', verifyToken, async (req, res) => {
   try {
     const { videoIndex } = req.body;
     
+    // Validate videoIndex is a reasonable non-negative integer
+    if (!isValidPositiveInt(videoIndex, 10000)) {
+      return res.status(400).json({ success: false, error: 'Invalid video index' });
+    }
+    const safeVideoIndex = Number(videoIndex);
+    
     let progress = await Progress.findOne({ userId: req.userId, subject: req.params.subject });
     
     if (!progress) {
@@ -77,15 +75,15 @@ router.post('/:subject/mark-video', verifyToken, async (req, res) => {
         userId: req.userId,
         subject: req.params.subject,
         topicIndex: 0,
-        completedVideos: [videoIndex],
-        lastViewed: videoIndex,
+        completedVideos: [safeVideoIndex],
+        lastViewed: safeVideoIndex,
       });
       await progress.save();
     } else {
-      if (!progress.completedVideos.includes(videoIndex)) {
-        progress.completedVideos.push(videoIndex);
+      if (!progress.completedVideos.includes(safeVideoIndex)) {
+        progress.completedVideos.push(safeVideoIndex);
       }
-      progress.lastViewed = videoIndex;
+      progress.lastViewed = safeVideoIndex;
       progress.lastViewedTime = new Date();
       await progress.save();
     }
@@ -93,7 +91,7 @@ router.post('/:subject/mark-video', verifyToken, async (req, res) => {
     res.json({ success: true, progress });
   } catch (err) {
     console.error('Mark video error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to mark video' });
   }
 });
 
@@ -114,7 +112,7 @@ router.post('/:subject/next-topic', verifyToken, async (req, res) => {
     res.json({ success: true, progress });
   } catch (err) {
     console.error('Next topic error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to advance topic' });
   }
 });
 
@@ -137,7 +135,7 @@ router.post('/:subject/prev-topic', verifyToken, async (req, res) => {
     res.json({ success: true, progress });
   } catch (err) {
     console.error('Prev topic error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to go to previous topic' });
   }
 });
 
@@ -159,7 +157,7 @@ router.post('/:subject/reset', verifyToken, async (req, res) => {
     res.json({ success: true, progress });
   } catch (err) {
     console.error('Reset progress error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to reset progress' });
   }
 });
 
@@ -169,7 +167,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
     const progress = await Progress.findById(req.params.id);
     if (!progress) return res.status(404).json({ success: false, error: 'Progress not found' });
     
-    if (progress.userId.toString() !== req.userId) {
+    if (progress.userId.toString() !== req.userId.toString()) {
       return res.status(403).json({ success: false, error: 'Can only delete your own progress' });
     }
 
@@ -177,7 +175,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
     res.json({ success: true, message: 'Progress deleted' });
   } catch (err) {
     console.error('Delete progress error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to delete progress' });
   }
 });
 

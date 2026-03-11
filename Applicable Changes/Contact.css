@@ -1,0 +1,204 @@
+/* Import the classic 8-bit pixel font */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.retro-contact-container {
+  background-color: #050505;
+  color: #39ff14; /* Terminal neon green */
+  font-family: 'Press Start 2P', monospace;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* CRT Scanline effect */
+.scanlines {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0) 50%,
+    rgba(0, 0, 0, 0.25) 50%,
+    rgba(0, 0, 0, 0.25)
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* 8-Bit Terminal Window Styling */
+.terminal-window {
+  width: 100%;
+  max-width: 700px;
+  background-color: #111;
+  border: 4px solid #39ff14;
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.2), inset 0 0 20px rgba(57, 255, 20, 0.1);
+  z-index: 1;
+  position: relative;
+}
+
+.terminal-header {
+  background-color: #39ff14;
+  color: #111;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  border-bottom: 4px solid #39ff14;
+}
+
+.header-dots {
+  display: flex;
+  gap: 8px;
+  margin-right: 15px;
+}
+
+.dot {
+  width: 12px; height: 12px;
+  background-color: #111;
+}
+
+.terminal-title {
+  font-size: 0.8rem;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.terminal-body {
+  padding: 40px 30px;
+}
+
+/* Sequential Boot-up Animations */
+.boot-sequence {
+  margin-bottom: 30px;
+}
+
+.typewriter {
+  font-size: 0.8rem;
+  line-height: 1.8;
+  margin: 0 0 10px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 0;
+  animation: typing 1.5s steps(40, end) forwards;
+}
+
+.typewriter.delayed {
+  animation-delay: 1.5s;
+  opacity: 0;
+  animation: delayed-typing 1.5s steps(40, end) 1.5s forwards;
+  color: #00e1ff; /* Cyan accent for the second line */
+}
+
+/* Form Styles */
+.retro-form {
+  opacity: 0;
+  animation: fade-in 0.5s ease-in 3s forwards; /* Fades in after typing completes */
+}
+
+.input-group {
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  font-size: 0.8rem;
+  margin-bottom: 15px;
+  color: #ffcc00; /* Arcade yellow */
+}
+
+.retro-form input, .retro-form textarea {
+  background-color: transparent;
+  border: 3px dashed #39ff14; /* Dashed border looks pixelated/retro */
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.8rem;
+  padding: 15px;
+  outline: none;
+  transition: all 0.2s ease;
+  resize: vertical; /* Allows resizing the textarea */
+}
+
+.retro-form input:focus, .retro-form textarea:focus {
+  border-style: solid;
+  background-color: rgba(57, 255, 20, 0.05);
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
+}
+
+.retro-form input::placeholder, .retro-form textarea::placeholder {
+  color: #444;
+}
+
+/* Submit Button */
+.retro-submit-btn {
+  background-color: transparent;
+  border: none;
+  color: #ff003c; /* Magenta accent */
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 15px 0;
+  margin-top: 10px;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.retro-submit-btn:hover {
+  color: #fff;
+  text-shadow: 3px 3px #ff003c;
+  transform: translateX(10px); /* Slight shift on hover */
+}
+
+.retro-submit-btn::before {
+  content: "> ";
+  color: #39ff14;
+  animation: blink 1s step-end infinite;
+}
+
+/* --- Keyframe Animations --- */
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes delayed-typing {
+  from { width: 0; opacity: 1; }
+  to { width: 100%; opacity: 1; }
+}
+
+@keyframes fade-in {
+  to { opacity: 1; }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 600px) {
+  .terminal-body { padding: 20px; }
+  .terminal-title { font-size: 0.6rem; }
+  
+  /* Disable typewriter on mobile to prevent horizontal overflow scrolling issues */
+  .typewriter { 
+    font-size: 0.6rem; 
+    white-space: normal; 
+    width: auto; 
+    animation: none; 
+  }
+  .typewriter.delayed { 
+    animation: none; 
+    opacity: 1; 
+  }
+  
+  .retro-form { animation: none; opacity: 1; margin-top: 20px; }
+  .input-group label, .retro-form input, .retro-form textarea { font-size: 0.7rem; }
+  .retro-submit-btn { font-size: 0.8rem; }
+}

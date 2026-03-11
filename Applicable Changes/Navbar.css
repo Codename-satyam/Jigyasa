@@ -1,0 +1,243 @@
+/* =========================================================
+   Navbar.css - Retro RPG Menu Bar
+========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+:root {
+  --nav-bg: rgba(8, 27, 51, 0.95); /* Deep RPG Blue */
+  --border-light: #d4d4d4;
+  --gold: #f8c522;
+  --neon-cyan: #00e5ff;
+  --text-white: #f0f0f0;
+  --text-green: #39ff14;
+  --button-red: #b22222;
+  --button-hover: #d12a2a;
+}
+
+/* Base Navbar Container */
+.navbar {
+  position: sticky;
+  top: 0;
+  background-color: var(--nav-bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  
+  /* Classic RPG Bottom Border */
+  border-bottom: 4px solid var(--border-light);
+  box-shadow: 
+    inset 0 -4px 0 #000, 
+    0 10px 20px rgba(0, 0, 0, 0.8);
+  
+  z-index: 1000;
+  font-family: 'Press Start 2P', cursive; /* Gamified blocky font */
+  backdrop-filter: blur(4px);
+}
+
+/* ================= LOGO ANIMATION ================= */
+
+.logo {
+  font-size: 2rem;
+  color: var(--gold);
+  display: flex;
+  cursor: pointer;
+  user-select: none;
+  text-shadow: 3px 3px 0 #000;
+}
+
+.logo-letter {
+  display: inline-block;
+  animation: float-idle 2s ease-in-out infinite;
+  transition: color 0.2s ease;
+}
+
+/* Staggered floating effect */
+.logo-letter:nth-child(1) { animation-delay: 0s; color: var(--neon-cyan); }
+.logo-letter:nth-child(2) { animation-delay: 0.1s; }
+.logo-letter:nth-child(3) { animation-delay: 0.2s; }
+.logo-letter:nth-child(4) { animation-delay: 0.3s; }
+.logo-letter:nth-child(5) { animation-delay: 0.4s; }
+.logo-letter:nth-child(6) { animation-delay: 0.5s; }
+.logo-letter:nth-child(7) { animation-delay: 0.6s; }
+
+/* Interactive Hover Bounce (Like collecting a coin) */
+.logo:hover .logo-letter {
+  color: var(--text-white);
+  text-shadow: 0 0 10px var(--gold), 3px 3px 0 #000;
+  animation: bounce-hover 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite !important;
+}
+
+.logo:hover .logo-letter:nth-child(1) { animation-delay: 0s !important; color: var(--gold); }
+.logo:hover .logo-letter:nth-child(2) { animation-delay: 0.05s !important; }
+.logo:hover .logo-letter:nth-child(3) { animation-delay: 0.1s !important; }
+.logo:hover .logo-letter:nth-child(4) { animation-delay: 0.15s !important; }
+.logo:hover .logo-letter:nth-child(5) { animation-delay: 0.2s !important; }
+.logo:hover .logo-letter:nth-child(6) { animation-delay: 0.25s !important; }
+.logo:hover .logo-letter:nth-child(7) { animation-delay: 0.3s !important; }
+
+/* ================= NAV MENU & BUTTONS ================= */
+
+.nav-menu {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar ul li {
+  margin-left: 20px;
+}
+
+/* Standard Links */
+.navbar ul li a {
+  font-size: 0.8rem;
+  text-decoration: none;
+  color: var(--text-white);
+  background: #111;
+  padding: 10px 15px;
+  border: 2px solid #555;
+  box-shadow: 3px 3px 0 #000;
+  transition: all 0.1s steps(1, end);
+  text-transform: uppercase;
+}
+
+.navbar ul li a:hover {
+  background: var(--menu-bg);
+  color: var(--gold);
+  border-color: var(--gold);
+  transform: translate(-2px, -2px); 
+  box-shadow: 5px 5px 0 #000;
+}
+
+.navbar ul li a:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 #000;
+}
+
+/* Logout Button (Action Style) */
+.navbar ul li .nav-logout {
+  background: var(--button-red);
+  border-color: #ff4444;
+  color: #fff;
+  cursor: pointer;
+}
+
+.navbar ul li .nav-logout:hover {
+  background: var(--button-hover);
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+/* User Status Indicator */
+.navbar ul li .nav-user {
+  font-family: 'VT323', monospace;
+  color: var(--text-green);
+  font-size: 1.5rem;
+  padding: 0 10px;
+  text-shadow: 2px 2px 0 #000;
+}
+.navbar ul li .nav-user::before {
+  content: "Lv.99 "; /* Fun RPG touch */
+  color: var(--gold);
+  font-size: 1rem;
+}
+
+/* ================= HAMBURGER MENU ================= */
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  background: #111;
+  border: 2px solid #555;
+  box-shadow: 3px 3px 0 #000;
+  cursor: pointer;
+  padding: 8px;
+  gap: 4px;
+}
+
+.hamburger:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+.hamburger span {
+  width: 24px;
+  height: 3px;
+  background-color: var(--text-white);
+}
+
+.hamburger:hover span {
+  background-color: var(--gold);
+}
+
+/* ================= ANIMATIONS ================= */
+
+@keyframes float-idle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes bounce-hover {
+  0%, 50%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+  25% { transform: translateY(-15px) scale(1.1) rotate(-5deg); }
+  75% { transform: translateY(-8px) scale(1.05) rotate(5deg); }
+}
+
+/* ================= MOBILE RESPONSIVE ================= */
+
+@media (max-width: 900px) {
+  .navbar {
+    padding: 15px 20px;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  /* RPG Dropdown Box styling */
+  .nav-menu {
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--nav-bg);
+    border-bottom: 4px solid var(--border-light);
+    box-shadow: inset 0 -4px 0 #000, 0 15px 30px rgba(0,0,0,0.9);
+    
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+  }
+
+  .nav-menu.active {
+    max-height: 500px;
+    padding: 20px 0;
+  }
+
+  .navbar ul li {
+    margin: 10px 0;
+    width: 100%;
+    text-align: center;
+  }
+
+  .navbar ul li a,
+  .navbar ul li .nav-logout {
+    display: inline-block;
+    width: 80%;
+    max-width: 300px;
+    padding: 15px;
+  }
+
+  .navbar ul li .nav-user {
+    display: block;
+    margin-bottom: 10px;
+  }
+}

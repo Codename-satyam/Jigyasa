@@ -9,7 +9,7 @@ import Navbar from "./Components/Navbar/Navbar.jsx";
 import Page2 from "./Components/HomePage/Page2/Page2.jsx";
 import Page3 from "./Components/HomePage/Page3/Page3.jsx";
 import Page4 from "./Components/HomePage/Page4/Page4.jsx";
-import Footer from "./Components/Footer/Footer.jsx";
+import Footer from "./Components/HomePage/Footer/Footer.jsx";
 import Contact from "./Components/ContactUs/Contact.jsx";
 import About from "./Components/About/About.jsx";
 import Dashboard from "./Components/Dashboard/Dashboard.jsx";
