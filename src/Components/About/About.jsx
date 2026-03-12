@@ -133,7 +133,7 @@ function About() {
                                 <p className="pixel-subtitle blue-text mt-2">C:\JIGYASA\ROSTER.EXE</p>
                             </div>
 
-                            <div className="rpg-dialogue-box mx-auto mt-4 mb-4">
+                            <div className="rpg-dialogue-box">
                                 <h2 className="pixel-title-small green-text text-center">ABOUT JIGYASA</h2>
                                 <p className="text-center">
                                     Jigyasa is a playful learning app that transforms quizzes into an exciting adventure. Designed to make learning fun and interactive, it blends knowledge with game-like challenges that keep users engaged and motivated. Built by a guild of six passionate developers, Jigyasa aims to create a platform where curiosity meets creativity, encouraging learners to test their knowledge, explore new ideas, and enjoy the process of learning.

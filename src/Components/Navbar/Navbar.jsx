@@ -30,8 +30,8 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar pixelify-sans-font">
-      <div className="logo">
+    <nav className="cyber-navbar pixelify-sans-font">
+      <div className="logo" onClick={() => navigate('/home')}>
         <span className="logo-letter">J</span>
         <span className="logo-letter">i</span>
         <span className="logo-letter">g</span>
@@ -56,21 +56,21 @@ const Navbar = () => {
         <li><Link to="/home" onClick={closeMenu}>Home</Link></li>
         <li><Link to="/about" onClick={closeMenu}>About</Link></li>
         <li><Link to="/play" onClick={closeMenu}>Play</Link></li>
-        {/* <li><Link to="/contact" onClick={closeMenu}>Contact</Link></li> */}
         <li><Link to="/dashboard" onClick={closeMenu}>Dashboard</Link></li>
+        
         {!user ? (
           <>
-            <li><Link to="/login" onClick={closeMenu}>Login</Link></li>
+            <li><Link to="/login" className="cyber-btn-accent" onClick={closeMenu}>Login</Link></li>
           </>
         ) : (
           <>
             <li>
-              <span className="nav-user">Hello, {user.name}</span>
+              <span className="nav-user"><span className="cyber-prompt">&gt; SYS.USER:</span> {user.name}</span>
             </li>
             <li>
               <button
                 type="button"
-                className="nav-logout"
+                className="nav-logout cyber-btn-accent"
                 onClick={handleLogout}
                 aria-label="Logout"
               >

@@ -5,88 +5,224 @@
   font-weight: 700;
 }
 
-.navbar {
-  background-color: #222;
-  color: #00ffff;
-  font-size: 30px;
+/* CYBERPUNK VARIABLES */
+:root {
+  --neon-cyan: #00f0ff;
+  --neon-magenta: #ff003c;
+  --cyber-bg: #050505;
+  --cyber-panel: #111111;
+}
+
+.cyber-navbar {
+  background-color: var(--cyber-bg);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 40px;
-  border: 4px solid #fff;
-  box-shadow: 4px 4px 0 #ff00ff; 
-  image-rendering: pixelated; 
+  padding: 15px 40px;
+  border-bottom: 2px solid var(--neon-cyan);
+  box-shadow: 0 4px 20px rgba(0, 240, 255, 0.15);
   z-index: 1000;
+  position: relative;
 }
 
-.navbar {
-  clip-path: polygon(
-    0 0, 96% 0, 100% 10%, 100% 100%, 4% 100%, 0 90%
-  ); 
+/* Optional: Techy top border line */
+.cyber-navbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--neon-magenta), transparent);
 }
 
-
+/* LOGO: Cyber Glitch Effect instead of bouncy hop */
 .logo {
-  font-size: 60px;
+  font-size: 36px;
   font-weight: 800;
   align-items: center;
-  color: #6fa7e7;
-  gap: 3px;
+  color: #fff;
+  gap: 2px;
   display: flex;
   cursor: pointer;
   user-select: none;
+  text-shadow: 2px 2px 0px var(--neon-magenta);
 }
 
 .logo-letter {
-  color: #6fa7e7;
   display: inline-block;
-  animation: hop 0.6s ease-in-out infinite;
-  animation-delay: var(--delay);
-  transition: color 0.3s ease;
-  transform-origin: bottom center;
+  transition: all 0.2s ease;
 }
 
-.logo-letter:first-child {
-  color: #3700ff;
+.logo {
+  font-size: 36px;
+  font-weight: 800;
+  align-items: center;
+  color: #fff;
+  gap: 2px;
+  display: flex;
+  cursor: pointer;
+  user-select: none;
+  text-shadow: 2px 2px 0px var(--neon-magenta);
 }
 
-.logo:hover .logo-letter {
-  color: #a66bff;
-  text-shadow: 0 0 15px rgba(160, 32, 240, 0.8);
-  animation: bounce-hover 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite !important;
+.logo-letter {
+  display: inline-block;
+  transition: all 0.2s ease;
+  transform-origin: center center;
 }
 
-.logo:hover .logo-letter:first-child {
-  color: #ff2e63;
-  text-shadow: 0 0 15px rgba(255, 46, 99, 0.8);
+/* Give every single letter a wild, unique animation on hover */
+.logo:hover .logo-letter:nth-child(1) {
+  animation: wild-jump 0.3s ease-in-out infinite alternate;
+  color: var(--neon-magenta);
 }
 
-.logo:hover .logo-letter:nth-child(1) { animation-delay: 0s !important; }
-.logo:hover .logo-letter:nth-child(2) { animation-delay: 0.05s !important; }
-.logo:hover .logo-letter:nth-child(3) { animation-delay: 0.1s !important; }
-.logo:hover .logo-letter:nth-child(4) { animation-delay: 0.15s !important; }
-.logo:hover .logo-letter:nth-child(5) { animation-delay: 0.2s !important; }
-.logo:hover .logo-letter:nth-child(6) { animation-delay: 0.25s !important; }
-.logo:hover .logo-letter:nth-child(7) { animation-delay: 0.3s !important; }
+.logo:hover .logo-letter:nth-child(2) {
+  animation: wild-tumble 0.5s linear infinite;
+  color: var(--neon-cyan);
+}
 
-@keyframes bounce-hover {
+.logo:hover .logo-letter:nth-child(3) {
+  animation: wild-jumble 0.2s steps(3) infinite;
+  color: #39ff14;
+  /* Neon Green */
+}
+
+.logo:hover .logo-letter:nth-child(4) {
+  animation: wild-flip 0.6s ease-in-out infinite;
+  color: #ffd700;
+  /* Gold */
+}
+
+.logo:hover .logo-letter:nth-child(5) {
+  animation: wild-shake 0.15s linear infinite;
+  color: #b000ff;
+  /* Purple */
+}
+
+.logo:hover .logo-letter:nth-child(6) {
+  animation: wild-spin-jump 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+  color: var(--neon-cyan);
+}
+
+.logo:hover .logo-letter:nth-child(7) {
+  animation: wild-squish 0.25s ease-in-out infinite alternate;
+  color: var(--neon-magenta);
+}
+
+
+@keyframes wild-jump {
   0% {
-    transform: translateY(0) scale(1) rotate(0deg);
+    transform: translateY(0) rotate(0deg) scale(1);
   }
-  25% {
-    transform: translateY(-25px) scale(1.15) rotate(-5deg);
-  }
-  50% {
-    transform: translateY(0) scale(1) rotate(0deg);
-  }
-  75% {
-    transform: translateY(-12px) scale(1.08) rotate(5deg);
-  }
+
   100% {
-    transform: translateY(0) scale(1) rotate(0deg);
+    transform: translateY(-15px) rotate(15deg) scale(1.3);
+    text-shadow: 0 10px 15px var(--neon-magenta);
   }
 }
 
+/* 2. i - Physically tumbles in a circle */
+@keyframes wild-tumble {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    text-shadow: 0 0 10px var(--neon-cyan);
+  }
+
+  50% {
+    transform: translateY(8px) rotate(180deg);
+  }
+
+  100% {
+    transform: translateY(0) rotate(360deg);
+    text-shadow: 0 0 10px var(--neon-cyan);
+  }
+}
+
+/* 3. g - Glitches out and skews sharply */
+@keyframes wild-jumble {
+  0% {
+    transform: translate(0, 0) skew(0deg);
+  }
+
+  33% {
+    transform: translate(-4px, 4px) skew(25deg);
+    text-shadow: -3px 0 #fff;
+  }
+
+  66% {
+    transform: translate(4px, -4px) skew(-25deg);
+    text-shadow: 3px 0 var(--neon-magenta);
+  }
+
+  100% {
+    transform: translate(0, 0) skew(0deg);
+  }
+}
+
+/* 4. y - Does a 3D coin flip */
+@keyframes wild-flip {
+  0% {
+    transform: perspective(400px) rotateY(0deg);
+  }
+
+  50% {
+    transform: perspective(400px) rotateY(180deg) scale(1.4);
+    text-shadow: 0 0 20px #ffd700;
+  }
+
+  100% {
+    transform: perspective(400px) rotateY(360deg);
+  }
+}
+
+/* 5. a - Shakes violently */
+@keyframes wild-shake {
+
+  0%,
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+
+  25% {
+    transform: translateX(-5px) translateY(-3px) rotate(-10deg);
+    text-shadow: 2px 2px 0 var(--neon-cyan);
+  }
+
+  75% {
+    transform: translateX(5px) translateY(3px) rotate(10deg);
+    text-shadow: -2px -2px 0 var(--neon-magenta);
+  }
+}
+
+/* 6. s - Jumps up while spinning backward */
+@keyframes wild-spin-jump {
+  0% {
+    transform: translateY(0) rotateZ(0deg);
+  }
+
+  50% {
+    transform: translateY(-20px) rotateZ(-90deg);
+    text-shadow: 0 0 15px var(--neon-cyan);
+  }
+
+  100% {
+    transform: translateY(0) rotateZ(0deg);
+  }
+}
+
+/* 7. a - Squishes flat and bounces */
+@keyframes wild-squish {
+  0% {
+    transform: scale(1, 1) translateY(0);
+  }
+
+  100% {
+    transform: scale(1.6, 0.4) translateY(12px);
+    text-shadow: 0 -10px 10px var(--neon-magenta);
+  }
+}
 
 /* Hamburger menu - hidden by default on desktop */
 .hamburger {
@@ -97,158 +233,169 @@
   cursor: pointer;
   padding: 0;
   z-index: 1001;
-  gap: 5px;
+  gap: 6px;
 }
 
 .hamburger span {
   width: 30px;
   height: 3px;
-  background-color: #00ffff;
+  background-color: var(--neon-cyan);
   transition: all 0.3s ease;
-  box-shadow: 1px 1px 0 #fff;
+  box-shadow: 0 0 5px var(--neon-cyan);
 }
 
 .hamburger:hover span {
-  background-color: #ff00ff;
+  background-color: var(--neon-magenta);
+  box-shadow: 0 0 8px var(--neon-magenta);
 }
 
+/* NAV MENU */
 .nav-menu {
   list-style: none;
   display: flex;
   margin: 0;
   padding: 0;
+  align-items: center;
 }
 
-.navbar ul li {
-  margin-left: 30px;
+.cyber-navbar ul li {
+  margin-left: 20px;
 }
 
-
-.navbar ul li a {
+/* CYBERPUNK BUTTON UI (Maintains size) */
+.cyber-navbar ul li a,
+.cyber-navbar ul li .nav-logout {
   font-weight: 600;
   text-decoration: none;
-  color: #fff;
-  background: #000;
+  color: var(--neon-cyan);
+  background: var(--cyber-panel);
   padding: 6px 14px;
-  border: 3px solid #fff;
-  box-shadow: 3px 3px 0 #00ffff;
-  transition: all 0.05s steps(1, end);
-}
-.navbar ul li a:hover {
-  background: #fff;
-  color: #000;
-  box-shadow: 3px 3px 0 #ff00ff;
-  transform: translate(-2px, -2px); 
+  /* Exact same padding as your original code */
+  border: 1px solid var(--neon-cyan);
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  box-shadow: inset 0 0 5px rgba(0, 240, 255, 0.2);
 }
 
-/* Style the logout button to match nav links */
-.navbar ul li .nav-logout {
-  font-weight: 600;
-  color: #fff;
-  background: #000;
-  padding: 6px 14px;
-  border: 3px solid #fff;
-  box-shadow: 3px 3px 0 #00ffff;
-  transition: all 0.05s steps(1, end);
-  cursor: pointer;
-  font-family: inherit;
-}
-.navbar ul li .nav-logout:hover,
-.navbar ul li .nav-logout:focus {
-  background: #fff;
+/* Hover effect */
+.cyber-navbar ul li a:hover,
+.cyber-navbar ul li .nav-logout:hover,
+.cyber-navbar ul li .nav-logout:focus {
+  background: var(--neon-cyan);
   color: #000;
-  box-shadow: 3px 3px 0 #ff00ff;
-  transform: translate(-2px, -2px);
+  box-shadow: 0 0 10px var(--neon-cyan), inset 0 0 10px rgba(0, 0, 0, 0.5);
   outline: none;
 }
 
-/* Remove default button appearance in some browsers */
-.navbar ul li .nav-logout { -webkit-appearance: none; appearance: none; }
-
-/* Style for user greeting */
-.navbar ul li .nav-user {
-  color: #00ffff;
-  font-weight: 600;
-  padding: 6px 14px;
+/* Accent Button (For Login/Logout) */
+.cyber-navbar ul li .cyber-btn-accent {
+  border-color: var(--neon-magenta);
+  color: var(--neon-magenta);
+  box-shadow: inset 0 0 5px rgba(255, 0, 60, 0.2);
 }
+
+.cyber-navbar ul li .cyber-btn-accent:hover {
+  background: var(--neon-magenta);
+  color: #fff;
+  box-shadow: 0 0 10px var(--neon-magenta);
+}
+
+/* Remove default button appearance */
+.cyber-navbar ul li .nav-logout {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Terminal style user greeting */
+.cyber-navbar ul li .nav-user {
+  color: #fff;
+  font-weight: 400;
+  padding: 6px 14px;
+  font-size: 14px;
+  text-shadow: 0 0 3px #fff;
+}
+
+.cyber-prompt {
+  color: var(--neon-green, #39ff14);
+  margin-right: 5px;
+}
+
+/* =========================================
+   RESPONSIVE DESIGN 
+   ========================================= */
 
 /* Tablet and smaller screens */
 @media (max-width: 768px) {
-  .navbar {
+  .cyber-navbar {
     flex-wrap: wrap;
     padding: 15px 20px;
-    font-size: 18px;
-    clip-path: none; /* Remove clip-path for better mobile display */
-    position: relative;
   }
 
   .logo {
-    font-size: 36px;
-    text-align: center;
+    font-size: 28px;
     flex: 1;
   }
 
-  /* Show hamburger menu */
   .hamburger {
     display: flex;
     order: 3;
   }
 
-  /* Hide menu by default on mobile */
   .nav-menu {
     flex-direction: column;
     width: 100%;
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease, padding 0.3s ease;
+    transition: max-height 0.3s ease-out;
     order: 4;
-    background-color: #222;
-    padding: 0;
+    background-color: var(--cyber-panel);
+    border-top: 1px solid transparent;
+    /* Prevents border when closed */
   }
 
-  /* Show menu when active */
   .nav-menu.active {
     max-height: 600px;
     padding: 15px 0;
+    border-top: 1px solid var(--neon-cyan);
+    margin-top: 15px;
   }
 
-  .navbar ul li {
-    margin: 8px 0;
-    margin-left: 0;
+  .cyber-navbar ul li {
+    margin: 10px 0;
     width: 100%;
     text-align: center;
   }
 
-  .navbar ul li a,
-  .navbar ul li .nav-logout {
+  .cyber-navbar ul li a,
+  .cyber-navbar ul li .nav-logout {
     display: block;
     width: 100%;
     max-width: 300px;
     margin: 0 auto;
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 12px 20px;
     box-sizing: border-box;
   }
 
-  .navbar ul li .nav-user {
+  .cyber-navbar ul li .nav-user {
     display: block;
     padding: 10px;
-    font-size: 16px;
     text-align: center;
   }
 }
 
 /* Mobile phones */
 @media (max-width: 480px) {
-  .navbar {
+  .cyber-navbar {
     padding: 12px 15px;
-    font-size: 16px;
-    border-width: 3px;
-    box-shadow: 3px 3px 0 #ff00ff;
   }
 
   .logo {
-    font-size: 28px;
+    font-size: 24px;
   }
 
   .hamburger span {
@@ -256,32 +403,9 @@
     height: 3px;
   }
 
-  .nav-menu.active {
-    max-height: 500px;
-    padding: 10px 0;
-  }
-
-  .navbar ul li {
-    margin: 6px 0;
-  }
-
-  .navbar ul li a,
-  .navbar ul li .nav-logout {
+  .cyber-navbar ul li a,
+  .cyber-navbar ul li .nav-logout {
     max-width: 250px;
-    padding: 8px 16px;
     font-size: 14px;
-    border-width: 2px;
-    box-shadow: 2px 2px 0 #00ffff;
-  }
-
-  .navbar ul li a:hover,
-  .navbar ul li .nav-logout:hover {
-    box-shadow: 2px 2px 0 #ff00ff;
-    transform: translate(-1px, -1px);
-  }
-
-  .navbar ul li .nav-user {
-    font-size: 14px;
-    padding: 8px;
   }
 }

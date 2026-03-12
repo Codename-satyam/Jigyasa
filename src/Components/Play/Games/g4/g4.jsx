@@ -117,7 +117,7 @@ function MathGame() {
 
     if (timer <= 0) {
       setFeedback("wrong");
-      setResult("⏰ Time's up!");
+      setResult("SYSTEM TIMEOUT!");
       TIMEOUT_SOUND.play();
       setTimeout(() => generateEquation(questionCount), 1200);
       return;
@@ -156,11 +156,11 @@ function MathGame() {
     setSelectedValue(equation);
     setFeedback(isCorrect ? "correct" : "wrong");
     if (isCorrect) {
-      setResult("✅ Correct!");
+      setResult("MATCH CONFIRMED");
       setScore(prev => prev + 1);
       CORRECT_SOUND.play();
     } else {
-      setResult("❌ Wrong!");
+      setResult("ERROR: INVALID");
       WRONG_SOUND.play();
     }
 
@@ -176,19 +176,26 @@ function MathGame() {
   };
 
   return (
-    <div className="math-game-page">
-      <ThreeDBackground />
-      <div className="game-container">
+    <div className="math-game-page crt-screen">
+      <div className="bg-3d-layer">
+        <ThreeDBackground />
+      </div>
+
+      <div className="game-container retro-panel">
         <div className="game-header">
-          <h2>Find the Equation!</h2>
+          <h2 className="pixel-title-small blue-text">CRACK THE CODE</h2>
           <div className="game-stats">
-            <span className="question-counter">Question {questionCount}/{MAX_QUESTIONS}</span>
-            <span className={`timer ${timer <= 5 ? 'timer-warning' : ''}`}>⏱️ {timer}s</span>
+            <span className="question-counter green-text">LVL {questionCount}/{MAX_QUESTIONS}</span>
+            <span className={`timer ${timer <= 5 ? 'timer-warning' : 'gold-text'}`}>T-{timer}s</span>
           </div>
         </div>
-        <h1>{targetNumber}</h1>
+        
+        <div className="target-display">
+          <span className="target-label">TARGET VALUE:</span>
+          <h1 className="target-number">{targetNumber}</h1>
+        </div>
 
-        <div className="options">
+        <div className="options-grid">
           {options.map((opt, i) => {
             const isSelected = selectedValue === opt;
             const stateClass = isSelected && feedback ? feedback : "";
@@ -196,9 +203,10 @@ function MathGame() {
             return (
               <button
                 key={i}
-                className={`option-btn ${stateClass}`.trim()}
+                className={`pixel-btn option-btn ${stateClass}`.trim()}
                 onClick={() => handleClick(opt)}
                 type="button"
+                disabled={feedback !== null}
               >
                 {opt}
               </button>
@@ -206,25 +214,32 @@ function MathGame() {
           })}
         </div>
 
-        <p className="result">{result}</p>
+        <div className="result-container">
+          <p className={`result-text ${feedback === 'correct' ? 'green-text' : feedback === 'wrong' ? 'red-text blink' : ''}`}>
+            {result || "AWAITING INPUT..."}
+          </p>
+        </div>
       </div>
 
       {gameOver && (
         <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>🎉 Game Over!</h2>
+          <div className="modal-content retro-panel">
+            <h2 className="pixel-title gold-text blink mb-2">MISSION ACCOMPLISHED</h2>
+            
             <div className="score-display">
-              <p className="final-score">{score}/{MAX_QUESTIONS}</p>
-              <p className="score-label">Correct Answers</p>
+              <p className="score-label blue-text">FINAL SCORE</p>
+              <p className="final-score green-text">{score} / {MAX_QUESTIONS}</p>
             </div>
-            <div className="score-message">
-              {score === MAX_QUESTIONS && <p>🌟 Perfect Score! Amazing!</p>}
-              {score >= 7 && score < MAX_QUESTIONS && <p>🎯 Great Job!</p>}
-              {score >= 5 && score < 7 && <p>👍 Good Effort!</p>}
-              {score < 5 && <p>💪 Keep Practicing!</p>}
+            
+            <div className="score-message mb-4">
+              {score === MAX_QUESTIONS && <p className="gold-text">S-RANK: PERFECT RUN!</p>}
+              {score >= 7 && score < MAX_QUESTIONS && <p className="green-text">A-RANK: EXCELLENT WORK!</p>}
+              {score >= 5 && score < 7 && <p className="blue-text">B-RANK: OPERATION SUCCESS.</p>}
+              {score < 5 && <p className="red-text">C-RANK: TRAINING REQUIRED.</p>}
             </div>
-            <button className="restart-btn" onClick={restartGame}>
-              Play Again
+            
+            <button className="pixel-btn restart-btn" onClick={restartGame}>
+              [ INITIALIZE RETRY ]
             </button>
           </div>
         </div>
