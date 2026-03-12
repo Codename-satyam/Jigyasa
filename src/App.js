@@ -1,82 +1,74 @@
+import React, { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
-import Settings from "./Components/Settings/Settings.jsx";
 
-//Pages
-import Landing from "./Components/LandingPage/Landing.jsx";
-import HomePage from "./Components/HomePage/Page1/HomePage.jsx";
+// Eagerly loaded (used across many routes)
 import Navbar from "./Components/Navbar/Navbar.jsx";
-import Page2 from "./Components/HomePage/Page2/Page2.jsx";
-import Page3 from "./Components/HomePage/Page3/Page3.jsx";
-import Page4 from "./Components/HomePage/Page4/Page4.jsx";
-import Page5 from "./Components/HomePage/Page5/Page5.jsx";
-import Page6 from "./Components/HomePage/Page6/Page6.jsx";
-import Footer from "./Components/HomePage/Footer/Footer.jsx";
-import Contact from "./Components/ContactUs/Contact.jsx";
-import About from "./Components/About/About.jsx";
-import Dashboard from "./Components/Dashboard/Dashboard.jsx";
-import TeacherDashboard from "./Components/Dashboard/TeacherDashboard.jsx";
-import CreateQuiz from "./Components/Dashboard/CreateQuiz.jsx";
-import Admin from "./Components/Dashboard/Admin.jsx";
-//Pages
-
-
-//The page is responsible for routing the Quiz, Games and Courses
-import PlayLanding from "./Components/Play/PlayLanding/PlayLanding.jsx";
-
-
-
-//Login and Register
-import Login from "./Components/Login/Login.jsx";
-import Register from "./Components/Login/Register.jsx";
-import AdminLogin from "./Components/Login/AdminLogin.jsx";
-import BlockedUser from "./Components/Login/BlockedUser.jsx";
+import PageTransition from "./Components/PageTransition.jsx";
+import LoadingPage from "./Components/LoadingPage/LoadingPage.jsx";
 import ProtectedRoute from "./Components/Auth/ProtectedRoute.jsx";
 import RoleProtectedRoute from "./Components/Auth/RoleProtectedRoute.jsx";
 import AdminProtectedRoute from "./Components/Auth/AdminProtectedRoute.jsx";
-//Login and Register
 
-import Notes from "./Components/Play/Notes/Notes.jsx";
+// Lazy loaded pages
+const Settings = lazy(() => import("./Components/Settings/Settings.jsx"));
+const Landing = lazy(() => import("./Components/LandingPage/Landing.jsx"));
+const HomePage = lazy(() => import("./Components/HomePage/Page1/HomePage.jsx"));
+const Page2 = lazy(() => import("./Components/HomePage/Page2/Page2.jsx"));
+const Page3 = lazy(() => import("./Components/HomePage/Page3/Page3.jsx"));
+const Page4 = lazy(() => import("./Components/HomePage/Page4/Page4.jsx"));
+const Page5 = lazy(() => import("./Components/HomePage/Page5/Page5.jsx"));
+const Page6 = lazy(() => import("./Components/HomePage/Page6/Page6.jsx"));
+const Footer = lazy(() => import("./Components/HomePage/Footer/Footer.jsx"));
+const Contact = lazy(() => import("./Components/ContactUs/Contact.jsx"));
+const About = lazy(() => import("./Components/About/About.jsx"));
+const Dashboard = lazy(() => import("./Components/Dashboard/Dashboard.jsx"));
+const TeacherDashboard = lazy(() => import("./Components/Dashboard/TeacherDashboard.jsx"));
+const CreateQuiz = lazy(() => import("./Components/Dashboard/CreateQuiz.jsx"));
+const Admin = lazy(() => import("./Components/Dashboard/Admin.jsx"));
 
-//Quiz
-import QuizPage from "./Components/Play/QuizPage/QuizPage.jsx";
-import SelectQuiz from "./Components/Play/QuizPage/SelectQuiz.jsx";
-//Quiz
+// Play
+const PlayLanding = lazy(() => import("./Components/Play/PlayLanding/PlayLanding.jsx"));
 
-//Games
-import Games from "./Components/Play/Games/Games.jsx";
-import MemoryGame from "./Components/Play/Games/g1/game1.jsx";
-import Guessgame from "./Components/Play/Games/g2/g2.jsx";
-import Monumentgame from "./Components/Play/Games/g3/g3.jsx";
-import MathGame from "./Components/Play/Games/g4/g4.jsx";
-import Game2048 from "./Components/Play/Games/g5/g5.jsx";
-import Game6 from "./Components/Play/Games/g6/g6.jsx";
-//Games
+// Login and Register
+const Login = lazy(() => import("./Components/Login/Login.jsx"));
+const Register = lazy(() => import("./Components/Login/Register.jsx"));
+const AdminLogin = lazy(() => import("./Components/Login/AdminLogin.jsx"));
+const BlockedUser = lazy(() => import("./Components/Login/BlockedUser.jsx"));
 
+const Notes = lazy(() => import("./Components/Play/Notes/Notes.jsx"));
 
-//Videos
-import SubjectSelector from "./Components/Play/Videos/Selector/SubjectCards.jsx";
-import TopicSelector from "./Components/Play/Videos/Selector/TopicSelector.jsx";
-import VideoPlayer from "./Components/Play/Videos/VideoPlayer.jsx";
-import Courses from "./Components/Play/Courses/Courses.jsx";
-//Videos
+// Quiz
+const QuizPage = lazy(() => import("./Components/Play/QuizPage/QuizPage.jsx"));
+const SelectQuiz = lazy(() => import("./Components/Play/QuizPage/SelectQuiz.jsx"));
 
-//leaderboard
-import LeaderBoard from "./Components/LeaderBoard/LeaderBoard.jsx";
-// import ThreeScene from "./Components/ThreeScene.jsx";
+// Games
+const Games = lazy(() => import("./Components/Play/Games/Games.jsx"));
+const MemoryGame = lazy(() => import("./Components/Play/Games/g1/game1.jsx"));
+const Guessgame = lazy(() => import("./Components/Play/Games/g2/g2.jsx"));
+const Monumentgame = lazy(() => import("./Components/Play/Games/g3/g3.jsx"));
+const MathGame = lazy(() => import("./Components/Play/Games/g4/g4.jsx"));
+const Game2048 = lazy(() => import("./Components/Play/Games/g5/g5.jsx"));
+const Game6 = lazy(() => import("./Components/Play/Games/g6/g6.jsx"));
 
+// Videos
+const SubjectSelector = lazy(() => import("./Components/Play/Videos/Selector/SubjectCards.jsx"));
+const TopicSelector = lazy(() => import("./Components/Play/Videos/Selector/TopicSelector.jsx"));
+const VideoPlayer = lazy(() => import("./Components/Play/Videos/VideoPlayer.jsx"));
+const Courses = lazy(() => import("./Components/Play/Courses/Courses.jsx"));
 
-//transitions
-import PageTransition from "./Components/PageTransition.jsx";
+// Leaderboard
+const LeaderBoard = lazy(() => import("./Components/LeaderBoard/LeaderBoard.jsx"));
 
-//404
-import NotFound from "./Components/Error/Error404.jsx";
+// 404
+const NotFound = lazy(() => import("./Components/Error/Error404.jsx"));
 
 function AnimatedRoutes() {
   const location = useLocation();
 
   return (
     <AnimatePresence mode="wait">
+      <Suspense fallback={<LoadingPage />}>
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
         <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
@@ -308,7 +300,9 @@ function AnimatedRoutes() {
               <About />
             </PageTransition>
           }
-        />        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />      </Routes>
+        />        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+      </Routes>
+      </Suspense>
     </AnimatePresence>
   );
 }

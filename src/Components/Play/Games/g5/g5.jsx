@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import "./g5.css";
 import gamesTracker from "../../../../api/gamesTracker";
 import auth from "../../../../api/auth";
@@ -39,14 +39,11 @@ const slide = (row) => {
 };
 
 const canMove = (board) => {
-    // Check if any empty cell exists
     for (let r = 0; r < SIZE; r++) {
         for (let c = 0; c < SIZE; c++) {
             if (board[r][c] === 0) return true;
         }
     }
-    
-    // Check if any moves are possible
     for (let r = 0; r < SIZE; r++) {
         for (let c = 0; c < SIZE; c++) {
             const current = board[r][c];
@@ -62,6 +59,10 @@ function Game2048() {
     const [score, setScore] = useState(0);
     const [gameOver, setGameOver] = useState(false);
     const [highestTile, setHighestTile] = useState(0);
+
+    // Refs for Swipe Logic
+    const touchStartX = useRef(0);
+    const touchStartY = useRef(0);
 
     const initGame = () => {
         let newBoard = createEmptyBoard();
@@ -141,92 +142,32 @@ function Game2048() {
             setBoard(newBoard);
             setScore((prevScore) => prevScore + totalScoreGain);
             
-            // Update highest tile
             const maxTile = Math.max(...newBoard.flat());
             setHighestTile(maxTile);
             
-            // Check if game is over
             if (!canMove(newBoard)) {
                 setGameOver(true);
             }
         }
     }, [board, gameOver]);
 
+    // Keyboard Listeners
     useEffect(() => {
         const handleKey = (e) => {
-            if (e.key === "ArrowLeft") {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
                 e.preventDefault();
-                handleMove("left");
             }
-            if (e.key === "ArrowRight") {
-                e.preventDefault();
-                handleMove("right");
-            }
-            if (e.key === "ArrowUp") {
-                e.preventDefault();
-                handleMove("up");
-            }
-            if (e.key === "ArrowDown") {
-                e.preventDefault();
-                handleMove("down");
-            }
+            if (e.key === "ArrowLeft") handleMove("left");
+            if (e.key === "ArrowRight") handleMove("right");
+            if (e.key === "ArrowUp") handleMove("up");
+            if (e.key === "ArrowDown") handleMove("down");
         };
         
         window.addEventListener("keydown", handleKey);
         return () => window.removeEventListener("keydown", handleKey);
     }, [handleMove]);
 
-    // Swipe Event Listeners
-    useEffect(() => {
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchEndX = 0;
-        let touchEndY = 0;
-
-        const handleTouchStart = (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-        };
-
-        const handleTouchEnd = (e) => {
-            touchEndX = e.changedTouches[0].screenX;
-            touchEndY = e.changedTouches[0].screenY;
-
-            const deltaX = touchEndX - touchStartX;
-            const deltaY = touchEndY - touchStartY;
-            const minSwipeDistance = 25;
-
-            // Detect horizontal swipes
-            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
-                if (deltaX > 0) {
-                    handleMove("right");
-                } else {
-                    handleMove("left");
-                }
-            }
-            // Detect vertical swipes
-            else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > minSwipeDistance) {
-                if (deltaY > 0) {
-                    handleMove("down");
-                } else {
-                    handleMove("up");
-                }
-            }
-        };
-
-        const gameBoard = document.querySelector(".board");
-        if (gameBoard) {
-            gameBoard.addEventListener("touchstart", handleTouchStart, false);
-            gameBoard.addEventListener("touchend", handleTouchEnd, false);
-
-            return () => {
-                gameBoard.removeEventListener("touchstart", handleTouchStart);
-                gameBoard.removeEventListener("touchend", handleTouchEnd);
-            };
-        }
-    }, [handleMove]);
-
-    // Record game when it's over
+    // Track game over for backend
     useEffect(() => {
         if (gameOver) {
             const user = auth.getCurrentUser();
@@ -242,72 +183,115 @@ function Game2048() {
         }
     }, [gameOver, score]);
 
+    // --- NEW ROBUST SWIPE HANDLERS ---
+    const handleTouchStart = (e) => {
+        touchStartX.current = e.touches[0].clientX;
+        touchStartY.current = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e) => {
+        if (gameOver) return;
+
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+
+        const deltaX = touchEndX - touchStartX.current;
+        const deltaY = touchEndY - touchStartY.current;
+        const minSwipeDistance = 30;
+
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            // Horizontal Swipe
+            if (Math.abs(deltaX) > minSwipeDistance) {
+                if (deltaX > 0) handleMove("right");
+                else handleMove("left");
+            }
+        } else {
+            // Vertical Swipe
+            if (Math.abs(deltaY) > minSwipeDistance) {
+                if (deltaY > 0) handleMove("down");
+                else handleMove("up");
+            }
+        }
+    };
 
     return (
-        <div className="game-container">
-            <div className="game-main-wrapper">
-                {/* Left side - Game Board */}
-                <div className="game-left-section">
-                    <div className="board">
+        <div className="game-2048-page crt-screen">
+            <div className="arcade-cabinet-2048 retro-panel">
+                
+                <div className="cabinet-header">
+                    <div className="header-titles">
+                        <h2 className="pixel-subtitle blue-text">DATA MERGE PROTOCOL</h2>
+                        <h1 className="pixel-title gold-text">SYSTEM 2048</h1>
+                    </div>
+                    
+                    <div className="header-stats">
+                        <div className="stat-block border-green">
+                            <span className="stat-label">EXP SCORE</span>
+                            <span className="stat-value">{score}</span>
+                        </div>
+                        <div className="stat-block border-purple">
+                            <span className="stat-label">MAX TILE</span>
+                            <span className="stat-value">{highestTile}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="game-play-area">
+                    
+                    {/* SWIPE EVENTS ATTACHED DIRECTLY TO THE BOARD */}
+                    <div 
+                        className="cyber-grid-board"
+                        onTouchStart={handleTouchStart}
+                        onTouchEnd={handleTouchEnd}
+                    >
                         {board.map((row, r) =>
                             row.map((cell, c) => (
-                                <div key={`${r}-${c}`} className={`cell value-${cell}`}>
-                                    <span className="cell-content">{cell !== 0 ? cell : ""}</span>
+                                <div key={`${r}-${c}`} className={`grid-cell tile-${cell}`}>
+                                    <span className="cell-number">{cell !== 0 ? cell : ""}</span>
                                 </div>
                             ))
                         )}
                     </div>
-                </div>
 
-                {/* Right side - Content */}
-                <div className="game-right-section">
-                    <div className="content-wrapper">
-                        <h1 className="game-title">2048 Game</h1>
+                    <div className="cabinet-sidebar">
+                        <div className="rpg-dialogue-box instructions-box">
+                            <h3 className="green-text mb-2">CONTROLS</h3>
+                            <p>▶ Use ARROW KEYS or SWIPE to move tiles.</p>
+                            <p>▶ Merge identical data blocks to upgrade them.</p>
+                            <p>▶ Reach tile 2048 to master the system.</p>
+                        </div>
                         
                         <button 
-                            className="restart-btn" 
+                            className="pixel-btn btn-blue pulse-btn w-100 mt-4" 
                             onClick={initGame}
                         >
-                            {gameOver ? "New Game" : "Restart"}
+                            [ {gameOver ? "REBOOT SYSTEM" : "FORCE RESTART"} ]
                         </button>
-
-                        <div className="stat-box large">
-                            <div className="g5-stat-label">Current Score</div>
-                            <div className="stat-value-large">{score}</div>
-                        </div>
-
-                        <div className="stat-box">
-                            <div className="g5-stat-label">Highest Tile</div>
-                            <div className="stat-value-large">{highestTile}</div>
-                        </div>
-
-                        <div className="controls-info">
-                            <p>⬆️ ⬇️ ⬅️ ➡️</p>
-                            <p>Use arrow keys or swipe</p>
-                        </div>
                     </div>
+
                 </div>
+
             </div>
 
             {gameOver && (
-                <div className="game-over-modal">
-                    <div className="modal-content">
-                        <h2>Game Over!</h2>
-                        <div className="final-stats">
-                            <div className="final-stat">
-                                <span className="label">Final Score:</span>
-                                <span className="value">{score}</span>
+                <div className="modal-overlay">
+                    <div className="in-screen-modal-content border-red text-center">
+                        <h2 className="pixel-title red-text blink mb-2">SYSTEM HALTED</h2>
+                        <p className="pixel-subtitle mb-4">No Valid Moves Remain</p>
+                        
+                        <div className="final-stats-box mb-4">
+                            <div className="stat-row">
+                                <span className="blue-text">FINAL EXP:</span>
+                                <span className="gold-text huge-text">{score}</span>
                             </div>
-                            <div className="final-stat">
-                                <span className="label">Highest Tile:</span>
-                                <span className="value">{highestTile}</span>
+                            <div className="stat-row mt-2">
+                                <span className="blue-text">PEAK DATA:</span>
+                                <span className="green-text huge-text">{highestTile}</span>
                             </div>
                         </div>
-                        <button 
-                            className="modal-btn" 
-                            onClick={initGame}
-                        >
-                            Play Again
+                        
+                        <button className="pixel-btn btn-green mx-auto pulse-btn" onClick={initGame}>
+                            [ INITIALIZE NEW RUN ]
                         </button>
                     </div>
                 </div>

@@ -1,0 +1,257 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.home-page {
+  font-family: 'Press Start 2P', monospace;
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 2rem;
+  box-sizing: border-box;
+  overflow: hidden; /* Keeps the crazy animations contained */
+}
+
+/* Background Video Setup */
+.background-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.video-scan-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(5, 5, 15, 0.85); /* Deep dark overlay so neon pops */
+  z-index: 1;
+}
+
+/* Main Container */
+.hero-container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* =========================================
+   WILD CONTINUOUS HERO TITLE
+   ========================================= */
+.hero-title-wrapper {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.system-boot {
+  font-size: 10px;
+  letter-spacing: 2px;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.wild-hero-title {
+  font-size: 72px; /* Huge text! */
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 30px;
+  /* Add perspective for the 3D flip */
+  perspective: 1000px; 
+}
+
+.hero-subtitle {
+  font-size: 14px;
+  color: #39ff14;
+  text-shadow: 3px 3px 0 #000;
+  margin-top: 20px;
+  letter-spacing: 1px;
+}
+
+/* Continuous Chaos Assignments */
+.hero-letter {
+  display: inline-block;
+  transform-origin: center center;
+}
+
+.hero-letter:nth-child(1) { animation: hero-jump 0.4s ease-in-out infinite alternate; color: #ff003c; }
+.hero-letter:nth-child(2) { animation: hero-tumble 1.5s linear infinite; color: #00f0ff; }
+.hero-letter:nth-child(3) { animation: hero-jumble 0.3s steps(3) infinite; color: #39ff14; }
+.hero-letter:nth-child(4) { animation: hero-flip 2s ease-in-out infinite; color: #ffd700; }
+.hero-letter:nth-child(5) { animation: hero-shake 0.2s linear infinite; color: #b000ff; }
+.hero-letter:nth-child(6) { animation: hero-spin-jump 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; color: #00f0ff; }
+.hero-letter:nth-child(7) { animation: hero-squish 0.5s ease-in-out infinite alternate; color: #ff003c; }
+
+/* The Hero Keyframes */
+@keyframes hero-jump {
+  0% { transform: translateY(0) rotate(0deg) scale(1); }
+  100% { transform: translateY(-25px) rotate(15deg) scale(1.2); text-shadow: 0 10px 20px #ff003c; }
+}
+@keyframes hero-tumble {
+  0% { transform: translateY(0) rotate(0deg); text-shadow: 0 0 10px #00f0ff; }
+  50% { transform: translateY(15px) rotate(180deg); }
+  100% { transform: translateY(0) rotate(360deg); text-shadow: 0 0 10px #00f0ff; }
+}
+@keyframes hero-jumble {
+  0% { transform: translate(0, 0) skew(0deg); }
+  33% { transform: translate(-5px, 5px) skew(30deg); text-shadow: -4px 0 #fff; }
+  66% { transform: translate(5px, -5px) skew(-30deg); text-shadow: 4px 0 #39ff14; }
+  100% { transform: translate(0, 0) skew(0deg); }
+}
+@keyframes hero-flip {
+  0% { transform: rotateY(0deg); }
+  25% { transform: rotateY(180deg) scale(1.3); text-shadow: 0 0 30px #ffd700; }
+  50% { transform: rotateY(360deg); }
+  100% { transform: rotateY(360deg); } /* Pause before flipping again */
+}
+@keyframes hero-shake {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  25% { transform: translateX(-6px) translateY(-4px) rotate(-15deg); text-shadow: 3px 3px 0 #00f0ff; }
+  75% { transform: translateX(6px) translateY(4px) rotate(15deg); text-shadow: -3px -3px 0 #ff003c; }
+}
+@keyframes hero-spin-jump {
+  0% { transform: translateY(0) rotateZ(0deg); }
+  40% { transform: translateY(-40px) rotateZ(-180deg); text-shadow: 0 0 25px #00f0ff; }
+  80% { transform: translateY(0) rotateZ(-360deg); }
+  100% { transform: translateY(0) rotateZ(-360deg); }
+}
+@keyframes hero-squish {
+  0% { transform: scale(1, 1) translateY(0); }
+  100% { transform: scale(1.8, 0.3) translateY(20px); text-shadow: 0 -15px 15px #ff003c; }
+}
+
+/* =========================================
+   ARCADE PANELS
+   ========================================= */
+.arcade-panels-wrapper {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.retro-panel {
+  background-color: rgba(5, 5, 10, 0.9);
+  border: 4px solid #fff;
+  width: 100%;
+  flex: 1;
+  min-width: 300px;
+  box-shadow: 10px 10px 0px 0px rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+}
+
+.border-magenta { border-color: #ff003c; }
+.border-cyan { border-color: #00f0ff; }
+
+.panel-header {
+  padding: 15px;
+  font-size: 10px;
+  border-bottom: 4px solid #fff;
+}
+.bg-magenta { background-color: #ff003c; color: #000; border-bottom-color: #ff003c; }
+.bg-cyan { background-color: #00f0ff; color: #000; border-bottom-color: #00f0ff; }
+.text-black { color: #000; }
+
+.panel-body {
+  padding: 25px;
+}
+
+.panel-body p {
+  font-size: 11px;
+  line-height: 1.8;
+  color: #fff;
+  margin: 0;
+}
+
+/* Hacker List */
+.hacker-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.hacker-list li {
+  font-size: 11px;
+  color: #fff;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+.hacker-list li:last-child { margin-bottom: 0; }
+
+/* Theme Colors */
+.gold-text { color: #ffd700; }
+.blue-text { color: #00f0ff; }
+.cyan-text { color: #00ffff; }
+
+/* =========================================
+   CALL TO ACTION & BUTTONS
+   ========================================= */
+.cta-section {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.insert-coin {
+  font-size: 16px;
+  margin-bottom: 30px;
+  text-shadow: 3px 3px 0 #000;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.pixel-btn {
+  font-family: inherit;
+  font-size: 12px;
+  padding: 20px 30px;
+  cursor: pointer;
+  border: 4px solid #fff;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 6px 6px 0 0 #000;
+  transition: transform 0.1s, box-shadow 0.1s;
+  min-width: 250px;
+  display: inline-block;
+}
+
+.pixel-btn:active {
+  transform: translateY(6px);
+  box-shadow: 0px 0px 0 0 transparent;
+}
+
+.btn-green { background-color: #2e8b57; border-color: #39ff14; color: #000; }
+.btn-purple { background-color: #8a2be2; border-color: #b000ff; }
+
+/* Animations */
+.blink-fast { animation: blink 0.8s step-end infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+.pulse-btn { animation: pulse 2s infinite; }
+@keyframes pulse {
+  0% { box-shadow: 6px 6px 0 0 #000, 0 0 0 0 rgba(57, 255, 20, 0.7); }
+  70% { box-shadow: 6px 6px 0 0 #000, 0 0 0 15px rgba(57, 255, 20, 0); }
+  100% { box-shadow: 6px 6px 0 0 #000, 0 0 0 0 rgba(57, 255, 20, 0); }
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .wild-hero-title { font-size: 42px; gap: 2px; }
+  .arcade-panels-wrapper { flex-direction: column; }
+  .action-buttons { flex-direction: column; align-items: center; }
+  .pixel-btn { width: 100%; max-width: 350px; }
+}
