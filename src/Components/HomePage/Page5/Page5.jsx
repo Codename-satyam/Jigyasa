@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import './Page5.css';
 
-// Assuming you have these wrappers from your previous setup
+// Component imports
 import PageTransition from '../../PageTransition.jsx';
 import FadeInWhenVisible from '../../FadeInWhenVisible.jsx';
 
-// MOCK DATA: Replace this with an actual API call to your backend
+// MOCK DATA
 const initialReviews = [
   {
     id: 1,
@@ -42,32 +42,12 @@ const initialReviews = [
 ];
 
 function Reviews() {
-  const [reviews, setReviews] = useState(initialReviews);
+  const [reviews] = useState(initialReviews);
   const [filter, setFilter] = useState('all');
-  const [newReviewText, setNewReviewText] = useState('');
-  const [newReviewRating, setNewReviewRating] = useState(5);
 
   const filteredReviews = reviews.filter(
     (review) => filter === 'all' || review.role === filter
   );
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!newReviewText.trim()) return;
-
-    const newReview = {
-      id: Date.now(),
-      role: 'student', // Defaulting to student for the demo
-      name: 'NewPlayer',
-      rating: newReviewRating,
-      text: newReviewText,
-      date: new Date().toISOString().split('T')[0]
-    };
-
-    setReviews([newReview, ...reviews]);
-    setNewReviewText('');
-    setNewReviewRating(5);
-  };
 
   const renderStars = (rating) => {
     return '★'.repeat(rating) + '☆'.repeat(5 - rating);
@@ -77,8 +57,8 @@ function Reviews() {
     <PageTransition>
       <FadeInWhenVisible>
         <div className="reviews-container">
-          <div className="reviews-header">
-            <h1 className="pixel-title gold-text">Tavern Notice Board</h1>
+          <div className="reviews-header text-center">
+            <h1 className="pixel-title gold-text blink-slow">TAVERN NOTICE BOARD</h1>
             <p className="pixel-subtitle">Read tales from fellow adventurers and their guardians.</p>
           </div>
 
@@ -103,65 +83,40 @@ function Reviews() {
             </button>
           </div>
 
-          <div className="reviews-grid">
-            {filteredReviews.map((review) => (
-              <div key={review.id} className="rpg-dialogue-box">
-                <div className="dialogue-header">
-                  <div className="avatar-placeholder">
-                    {review.role === 'student' ? '👾' : '🛡️'}
-                  </div>
-                  <div className="user-info">
-                    <span className="user-name">{review.name}</span>
-                    <span className={`role-badge ${review.role === 'student' ? 'badge-student' : 'badge-parent'}`}>
-                      {review.role === 'student' ? 'Player' : 'Guardian'}
-                    </span>
-                  </div>
-                  <div className="star-rating gold-text">
-                    {renderStars(review.rating)}
-                  </div>
-                </div>
-                <div className="dialogue-body">
-                  <p>"{review.text}"</p>
-                </div>
-                <div className="dialogue-footer">
-                  <small>Logged: {review.date}</small>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="review-submission-area">
-            <h2 className="pixel-title">Pin a New Scroll</h2>
-            <form onSubmit={handleSubmit} className="retro-form">
-              <div className="form-group">
-                <label>Quest Rating:</label>
-                <select 
-                  className="pixel-select" 
-                  value={newReviewRating} 
-                  onChange={(e) => setNewReviewRating(Number(e.target.value))}
+          {/* INFINITE SCROLLING MARQUEE */}
+          <div className="marquee-viewport">
+            <div className="marquee-track">
+              {/* Duplicating the array to create a seamless infinite loop */}
+              {[...filteredReviews, ...filteredReviews].map((review, index) => (
+                <div 
+                  key={`${review.id}-${index}`} 
+                  className={`rpg-dialogue-box float-delay-${index % 4}`}
                 >
-                  <option value={5}>★★★★★ - Legendary</option>
-                  <option value={4}>★★★★☆ - Epic</option>
-                  <option value={3}>★★★☆☆ - Rare</option>
-                  <option value={2}>★★☆☆☆ - Uncommon</option>
-                  <option value={1}>★☆☆☆☆ - Needs Potion</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <textarea
-                  className="pixel-textarea"
-                  placeholder="Inscribe your tale here..."
-                  value={newReviewText}
-                  onChange={(e) => setNewReviewText(e.target.value)}
-                  rows={4}
-                />
-              </div>
-              <button type="submit" className="pixel-btn btn-orange">
-                Post Scroll
-              </button>
-            </form>
+                  <div className="dialogue-header">
+                    <div className={`avatar-placeholder ${review.role === 'student' ? 'border-green' : 'border-purple'}`}>
+                      {review.role === 'student' ? '👾' : '🛡️'}
+                    </div>
+                    <div className="user-info">
+                      <span className="user-name">{review.name}</span>
+                      <span className={`role-badge ${review.role === 'student' ? 'badge-student' : 'badge-parent'}`}>
+                        {review.role === 'student' ? 'Player' : 'Guardian'}
+                      </span>
+                    </div>
+                    <div className="star-rating gold-text">
+                      {renderStars(review.rating)}
+                    </div>
+                  </div>
+                  <div className="dialogue-body">
+                    <p>"{review.text}"</p>
+                  </div>
+                  <div className="dialogue-footer">
+                    <small className="blue-text">Logged: {review.date}</small>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-
+          
         </div>
       </FadeInWhenVisible>
     </PageTransition>

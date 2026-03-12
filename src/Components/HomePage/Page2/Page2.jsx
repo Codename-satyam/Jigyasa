@@ -2,59 +2,77 @@ import "./Page2.css";
 
 function Page2() {
   return (
-    <div className="page-2">
-      <div className="p2">
-        <div className="start1">
-          <h2>
-            Learn what your wards<span><br />would gain from us</span>
+    <div className="page-2-container">
+      <div className="p2-content">
+        
+        {/* Header Section */}
+        <div className="start1 text-center mb-4">
+          <h2 className="pixel-title gold-text">
+            CHOOSE YOUR PATH
+            <br />
+            <span className="pixel-subtitle-large blue-text">What your young heroes will gain</span>
           </h2>
-          <p>
-            This educational / learning activity is designed to develop mental
-            aptitude in kids. By engaging kids in brain teasers, our mind games
-            help enhance various critical skill-sets like critical thinking,
-            problem-solving, and creativity.
-          </p>
-        </div>
-
-        <div className="boxes">
-          <div className="box">
-            <h3>The Programmer</h3>
-            <ul>
-              <li>Personalized <br /> Worksheets</li>
-              <li>Daily Brain Workout</li>
-              <li>Gamified Format</li>
-              <li>Available offline</li>
-              <li>Fun & Engaging</li>
-              <li>Track Improvement</li>
-            </ul>
-          </div>
-
-          <div className="box">
-            <h3>The Fixer</h3>
-            <ul>
-              <li>International Exams <br />taken by 10 lakh+ <br /> kids</li>
-              <li>No maths, no science. <br /> Only focus on mental <br />ability</li>
-              <li>Certificates</li>
-            </ul>
-          </div>
-
-          <div className="box">
-            <h3>The Thinker</h3>
-            <ul>
-              <li>Encouraging the <br />creativity of kids</li>
-              <li>Personality<br />Enhancement prog.</li>
-              <li>Dance and music <br />classes</li>
-              <li>Art and craft <br />classes</li>
-            </ul>
+          
+          <div className="rpg-dialogue-box intro-text-box">
+            <p>
+              This training ground is designed to develop mental aptitude in young adventurers. 
+              By engaging in brain-teasing quests, our mind games help enhance critical skill-sets 
+              like critical thinking, problem-solving, and boundless creativity.
+            </p>
           </div>
         </div>
 
-        <div className="buttons">
-          <a href="/play" className="button2">Try Yourself</a>
-          <a href="/contact" className="button3">Contact Us</a>
+        {/* Class Selection / Benefits Boxes */}
+        <div className="class-boxes-grid">
+          
+          {/* Class 1: The Programmer */}
+          <div className="retro-panel class-card">
+            <div className="class-icon-wrapper blue-bg">
+              <span className="class-icon">💻</span>
+            </div>
+            <h3 className="pixel-title-small blue-text">The Programmer</h3>
+            <ul className="pixel-list">
+              <li><span>&gt;</span> Personalized Worksheets</li>
+              <li><span>&gt;</span> Daily Brain Workout</li>
+              <li><span>&gt;</span> Gamified Format</li>
+              <li><span>&gt;</span> Available Offline</li>
+              <li><span>&gt;</span> Fun & Engaging</li>
+              <li><span>&gt;</span> Track Improvement</li>
+            </ul>
+          </div>
+
+          {/* Class 2: The Fixer */}
+          <div className="retro-panel class-card">
+            <div className="class-icon-wrapper green-bg">
+              <span className="class-icon">🔧</span>
+            </div>
+            <h3 className="pixel-title-small green-text">The Fixer</h3>
+            <ul className="pixel-list">
+              <li><span>&gt;</span> Global Arena Exams (1M+ Players)</li>
+              <li><span>&gt;</span> Pure Mental Ability (No Math/Science)</li>
+              <li><span>&gt;</span> Legendary Certificates</li>
+            </ul>
+          </div>
+
+          {/* Class 3: The Thinker */}
+          <div className="retro-panel class-card">
+            <div className="class-icon-wrapper purple-bg">
+              <span className="class-icon">💡</span>
+            </div>
+            <h3 className="pixel-title-small purple-text">The Thinker</h3>
+            <ul className="pixel-list">
+              <li><span>&gt;</span> Creativity Enhancement</li>
+              <li><span>&gt;</span> Personality Level-Up Prog.</li>
+              <li><span>&gt;</span> Bard Skills (Dance & Music)</li>
+              <li><span>&gt;</span> Artisan Skills (Art & Craft)</li>
+            </ul>
+          </div>
+
         </div>
+
       </div>
     </div>
   );
 }
+
 export default Page2;

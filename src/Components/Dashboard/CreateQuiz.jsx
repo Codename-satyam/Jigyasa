@@ -4,6 +4,10 @@ import auth from '../../api/auth';
 import quizManager from '../../api/quizManager';
 import './CreateQuiz.css';
 
+// Component wrappers (assuming you have these available, or remove if not)
+import PageTransition from '../PageTransition.jsx';
+import FadeInWhenVisible from '../FadeInWhenVisible.jsx';
+
 function CreateQuiz() {
   const navigate = useNavigate();
   const current = auth.getCurrentUser();
@@ -21,17 +25,9 @@ function CreateQuiz() {
   // ✅ Conditional render AFTER hooks
   if (!current) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          color: '#fff',
-          flexDirection: 'column'
-        }}
-      >
-        <h1>Please log in first</h1>
+      <div className="unauthorized-screen">
+        <h1 className="pixel-title blink gold-text">[ ERROR ]</h1>
+        <p className="pixel-text">Player not recognized. Please insert coin (log in).</p>
       </div>
     );
   }
@@ -72,7 +68,7 @@ function CreateQuiz() {
     setError(null);
 
     if (!quizTitle.trim()) {
-      setError('Quiz title is required');
+      setError('Quest Name is required!');
       return;
     }
 
@@ -84,7 +80,7 @@ function CreateQuiz() {
     );
 
     if (validQuestions.length === 0) {
-      setError('Please fill in at least one complete question');
+      setError('Please forge at least one complete stage (question).');
       return;
     }
 
@@ -108,7 +104,7 @@ function CreateQuiz() {
       }, 500);
 
     } catch (err) {
-      setError('Error creating quiz: ' + err.message);
+      setError('System Error: ' + err.message);
       setIsPublishing(false);
     }
   };
@@ -117,7 +113,7 @@ function CreateQuiz() {
     setError(null);
 
     if (!quizTitle.trim()) {
-      setError('Quiz title is required');
+      setError('Quest Name is required to save progress!');
       return;
     }
 
@@ -140,173 +136,182 @@ function CreateQuiz() {
       }, 500);
 
     } catch (err) {
-      setError('Error saving draft: ' + err.message);
+      setError('Save Error: ' + err.message);
       setIsPublishing(false);
     }
   };
 
   return (
-    <div className="create-quiz-container">
-      <div className="create-quiz-header">
-        <button
-          onClick={() => navigate('/teacher-dashboard')}
-          className="back-btn"
-        >
-          ← Back
-        </button>
-        <h1>Create New Quiz</h1>
-      </div>
-
-      {error && <div className="error-message">{error}</div>}
-
-      <div className="quiz-form">
-        <div className="form-section">
-          <h2>Quiz Details</h2>
-
-          <div className="form-group">
-            <label>Quiz Title *</label>
-            <input
-              type="text"
-              placeholder="Enter quiz title"
-              value={quizTitle}
-              onChange={(e) => setQuizTitle(e.target.value)}
-              className="form-input"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Description</label>
-            <textarea
-              placeholder="Enter quiz description (optional)"
-              value={quizDescription}
-              onChange={(e) => setQuizDescription(e.target.value)}
-              className="form-textarea"
-              rows="3"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Difficulty Level</label>
-            <select
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value)}
-              className="form-select"
+    <PageTransition>
+      <FadeInWhenVisible>
+        <div className="forge-quest-container">
+          
+          <div className="forge-header">
+            <button
+              onClick={() => navigate('/teacher-dashboard')}
+              className="pixel-btn btn-dark"
             >
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-            </select>
+              [ ESC ] Return to HQ
+            </button>
+            <h1 className="pixel-title gold-text mt-2">FORGE NEW QUEST</h1>
           </div>
-        </div>
 
-        <div className="form-section">
-          <h2>Questions</h2>
+          {error && <div className="pixel-alert blink">{error}</div>}
 
-          {questions.map((question, index) => (
-            <div key={question.id} className="question-card">
-              <div className="question-header">
-                <h3>Question {index + 1}</h3>
-                {questions.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeQuestion(index)}
-                    className="remove-btn"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
+          <div className="retro-panel quest-form">
+            <div className="form-section setup-section">
+              <h2 className="pixel-title-small blue-text">Quest Parameters</h2>
 
-              <div className="form-group">
-                <label>Question Text *</label>
-                <textarea
-                  placeholder="Enter your question"
-                  value={question.question}
-                  onChange={(e) =>
-                    handleQuestionChange(index, 'question', e.target.value)
-                  }
-                  className="form-textarea"
-                  rows="2"
+              <div className="pixel-form-group">
+                <label>Quest Name *</label>
+                <input
+                  type="text"
+                  placeholder="e.g., The Trial of React Components..."
+                  value={quizTitle}
+                  onChange={(e) => setQuizTitle(e.target.value)}
+                  className="pixel-input"
                 />
               </div>
 
-              <div className="options-section">
-                <label>Options *</label>
-                {question.options.map((option, optIndex) => (
-                  <input
-                    key={optIndex}
-                    type="text"
-                    placeholder={`Option ${optIndex + 1}`}
-                    value={option}
-                    onChange={(e) =>
-                      handleQuestionChange(index, `option-${optIndex}`, e.target.value)
-                    }
-                    className="form-input"
-                  />
-                ))}
+              <div className="pixel-form-group">
+                <label>Lore / Briefing (Optional)</label>
+                <textarea
+                  placeholder="Provide context for this adventure..."
+                  value={quizDescription}
+                  onChange={(e) => setQuizDescription(e.target.value)}
+                  className="pixel-textarea"
+                  rows="3"
+                />
               </div>
 
-              <div className="form-group">
-                <label>Correct Answer *</label>
+              <div className="pixel-form-group w-50">
+                <label>Threat Level</label>
                 <select
-                  value={question.correct}
-                  onChange={(e) =>
-                    handleQuestionChange(index, 'correct', e.target.value)
-                  }
-                  className="form-select"
+                  value={difficulty}
+                  onChange={(e) => setDifficulty(e.target.value)}
+                  className="pixel-select"
                 >
-                  <option value="">Select correct answer</option>
-                  {question.options.map((option, optIndex) => (
-                    <option key={optIndex} value={option}>
-                      {option || `Option ${optIndex + 1}`}
-                    </option>
-                  ))}
+                  {/* Keeping underlying values the same so logic doesn't break */}
+                  <option value="easy">Lvl 1 - Novice (Easy)</option>
+                  <option value="medium">Lvl 2 - Adept (Medium)</option>
+                  <option value="hard">Lvl 3 - Expert (Hard)</option>
                 </select>
               </div>
+            </div>
 
-              <div className="form-group">
-                <label>Explanation *</label>
-                <textarea
-                  placeholder="Explain why this answer is correct"
-                  value={question.explanation}
-                  onChange={(e) =>
-                    handleQuestionChange(index, 'explanation', e.target.value)
-                  }
-                  className="form-textarea"
-                  rows="2"
-                />
+            <div className="form-section">
+              <h2 className="pixel-title-small green-text">Encounters (Questions)</h2>
+
+              {questions.map((question, index) => (
+                <div key={question.id} className="pixel-card question-card">
+                  <div className="question-header">
+                    <h3>Stage {index + 1}</h3>
+                    {questions.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeQuestion(index)}
+                        className="pixel-btn-small btn-red"
+                      >
+                        Delete Stage
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="pixel-form-group">
+                    <label>Challenge Description *</label>
+                    <textarea
+                      placeholder="What trial awaits the player?"
+                      value={question.question}
+                      onChange={(e) =>
+                        handleQuestionChange(index, 'question', e.target.value)
+                      }
+                      className="pixel-textarea"
+                      rows="2"
+                    />
+                  </div>
+
+                  <div className="options-grid">
+                    <label className="full-width">Player Choices *</label>
+                    {question.options.map((option, optIndex) => (
+                      <input
+                        key={optIndex}
+                        type="text"
+                        placeholder={`Path ${optIndex + 1}`}
+                        value={option}
+                        onChange={(e) =>
+                          handleQuestionChange(index, `option-${optIndex}`, e.target.value)
+                        }
+                        className="pixel-input option-input"
+                      />
+                    ))}
+                  </div>
+
+                  <div className="pixel-form-group mt-2">
+                    <label className="gold-text">Victory Condition (Correct Path) *</label>
+                    <select
+                      value={question.correct}
+                      onChange={(e) =>
+                        handleQuestionChange(index, 'correct', e.target.value)
+                      }
+                      className="pixel-select border-gold"
+                    >
+                      <option value="">Select the winning path...</option>
+                      {question.options.map((option, optIndex) => (
+                        <option key={optIndex} value={option}>
+                          {option || `Path ${optIndex + 1}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="pixel-form-group">
+                    <label>Wisdom Gained (Explanation) *</label>
+                    <textarea
+                      placeholder="Why is this the correct path?"
+                      value={question.explanation}
+                      onChange={(e) =>
+                        handleQuestionChange(index, 'explanation', e.target.value)
+                      }
+                      className="pixel-textarea border-blue"
+                      rows="2"
+                    />
+                  </div>
+                </div>
+              ))}
+
+              <div className="add-stage-container">
+                <button
+                  type="button"
+                  onClick={addQuestion}
+                  className="pixel-btn btn-purple massive-add-btn"
+                >
+                  + FORGE NEW STAGE
+                </button>
               </div>
             </div>
-          ))}
 
-          <button
-            type="button"
-            onClick={addQuestion}
-            className="add-question-btn"
-          >
-            + Add Question
-          </button>
+            <div className="form-actions retro-footer-panel">
+              <button
+                onClick={handleSaveDraft}
+                disabled={isPublishing}
+                className="pixel-btn btn-dark"
+              >
+                {isPublishing ? 'SAVING DATA...' : 'SAVE SCROLL (DRAFT)'}
+              </button>
+
+              <button
+                onClick={handlePublish}
+                disabled={isPublishing}
+                className="pixel-btn btn-green pulse-btn"
+              >
+                {isPublishing ? 'LAUNCHING...' : '🚀 LAUNCH QUEST'}
+              </button>
+            </div>
+
+          </div>
         </div>
-
-        <div className="form-actions">
-          <button
-            onClick={handleSaveDraft}
-            disabled={isPublishing}
-            className="draft-btn"
-          >
-            {isPublishing ? 'Saving...' : 'Save as Draft'}
-          </button>
-
-          <button
-            onClick={handlePublish}
-            disabled={isPublishing}
-            className="publish-btn"
-          >
-            {isPublishing ? 'Publishing...' : '✅ Publish Quiz'}
-          </button>
-        </div>
-      </div>
-    </div>
+      </FadeInWhenVisible>
+    </PageTransition>
   );
 }
 

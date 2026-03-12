@@ -4,15 +4,14 @@ import { fetchQuiz, fetchCategories } from "../../../api/quizApi";
 import auth from "../../../api/auth";
 import { addScore } from "../../../api/scores";
 import QuizBackground3D from "./QuizBackground3D";
-import { useSearchParams} from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
-
-const LoadingPage = ({ text = "Loading Quiz..." }) => {
+const LoadingPage = ({ text = "LOADING QUEST DATA..." }) => {
   return (
-    <div className="loading-screen pixelify-sans-font">
-      <div className="loader-text">{text}</div>
-      <div className="loading-bar">
-        <div className="progress"></div>
+    <div className="retro-loading-screen text-center">
+      <div className="loader-text blink-slow gold-text">{text}</div>
+      <div className="pixel-loading-bar">
+        <div className="pixel-progress"></div>
       </div>
     </div>
   );
@@ -110,79 +109,138 @@ function QuizPage() {
     startQuiz();
   };
 
+  // Calculate progress for the HUD
+  const progressPercent = questions.length > 0 
+    ? Math.round((currentQuestion / questions.length) * 100) 
+    : 0;
+
   return (
-    <div className="quiz-page">
-      <QuizBackground3D/>
-      <div className="quiz-box pixelify-sans-font">
-        <div className="quiz-controls">
-          <label>
-            Amount:
-            <input type="number" min={1} max={20} value={amount} onChange={(e) => setAmount(Number(e.target.value))}
-            />
-          </label>
-
-          <label>
-            Difficulty:
-            <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-            </select>
-          </label>
-
-          <label>
-            Category:
-            <select value={categoryId || ""} onChange={(e) => setCategoryId(e.target.value || null)} className="category-select">
-              <option value="">Any</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <button onClick={startQuiz} className="start-btn">
-            Start Quiz
-          </button>
-        </div>
-
-        {loading ? (
-          <LoadingPage />
-        ) : error ? (
-          <div className="error">{error}</div>
-        ) : questions.length === 0 ? (
-          <div className="welcome">
-            <h2>Welcome to Jigyasa!</h2>
-            <p>Choose options above and press Start Quiz to fetch kid-friendly questions.</p>
-          </div>
-        ) : !showScore ? (
-          <>
-            <h2 className="question">{questions[currentQuestion].question}</h2>
-            <div className="quiz-options">
-              {questions[currentQuestion].options.map((option, index) => (
-                <button key={index} className="quiz-option-btn" onClick={() => handleAnswer(option)}>
-                  {option}
-                </button>
-              ))}
+    <div className="quiz-page-wrapper">
+      
+      {/* Render 3D background behind the UI */}
+      <div className="bg-3d-layer">
+        <QuizBackground3D />
+      </div>
+      
+      <div className="quiz-container">
+        <div className="retro-panel arcade-monitor">
+          
+          {/* TOP HUD / CONTROLS */}
+          <div className="mission-config-bar">
+            <div className="config-group">
+              <label className="blue-text">STAGES:</label>
+              <input 
+                type="number" 
+                min={1} 
+                max={20} 
+                value={amount} 
+                onChange={(e) => setAmount(Number(e.target.value))}
+                className="pixel-input-small"
+              />
             </div>
-            <p className="progress">
-              Question {currentQuestion + 1} of {questions.length}
-            </p>
-          </>
-        ) : (
-          <div className="score-section">
-            <h2>
-              Your Score: {score}/{questions.length}
-            </h2>
-            <button className="restart-btn" onClick={handleRestart}>
-              Play Again
+
+            <div className="config-group">
+              <label className="blue-text">THREAT:</label>
+              <select 
+                value={difficulty} 
+                onChange={(e) => setDifficulty(e.target.value)}
+                className="pixel-select-small"
+              >
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+
+            <div className="config-group">
+              <label className="blue-text">SECTOR:</label>
+              <select 
+                value={categoryId || ""} 
+                onChange={(e) => setCategoryId(e.target.value || null)} 
+                className="pixel-select-small"
+              >
+                <option value="">Any</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button onClick={startQuiz} className="pixel-btn-small btn-green pulse-btn">
+              [ INITIALIZE ]
             </button>
           </div>
-        )}
+
+          {/* MAIN CONTENT AREA */}
+          <div className="quiz-content-area mt-4">
+            {loading ? (
+              <LoadingPage />
+            ) : error ? (
+              <div className="rpg-dialogue-box error-box text-center">
+                <h3 className="red-text blink">SYSTEM ERROR</h3>
+                <p>{error}</p>
+              </div>
+            ) : questions.length === 0 ? (
+              <div className="welcome-screen text-center">
+                <h1 className="pixel-title gold-text mb-2">READY PLAYER 1</h1>
+                <p className="pixel-subtitle">Configure your mission parameters above and press INITIALIZE to begin.</p>
+              </div>
+            ) : !showScore ? (
+              <div className="active-quest-screen">
+                
+                <div className="hud-head">
+                  <span className="blue-text">STAGE: {currentQuestion + 1}/{questions.length}</span>
+                  <span className="green-text">EXP: {score}</span>
+                </div>
+                
+                <div className="progress-wrap mb-4">
+                  <div className="progress-track">
+                    <div className="progress-fill" style={{ width: `${progressPercent}%`, backgroundColor: 'var(--retro-green)' }}></div>
+                  </div>
+                </div>
+
+                <div className="rpg-dialogue-box question-box mb-4">
+                  <h2 className="pixel-title-small text-center" dangerouslySetInnerHTML={{ __html: questions[currentQuestion].question }}></h2>
+                </div>
+
+                {/* UPGRADED RPG BATTLE MENU FOR OPTIONS */}
+                <div className="rpg-options-menu">
+                  {questions[currentQuestion].options.map((option, index) => (
+                    <button 
+                      key={index} 
+                      className="rpg-option-box" 
+                      onClick={() => handleAnswer(option)}
+                    >
+                      <span className="cursor-arrow">▶</span>
+                      <span className="option-letter">{String.fromCharCode(65 + index)}.</span>
+                      <span className="option-text" dangerouslySetInnerHTML={{ __html: option }} />
+                    </button>
+                  ))}
+                </div>
+
+              </div>
+            ) : (
+              <div className="score-screen text-center">
+                <h2 className="pixel-title gold-text blink mb-2">QUEST CLEARED</h2>
+                
+                <div className="score-display-box mx-auto mt-4 mb-4">
+                  <span className="blue-text">FINAL EXP SECURED</span>
+                  <h1 className="huge-score green-text">{score} / {questions.length}</h1>
+                  <span className="pixel-text-small mt-2">Accuracy: {Math.round((score / questions.length) * 100)}%</span>
+                </div>
+
+                <button className="pixel-btn btn-purple pulse-btn mx-auto" onClick={handleRestart}>
+                  [ PLAY AGAIN ]
+                </button>
+              </div>
+            )}
+          </div>
+
+        </div>
       </div>
     </div>
-
   );
 }
 

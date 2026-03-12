@@ -7,6 +7,7 @@ function PlayLanding() {
     const [quote, setQuote] = useState("");
     const [typing, setTyping] = useState("");
 
+    // LOGIC REMAINS COMPLETELY UNTOUCHED
     useEffect(() => {
         let mounted = true;
         const localQuotes = [
@@ -53,27 +54,50 @@ function PlayLanding() {
     }, [quote]);
 
     return (
-        <div className="play-landing">
-            <header className="pl-header">
-                <h1 className="pl-title">Play</h1>
-                <p className="pl-sub"> "{typing}"</p>
-            </header>
+        <div className="play-landing-page">
+            <div className="play-container">
+                
+                <header className="play-header text-center">
+                    <h1 className="pixel-title gold-text blink-slow">ARCADE HUB</h1>
+                    
+                    {/* The typing effect is perfect for a retro terminal window */}
+                    <div className="terminal-box mx-auto mt-4">
+                        <div className="terminal-top-bar">
+                            <span className="dot red-dot"></span>
+                            <span className="dot yellow-dot"></span>
+                            <span className="dot green-dot"></span>
+                            <span className="terminal-title">SAGE_ADVICE.EXE</span>
+                        </div>
+                        <div className="terminal-body">
+                            <p className="typing-text green-text">
+                                &gt; {typing}<span className="cursor blink">_</span>
+                            </p>
+                        </div>
+                    </div>
+                </header>
 
-            <div className="pl-grid">
-                <Link to="/courses" className='pl-card' aria-label='Courses'>
-                    <div className="pl-icon"><FaBook /></div>
-                    <div className="pl-label">Courses</div>
-                </Link>
+                {/* Navigation Grid styled as Arcade Modules */}
+                <div className="arcade-grid mt-4">
+                    
+                    <Link to="/courses" className="arcade-card border-blue" aria-label="Courses">
+                        <div className="arcade-icon blue-text"><FaBook /></div>
+                        <div className="arcade-label">TRAINING MANUALS</div>
+                        <div className="arcade-sub">[ Courses ]</div>
+                    </Link>
 
-                <Link to="/games" className="pl-card" aria-label="Games">
-                    <div className="pl-icon"><FaGamepad /></div>
-                    <div className="pl-label">Games</div>
-                </Link>
+                    <Link to="/games" className="arcade-card border-green" aria-label="Games">
+                        <div className="arcade-icon green-text"><FaGamepad /></div>
+                        <div className="arcade-label">SIMULATIONS</div>
+                        <div className="arcade-sub">[ Games ]</div>
+                    </Link>
 
-                <Link to="/play/quiz-select" className="pl-card" aria-label="Quiz">
-                    <div className="pl-icon"><FaQuestionCircle /></div>
-                    <div className="pl-label">Quiz</div>
-                </Link>
+                    <Link to="/play/quiz-select" className="arcade-card border-purple" aria-label="Quiz">
+                        <div className="arcade-icon purple-text"><FaQuestionCircle /></div>
+                        <div className="arcade-label">TRIAL QUESTS</div>
+                        <div className="arcade-sub">[ Quiz ]</div>
+                    </Link>
+                    
+                </div>
             </div>
         </div>
     );

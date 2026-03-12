@@ -1,223 +1,170 @@
-/* =========================================================
-   PlayLanding.css - Modern Retro RPG Menu Style
-========================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
-
-:root {
-  --bg-void: #050505;
-  --menu-bg: rgba(8, 27, 51, 0.85); /* Deep RPG Blue */
-  --border-light: #d4d4d4;
-  --gold: #f8c522;
-  --neon-cyan: #00e5ff;
-  --neon-magenta: #ff00ff;
-  --text-white: #f0f0f0;
-  --text-green: #39ff14;
-}
-
-/* ================= CONTAINER & CRT EFFECT ================= */
-
-.play-landing {
-  position: relative;
+.play-landing-page {
+  font-family: 'Press Start 2P', monospace;
+  background-color: #000000; /* Pure Black Background */
+  color: #e0e0e0;
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  background-color: var(--bg-void);
-  background-image: 
-    radial-gradient(circle at center, #111827 0%, #000000 100%);
-  padding: 40px 20px;
+  align-items: center;
+  padding: 4rem 2rem;
   box-sizing: border-box;
-  font-family: 'VT323', monospace;
-  overflow-x: hidden;
 }
 
-/* Subtle CRT Scanline Overlay */
-.play-landing::after {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(
-    rgba(18, 16, 16, 0) 50%, 
-    rgba(0, 0, 0, 0.1) 50%
-  );
-  background-size: 100% 4px;
-  pointer-events: none; /* Lets you click through the overlay */
-  z-index: 100;
-  opacity: 0.6;
-}
-
-/* ================= HEADER & DIALOGUE BOX ================= */
-
-.pl-header {
-  text-align: center;
-  margin-bottom: 50px;
-  z-index: 2;
+.play-container {
   width: 100%;
+  max-width: 1000px;
+}
+
+/* Typography Utilities */
+.text-center { text-align: center; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.mt-4 { margin-top: 2rem; }
+
+.pixel-title {
+  font-size: 32px;
+  text-shadow: 4px 4px 0 #333;
+  margin: 0 0 1rem 0;
+  letter-spacing: 2px;
+}
+
+.gold-text { color: var(--retro-gold, #ffd700); }
+.green-text { color: var(--retro-green, #39ff14); }
+.blue-text { color: var(--retro-blue, #00f0ff); }
+.purple-text { color: var(--retro-purple, #b000ff); }
+
+/* =========================================
+   TERMINAL QUOTE BOX
+   ========================================= */
+.terminal-box {
+  background-color: #050505;
+  border: 4px solid #444;
+  border-radius: 8px;
   max-width: 800px;
+  box-shadow: 8px 8px 0px 0px rgba(255,255,255,0.1);
+  overflow: hidden;
 }
 
-.pl-title {
-  font-family: 'Press Start 2P', cursive;
-  color: var(--gold);
-  font-size: 3rem;
-  margin-bottom: 30px;
-  text-transform: uppercase;
-  text-shadow: 
-    4px 4px 0px #000,
-    0 0 20px rgba(248, 197, 34, 0.4);
-  letter-spacing: 4px;
-  animation: float-title 3s ease-in-out infinite;
+.terminal-top-bar {
+  background-color: #333;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid #555;
 }
 
-/* Classic RPG Dialogue Box for the Quote */
-.pl-sub {
-  background-color: var(--menu-bg);
-  color: var(--text-green);
-  font-size: 1.8rem;
-  line-height: 1.4;
-  padding: 25px 30px;
-  border: 4px solid var(--border-light);
-  border-radius: 4px;
-  box-shadow: 
-    inset 0 0 0 4px #000, 
-    0 10px 20px rgba(0,0,0,0.8);
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.red-dot { background-color: #ff003c; }
+.yellow-dot { background-color: #ffd700; }
+.green-dot { background-color: #39ff14; }
+
+.terminal-title {
+  font-size: 10px;
+  color: #aaa;
+  margin-left: 15px;
+}
+
+.terminal-body {
+  padding: 30px;
+  min-height: 180px;
+  display: flex;
+  align-items: flex-start;
   text-align: left;
-  min-height: 120px; /* Prevents layout jumping while typing */
-  position: relative;
-  text-shadow: 1px 1px 0px #000;
 }
 
-/* Blinking cursor effect at the end of the typing text */
-.pl-sub::after {
-  content: '█';
-  animation: blink 1s step-end infinite;
+.typing-text {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  margin: 0;
+  text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
+}
+
+.cursor {
+  display: inline-block;
+  width: 10px;
+  background-color: var(--retro-green, #39ff14);
   margin-left: 5px;
 }
 
-/* ================= NAVIGATION GRID ================= */
-
-.pl-grid {
-  display: flex;
+/* =========================================
+   ARCADE GRID & CARDS
+   ========================================= */
+.arcade-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 30px;
-  justify-content: center;
-  flex-wrap: wrap;
-  z-index: 2;
-  max-width: 900px;
+  margin-top: 4rem;
 }
 
-/* ================= MENU CARDS ================= */
-
-.pl-card {
-  text-decoration: none;
-  background-color: #111;
-  border: 4px solid #444;
-  padding: 30px 20px;
-  width: 200px;
+.arcade-card {
+  background-color: #111122;
+  border: 4px solid #555;
+  padding: 40px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
-  transition: all 0.2s ease;
-  position: relative;
-  box-shadow: 6px 6px 0px #000;
+  text-decoration: none;
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  box-shadow: inset 0 0 15px #000, 6px 6px 0px rgba(255,255,255,0.1);
 }
 
-/* Pseudo-element for the "Selection Cursor" (hidden by default) */
-.pl-card::before {
-  content: '►';
-  font-family: 'Press Start 2P', cursive;
-  color: var(--gold);
-  position: absolute;
-  left: -30px;
-  font-size: 1.2rem;
-  opacity: 0;
-  transition: opacity 0.2s;
-  animation: point 0.5s infinite alternate;
+.arcade-card:hover {
+  transform: translateY(-8px);
+  z-index: 2;
 }
 
-.pl-icon {
-  font-size: 3.5rem;
-  color: var(--text-white);
-  transition: all 0.2s ease;
-  filter: drop-shadow(3px 3px 0 #000);
+/* Dynamic Hover Borders */
+.border-blue:hover { border-color: #00f0ff; box-shadow: inset 0 0 15px rgba(0,240,255,0.2), 8px 8px 0 0 #00f0ff; }
+.border-green:hover { border-color: #39ff14; box-shadow: inset 0 0 15px rgba(57,255,20,0.2), 8px 8px 0 0 #39ff14; }
+.border-purple:hover { border-color: #b000ff; box-shadow: inset 0 0 15px rgba(176,0,255,0.2), 8px 8px 0 0 #b000ff; }
+
+.arcade-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+  filter: drop-shadow(2px 2px 0px #000);
 }
 
-.pl-label {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 0.9rem;
-  color: var(--text-white);
-  text-transform: uppercase;
-  text-shadow: 2px 2px 0px #000;
-  transition: color 0.2s;
+.arcade-label {
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 15px;
+  line-height: 1.4;
+  text-shadow: 2px 2px 0 #000;
 }
 
-/* --- Hover & Active States --- */
-
-.pl-card:hover {
-  transform: translateY(-5px);
-  border-color: var(--gold);
-  background-color: var(--menu-bg);
-  box-shadow: 
-    6px 11px 0px #000,
-    0 0 15px rgba(248, 197, 34, 0.3);
+.arcade-sub {
+  font-size: 9px;
+  color: #888;
 }
 
-.pl-card:hover::before {
-  opacity: 1; /* Show the selection cursor */
-}
+/* Animations */
+.blink { animation: blink 1s step-end infinite; }
+.blink-slow { animation: blink 2s step-end infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-.pl-card:hover .pl-icon {
-  color: var(--neon-cyan);
-  transform: scale(1.1);
-}
-
-.pl-card:hover .pl-label {
-  color: var(--gold);
-}
-
-.pl-card:active {
-  transform: translate(4px, 4px);
-  box-shadow: 2px 2px 0px #000;
-}
-
-/* ================= ANIMATIONS ================= */
-
-@keyframes float-title {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-@keyframes point {
-  from { transform: translateX(0); }
-  to { transform: translateX(5px); }
-}
-
-/* ================= RESPONSIVE ================= */
-
-@media (max-width: 768px) {
-  .pl-title {
-    font-size: 2rem;
+/* Mobile Adjustments */
+@media (max-width: 850px) {
+  .arcade-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
-  
-  .pl-sub {
-    font-size: 1.4rem;
-    padding: 15px 20px;
+  .pixel-title {
+    font-size: 24px;
   }
-
-  .pl-card {
-    width: 160px;
-    padding: 20px 15px;
+  .terminal-body {
+    padding: 20px;
+    min-height: 250px;
   }
-  
-  .pl-card::before {
-    display: none; /* Hide cursor on mobile to save space */
+  .typing-text {
+    font-size: 10px;
   }
 }

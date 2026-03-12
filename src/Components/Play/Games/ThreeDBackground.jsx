@@ -10,139 +10,126 @@ const ThreeDBackground = () => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Scene setup
+    // 1. Scene Setup & Retro Fog
     const scene = new THREE.Scene();
     sceneRef.current = scene;
+    // Add fog to fade the grid out in the distance (matches the dark retro background)
+    scene.fog = new THREE.FogExp2(0x111122, 0.015);
 
-    // Camera setup
+    // 2. Camera Setup
     const camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
     );
-    camera.position.z = 50;
+    camera.position.set(0, 5, 30); // Raised slightly to look down the grid
 
-    // Renderer setup
+    // 3. Renderer Setup
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x0a0e27, 0.1);
+    renderer.setClearColor(0x111122, 1); // Solid retro dark blue/purple background
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // Create particles
-    const particleCount = 100;
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particleCount * 3);
-    const velocities = [];
+    // 4. Infinite Scrolling Neon Grid (The Floor)
+    const gridSize = 200;
+    const gridDivisions = 50;
+    // Purple center line, Green grid lines
+    const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0xb000ff, 0x004400);
+    gridHelper.position.y = -10;
+    scene.add(gridHelper);
 
-    for (let i = 0; i < particleCount * 3; i += 3) {
-      positions[i] = (Math.random() - 0.5) * 200;
-      positions[i + 1] = (Math.random() - 0.5) * 200;
-      positions[i + 2] = (Math.random() - 0.5) * 200;
+    // 5. Warp-Speed Starfield
+    const starCount = 600;
+    const starGeometry = new THREE.BufferGeometry();
+    const starPositions = new Float32Array(starCount * 3);
 
-      velocities.push({
-        x: (Math.random() - 0.5) * 0.5,
-        y: (Math.random() - 0.5) * 0.5,
-        z: (Math.random() - 0.5) * 0.5,
-      });
+    for (let i = 0; i < starCount * 3; i += 3) {
+      starPositions[i] = (Math.random() - 0.5) * 200; // x
+      starPositions[i + 1] = Math.random() * 100 - 10; // y (keep mostly above the grid)
+      starPositions[i + 2] = (Math.random() - 0.5) * 200; // z
     }
 
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
 
-    const material = new THREE.PointsMaterial({
-      color: 0x3b82f6,
-      size: 2,
-      sizeAttenuation: true,
+    const starMaterial = new THREE.PointsMaterial({
+      color: 0x00f0ff, // Retro cyan
+      size: 1.5,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.8,
     });
 
-    const points = new THREE.Points(geometry, material);
-    scene.add(points);
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    scene.add(stars);
 
-    const lines = new THREE.LineSegments(
-      new THREE.BufferGeometry().setFromPoints(
-        positions.reduce((acc, val, idx) => {
-          if (idx % 3 === 0) acc.push(new THREE.Vector3(positions[idx], positions[idx + 1], positions[idx + 2]));
-          return acc;
-        }, [])
-      ),
-      new THREE.LineBasicMaterial({
-        color: 0x8b5cf6,
-        transparent: true,
-        opacity: 0.2,
-      })
-    );
-    scene.add(lines);
-
-    // Create floating cubes
+    // 6. Floating Retro "Data Cubes"
     const cubes = [];
-    for (let i = 0; i < 5; i++) {
-      const geometry = new THREE.BoxGeometry(10, 10, 10);
-      const material = new THREE.MeshPhongMaterial({
-        color: new THREE.Color().setHSL(Math.random(), 0.7, 0.5),
+    const colors = [0x39ff14, 0xffd700, 0xff003c]; // Retro Green, Gold, Red
+
+    for (let i = 0; i < 6; i++) {
+      // Chunky, un-smoothed geometry for that retro polygon look
+      const geometry = new THREE.BoxGeometry(4, 4, 4);
+      
+      // Wireframe inside, solid slightly transparent outside
+      const material = new THREE.MeshBasicMaterial({
+        color: colors[i % colors.length],
         wireframe: true,
         transparent: true,
-        opacity: 0.3,
+        opacity: 0.5,
       });
+
       const cube = new THREE.Mesh(geometry, material);
+      
+      // Place them randomly along the grid
       cube.position.set(
-        (Math.random() - 0.5) * 150,
-        (Math.random() - 0.5) * 150,
-        (Math.random() - 0.5) * 100
+        (Math.random() - 0.5) * 80,
+        Math.random() * 15 - 2, // Floating height
+        (Math.random() - 0.5) * 100 - 20
       );
-      cube.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+      
+      scene.add(cube);
       cubes.push({
         mesh: cube,
-        rotationSpeed: {
-          x: (Math.random() - 0.5) * 0.01,
-          y: (Math.random() - 0.5) * 0.01,
-          z: (Math.random() - 0.5) * 0.01,
-        },
+        rotSpeedX: (Math.random() > 0.5 ? 1 : -1) * 0.01,
+        rotSpeedY: (Math.random() > 0.5 ? 1 : -1) * 0.02,
+        floatOffset: Math.random() * Math.PI * 2, // For bobbing up and down
       });
-      scene.add(cube);
     }
 
-    // Lighting
-    const light = new THREE.PointLight(0xffffff, 1, 300);
-    light.position.set(50, 50, 50);
-    scene.add(light);
-
-    const ambientLight = new THREE.AmbientLight(0x404040, 2);
-    scene.add(ambientLight);
-
-    // Animation loop
+    // 7. Animation Loop
     let animationFrameId;
+    const gridSpeed = 0.2; // How fast the floor moves
+    const starSpeed = 0.5; // How fast stars fly at the camera
+
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
 
-      // Update particles
-      const positionAttribute = points.geometry.getAttribute('position');
-      const positionArray = positionAttribute.array;
-
-      for (let i = 0; i < velocities.length; i++) {
-        const idx = i * 3;
-        positionArray[idx] += velocities[i].x;
-        positionArray[idx + 1] += velocities[i].y;
-        positionArray[idx + 2] += velocities[i].z;
-
-        // Bounce at boundaries
-        if (Math.abs(positionArray[idx]) > 100) velocities[i].x *= -1;
-        if (Math.abs(positionArray[idx + 1]) > 100) velocities[i].y *= -1;
-        if (Math.abs(positionArray[idx + 2]) > 100) velocities[i].z *= -1;
+      // Animate Grid (Creates infinite scrolling illusion)
+      gridHelper.position.z += gridSpeed;
+      if (gridHelper.position.z > 4) {
+        gridHelper.position.z = 0; // Reset to loop seamlessly
       }
 
-      positionAttribute.needsUpdate = true;
+      // Animate Stars (Warp effect moving towards camera)
+      const positions = stars.geometry.attributes.position.array;
+      for (let i = 2; i < positions.length; i += 3) {
+        positions[i] += starSpeed;
+        
+        // If a star goes behind the camera, reset it far into the distance
+        if (positions[i] > 50) {
+          positions[i] = -150;
+        }
+      }
+      stars.geometry.attributes.position.needsUpdate = true;
 
-      // Update cubes
+      // Animate Cubes (Spinning and floating)
+      const time = Date.now() * 0.002;
       cubes.forEach((cube) => {
-        cube.mesh.rotation.x += cube.rotationSpeed.x;
-        cube.mesh.rotation.y += cube.rotationSpeed.y;
-        cube.mesh.rotation.z += cube.rotationSpeed.z;
-
-        cube.mesh.position.x += Math.sin(Date.now() * 0.0005 + cube.mesh.position.y) * 0.1;
-        cube.mesh.position.y += Math.cos(Date.now() * 0.0005 + cube.mesh.position.x) * 0.1;
+        cube.mesh.rotation.x += cube.rotSpeedX;
+        cube.mesh.rotation.y += cube.rotSpeedY;
+        // Subtle bobbing up and down
+        cube.mesh.position.y += Math.sin(time + cube.floatOffset) * 0.02;
       });
 
       renderer.render(scene, camera);
@@ -150,7 +137,7 @@ const ThreeDBackground = () => {
 
     animate();
 
-    // Handle resize
+    // 8. Handle Resize
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -159,17 +146,22 @@ const ThreeDBackground = () => {
 
     window.addEventListener('resize', handleResize);
 
-    // Cleanup
+    // 9. Cleanup to prevent memory leaks
     return () => {
       window.removeEventListener('resize', handleResize);
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      
       container?.removeChild(renderer.domElement);
-      geometry.dispose();
-      material.dispose();
-      lines.geometry.dispose();
-      lines.material.dispose();
+      
+      // ✅ CORRECTED DISPOSE LOGIC
+      gridHelper.geometry.dispose();
+      gridHelper.material.dispose();
+      starGeometry.dispose();
+      starMaterial.dispose();
+      cubes.forEach(c => {
+        c.mesh.geometry.dispose();
+        c.mesh.material.dispose();
+      });
       renderer.dispose();
     };
   }, []);
@@ -181,9 +173,10 @@ const ThreeDBackground = () => {
         position: 'fixed',
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: -1,
+        width: '100vw',
+        height: '100vh',
+        zIndex: -1, // Ensures it stays behind your UI
+        pointerEvents: 'none', // Prevents it from blocking clicks on your UI
       }}
     />
   );

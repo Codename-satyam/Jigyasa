@@ -13,6 +13,7 @@ import {
 function Page4() {
   const [data, setData] = useState([]);
 
+  // Logic remains 100% untouched
   useEffect(() => {
     let count = 0;
     const interval = setInterval(() => {
@@ -30,31 +31,85 @@ function Page4() {
   }, []);
 
   return (
-    <div className="page4">
-      <div className="left1">
-        <h2 className="pixelify-sans-font">Performance Growth</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
-            <CartesianGrid stroke="#00ffff" strokeDasharray="3 3" />
-            <XAxis dataKey="name" stroke="#fff" />
-            <YAxis domain={[0, 100]} stroke="#fff" />
-            <Tooltip />
-            <Line
-              type="monotone"
-              dataKey="value"
-              stroke="#ff00ff"
-              strokeWidth={3}
-              dot={false}
-              animationDuration={500}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-      <div className="right1">
-        <h3 className="pixelify-sans-font">Track your progress in real-time</h3>
-        <p>Watch your learning curve rise as you improve with every challenge!</p>
-        <p>Get the Best out of your kids with the help of our interactive tools</p>
-        <p>Games and Quizzes will surely improve your child's performance!</p>
+    <div className="page-4-container">
+      <div className="p4-layout">
+        
+        {/* Left Side: The Chart */}
+        <div className="chart-section retro-panel">
+          <h2 className="pixel-title gold-text">EXP GROWTH SCANNER</h2>
+          
+          <div className="chart-wrapper mt-4">
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={data}>
+                {/* Darker grid for retro monitor feel */}
+                <CartesianGrid stroke="#222" strokeDasharray="4 4" />
+                
+                {/* Custom styling injected directly into Recharts axes */}
+                <XAxis 
+                  dataKey="name" 
+                  stroke="#00f0ff" 
+                  tick={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, fill: '#00f0ff' }} 
+                />
+                <YAxis 
+                  domain={[0, 100]} 
+                  stroke="#00f0ff" 
+                  tick={{ fontFamily: '"Press Start 2P", monospace', fontSize: 8, fill: '#00f0ff' }} 
+                />
+                
+                {/* 8-bit styled tooltip */}
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#000', 
+                    border: '2px solid #39ff14', 
+                    fontFamily: '"Press Start 2P", monospace', 
+                    fontSize: '10px',
+                    boxShadow: '4px 4px 0px 0px rgba(0,0,0,1)'
+                  }}
+                  itemStyle={{ color: '#ff00ff' }}
+                  labelStyle={{ color: '#fff', marginBottom: '5px' }}
+                />
+                
+                {/* Sharp 'linear' lines instead of curved 'monotone' for that chunky retro feel */}
+                <Line
+                  type="linear"
+                  dataKey="value"
+                  stroke="#ff00ff"
+                  strokeWidth={4}
+                  dot={{ r: 4, fill: '#000', stroke: '#ff00ff', strokeWidth: 2 }}
+                  activeDot={{ r: 6, fill: '#39ff14', stroke: '#fff', strokeWidth: 2 }}
+                  animationDuration={500}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Right Side: The Terminal Text */}
+        <div className="text-section">
+          <div className="rpg-dialogue-box analysis-box">
+            <h3 className="pixel-title-small blue-text blink">SYSTEM ANALYSIS</h3>
+            
+            <ul className="pixel-list mt-4">
+              <li>
+                <span className="green-text">&gt;</span> 
+                Track progress in real-time.
+              </li>
+              <li>
+                <span className="green-text">&gt;</span> 
+                Watch the EXP curve rise with every cleared challenge!
+              </li>
+              <li>
+                <span className="green-text">&gt;</span> 
+                Unlock maximum potential with our interactive toolkit.
+              </li>
+              <li>
+                <span className="green-text">&gt;</span> 
+                Minigames and Quests guarantee a permanent stat boost!
+              </li>
+            </ul>
+          </div>
+        </div>
+
       </div>
     </div>
   );

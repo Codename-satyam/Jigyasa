@@ -714,7 +714,7 @@ function Admin() {
 
   if (loading) {
     return (
-      <div className="crt-screen loading-screen">
+      <div className="loading-screen">
         <h1 className="pixel-title blink">LOADING SYSTEM...</h1>
       </div>
     );
@@ -723,7 +723,7 @@ function Admin() {
   return (
     <PageTransition>
       <FadeInWhenVisible>
-        <div className="admin-container crt-screen">
+        <div className="admin-container">
           <div className="admin-header">
             <h1 className="pixel-title gold-text">SYSTEM ADMIN</h1>
             <button onClick={() => navigate('/dashboard')} className="pixel-btn btn-dark">

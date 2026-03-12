@@ -2,7 +2,7 @@
 
 .join-hero-container {
   font-family: 'Press Start 2P', monospace;
-  background-color: var(--retro-bg, #111122);
+  background-color: #000000; /* Updated to pure black */
   color: var(--retro-text, #e0e0e0);
   min-height: 100vh;
   display: flex;
@@ -16,11 +16,11 @@
 
 /* The Main "Screen" */
 .arcade-cabinet-screen {
-  background-color: #000022;
+  background-color: #050505; /* Slightly off-black so the border pops */
   border: 6px solid #444;
   box-shadow: 
     inset 0 0 20px #000,
-    10px 10px 0px 0px rgba(0,0,0,0.8);
+    10px 10px 0px 0px rgba(255, 255, 255, 0.1); /* White/transparent shadow for dark bg */
   padding: 40px;
   max-width: 900px;
   width: 100%;
@@ -37,7 +37,7 @@
 
 .pixel-title {
   font-size: 28px;
-  text-shadow: 4px 4px 0 #000;
+  text-shadow: 4px 4px 0 #333; /* Softened from #000 to be visible */
   margin: 0 0 15px 0;
   line-height: 1.5;
 }
@@ -46,7 +46,7 @@
   font-size: 18px;
   margin-bottom: 2rem;
   color: #fff;
-  text-shadow: 2px 2px 0 #000;
+  text-shadow: 2px 2px 0 #333; /* Softened */
 }
 
 .pixel-subtitle {
@@ -71,7 +71,7 @@
   background-color: #111;
   border: 2px solid #555;
   padding: 20px;
-  box-shadow: 4px 4px 0 0 #000;
+  box-shadow: 4px 4px 0 0 rgba(255, 255, 255, 0.15); /* Adjusted shadow */
   transition: transform 0.2s;
 }
 
@@ -99,10 +99,10 @@
 
 /* Call to Action Buttons */
 .path-selection {
-  background-color: #222244;
+  background-color: #0a0a0a; /* Deep dark bg */
   padding: 30px;
   border: 4px solid #fff;
-  box-shadow: inset 4px 4px 0 0 rgba(0,0,0,0.5);
+  box-shadow: inset 4px 4px 0 0 rgba(255, 255, 255, 0.05);
   margin-bottom: 3rem;
 }
 
@@ -122,7 +122,7 @@
   padding: 20px 30px;
   cursor: pointer;
   border: 4px solid #fff;
-  box-shadow: 6px 6px 0 0 #000;
+  box-shadow: 6px 6px 0 0 #333; /* Changed to #333 so it shows up on black */
   color: #fff;
   min-width: 250px;
   transition: all 0.1s;
@@ -149,7 +149,7 @@
 
 .pixel-btn-massive:active {
   transform: translateY(6px);
-  box-shadow: 0px 0px 0 0 #000;
+  box-shadow: 0px 0px 0 0 transparent; /* Removes shadow flatly */
 }
 
 .bounce-hover:hover {
