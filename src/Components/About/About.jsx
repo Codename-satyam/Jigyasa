@@ -9,34 +9,93 @@ import Sanjay from '../../Assets/about_videos/sanjay.mp4';
 import "./About.css";
 
 const teamMembers = [
-    { name: "Satyam Anand", role: "Full Stack Engineer", icon: "⚙️" },
-    { name: "Prashant Bharadwaj", role: "Backend Developer", icon: "🔧" },
-    { name: "Siddarth Singh", role: "Data Science Engineer", icon: "📊" },
-    { name: "Yashvi Chaturvedi", role: "Data Science Engineer", icon: "📈" },
-    { name: "Sanjay Srivastav", role: "AI/ML Integrator", icon: "🤖" },
-    { name: "Rabindra Nahak", role: "Cloud Engineer", icon: "☁️" },
+    {
+        name: "Satyam Anand",
+        role: "Full Stack Engineer",
+        icon: "⚙️",
+        video: satyam,
+        color: "blue",
+        stats: { hp: 1200, mp: 850 },
+        powers: [
+            { name: "Full-Stack Strike", desc: "Connects frontend & backend for a devastating combo." },
+            { name: "State Management", desc: "Restores party balance by clearing corrupted data." }
+        ]
+    },
+    {
+        name: "Prashant Bharadwaj",
+        role: "Backend Developer",
+        icon: "🔧",
+        video: Prashant,
+        color: "green",
+        stats: { hp: 1500, mp: 600 },
+        powers: [
+            { name: "Query Smash", desc: "Executes heavy database queries to crush latency." },
+            { name: "API Barrier", desc: "Casts an impenetrable shield of secure endpoints." }
+        ]
+    },
+    {
+        name: "Siddarth Singh",
+        role: "Data Science Engineer",
+        icon: "📊",
+        video: siddarth,
+        color: "purple",
+        stats: { hp: 1000, mp: 1200 },
+        powers: [
+            { name: "Algorithmic Prediction", desc: "Reads enemy movements using advanced ML models." },
+            { name: "Data Cleansing", desc: "Purges debuffs and null values from the party." }
+        ]
+    },
+    {
+        name: "Yashvi Chaturvedi",
+        role: "Data Science Engineer",
+        icon: "📈",
+        video: yashvi,
+        color: "gold",
+        stats: { hp: 950, mp: 1300 },
+        powers: [
+            { name: "Visualization Beam", desc: "Blinds foes with complex, high-res data charts." },
+            { name: "Pattern Recognition", desc: "Automatically targets the weakest point in any architecture." }
+        ]
+    },
+    {
+        name: "Sanjay Srivastav",
+        role: "AI/ML Integrator",
+        icon: "🤖",
+        video: Sanjay,
+        color: "red",
+        stats: { hp: 1100, mp: 1500 },
+        powers: [
+            { name: "Neural Network", desc: "Summons AI drones for continuous passive damage." },
+            { name: "Deep Learning", desc: "Adapts to enemy attacks, gaining EXP exponentially." }
+        ]
+    },
+    {
+        name: "Rabindra Nahak",
+        role: "Cloud Engineer",
+        icon: "☁️",
+        video: rabindra,
+        color: "cyan",
+        stats: { hp: 1800, mp: 900 },
+        powers: [
+            { name: "Serverless Surge", desc: "Rains down auto-scaling server pods on the battlefield." },
+            { name: "Load Balance", desc: "Distributes enemy damage evenly, reducing total impact." }
+        ]
+    },
 ];
 
 function About() {
     const screenRef = useRef(null);
     const [selectedMember, setSelectedMember] = useState(null);
-    const [hoveredBox, setHoveredBox] = useState(null);
 
     const scrollUp = () => {
         if (screenRef.current) {
-            screenRef.current.scrollBy({
-                top: -80,
-                behavior: "smooth",
-            });
+            screenRef.current.scrollBy({ top: -150, behavior: "smooth" });
         }
     };
 
     const scrollDown = () => {
         if (screenRef.current) {
-            screenRef.current.scrollBy({
-                top: 80,
-                behavior: "smooth",
-            });
+            screenRef.current.scrollBy({ top: 150, behavior: "smooth" });
         }
     };
 
@@ -44,103 +103,154 @@ function About() {
         setSelectedMember(selectedMember === index ? null : index);
     };
 
+    const openModal = (index) => {
+        setSelectedMember(index);
+    };
+
+    const closeModal = () => {
+        setSelectedMember(null);
+    };
+
+    const handleMouseEnter = (e) => {
+        e.target.play().catch(err => console.log('Video play error:', err));
+    };
+
+    const handleMouseLeave = (e) => {
+        e.target.pause();
+    };
+
     return (
         <div className="about-page">
-            <div className={`floating-box box-1 ${hoveredBox === 0 ? 'hovered' : ''}`}
-                onMouseEnter={() => setHoveredBox(0)}
-                onMouseLeave={() => setHoveredBox(null)}>
-                <video src={satyam} autoPlay loop muted className="about-video" />
-                <div className="box-label">Satyam</div>
-            </div>
-            <div className={`floating-box box-2 ${hoveredBox === 1 ? 'hovered' : ''}`}
-                onMouseEnter={() => setHoveredBox(1)}
-                onMouseLeave={() => setHoveredBox(null)}>
-                <video src={siddarth} autoPlay loop muted className="about-video" />
-                <div className="box-label">Siddarth</div>
-            </div>
-            <div className={`floating-box box-3 ${hoveredBox === 2 ? 'hovered' : ''}`}
-                onMouseEnter={() => setHoveredBox(2)}
-                onMouseLeave={() => setHoveredBox(null)}>
-                <video src={yashvi} autoPlay loop muted className="about-video" />
-                <div className="box-label">Yashvi</div>
-            </div>
-            <div className={`floating-box box-4 ${hoveredBox === 3 ? 'hovered' : ''}`}
-                onMouseEnter={() => setHoveredBox(3)}
-                onMouseLeave={() => setHoveredBox(null)}>
-                <video src={rabindra} autoPlay loop muted className="about-video" />
-                <div className="box-label">Rabindra</div>
-            </div>
-            <div className={`floating-box box-5 ${hoveredBox === 4 ? 'hovered' : ''}`}
-                onMouseEnter={() => setHoveredBox(4)}
-                onMouseLeave={() => setHoveredBox(null)}>
-                <video src={Prashant} autoPlay loop muted className="about-video" />
-                <div className="box-label">Prashant</div>
-                <div className="box-pulse"></div>
-            </div>
-            <div className={`floating-box box-6 ${hoveredBox === 5 ? 'hovered' : ''}`}
-                onMouseEnter={() => setHoveredBox(5)}
-                onMouseLeave={() => setHoveredBox(null)}>
-                <video src={Sanjay} autoPlay loop muted className="about-video" />
-                <div className="box-label">Sanjay</div>
-            </div>
+            <div className="retro-pc-setup">
 
-            <div className="about-gameboy">
-                <div className="about-gb-top">
-                    <div className="about-gb-power" />
-                    <div className="about-gb-speaker" />
-                </div>
+                <div className="pc-monitor-bezel">
+                    <div className="pc-monitor-screen">
 
-                <div className="about-gb-screen">
-                    <div className="about-screen-inner" ref={screenRef}>
-                        <h2 className="screen-title">About Jigyasa</h2>
-                        <p className="screen-description">
-                            Jigyasa is a playful learning app that makes quizzes feel like a
-                            game. It uses bright challenges, friendly feedback, and simple
-                            progression to keep kids engaged built by a team of six passionate
-                            developers.
-                        </p>
-                        <div className="team-display">
-                            {teamMembers.map((member, idx) => (
-                                <div
-                                    key={idx}
-                                    className={`team-member-item ${selectedMember === idx ? 'expanded' : ''}`}
-                                    onClick={() => toggleMemberInfo(idx)}
-                                >
-                                    <span className="member-icon">{member.icon}</span>
-                                    <span className="member-name">{member.name}</span>
-                                    {selectedMember === idx && (
-                                        <span className="member-role">{member.role}</span>
-                                    )}
+                        <div className="screen-content-wrapper" ref={screenRef}>
+
+                            <div className="about-header text-center">
+                                <h1 className="pixel-title gold-text">SYSTEM DIRECTORY</h1>
+                                <p className="pixel-subtitle blue-text mt-2">C:\JIGYASA\ROSTER.EXE</p>
+                            </div>
+
+                            <div className="rpg-dialogue-box mx-auto mt-4 mb-4">
+                                <h2 className="pixel-title-small green-text text-center">ABOUT JIGYASA</h2>
+                                <p className="text-center">
+                                    Jigyasa is a playful learning app that transforms quizzes into an exciting adventure. Designed to make learning fun and interactive, it blends knowledge with game-like challenges that keep users engaged and motivated. Built by a guild of six passionate developers, Jigyasa aims to create a platform where curiosity meets creativity, encouraging learners to test their knowledge, explore new ideas, and enjoy the process of learning.
+                                </p>
+                            </div>
+
+                            <h2 className="pixel-title text-center mt-4 mb-4 blink-slow">SELECT YOUR FIGHTER</h2>
+
+                            {/* SYMMETRICAL 3x2 GRID */}
+                            <div className="roster-grid">
+                                {teamMembers.map((member, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={`roster-card border-${member.color}`}
+                                        onClick={() => openModal(idx)}
+                                    >
+                                        <div className="video-container">
+                                            <video
+                                                src={member.video}
+                                                muted
+                                                loop
+                                                className="roster-video"
+                                                onMouseEnter={handleMouseEnter}
+                                                onMouseLeave={handleMouseLeave}
+                                            />
+                                            <div className="video-overlay">HOVER TO INITIALIZE</div>
+                                        </div>
+
+                                        <div className="card-info text-center">
+                                            <span className="member-icon">{member.icon}</span>
+                                            <span className="member-name block mt-2">{member.name}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* IN-SCREEN MODAL (FIGHTER STATS) */}
+                            {selectedMember !== null && (
+                                <div className="in-screen-modal-overlay">
+                                    <div className={`in-screen-modal-content border-${teamMembers[selectedMember].color}`}>
+                                        <button className="close-modal-btn" onClick={closeModal}>[ X ]</button>
+
+                                        <div className="modal-split">
+
+                                            {/* Left: Video & Stats */}
+                                            <div className="modal-video-side">
+                                                <video
+                                                    src={teamMembers[selectedMember].video}
+                                                    autoPlay
+                                                    loop
+                                                    muted
+                                                    className="modal-video"
+                                                />
+                                                <div className="fighter-stats p-2">
+                                                    <div className="stat-row">
+                                                        <span className="stat-label">HP</span>
+                                                        <div className="stat-bar-bg">
+                                                            <div className="stat-bar-fill bg-hp" style={{ width: '80%' }}></div>
+                                                        </div>
+                                                        <span className="stat-num">{teamMembers[selectedMember].stats.hp}</span>
+                                                    </div>
+                                                    <div className="stat-row mt-2">
+                                                        <span className="stat-label">MP</span>
+                                                        <div className="stat-bar-bg">
+                                                            <div className="stat-bar-fill bg-mp" style={{ width: '65%' }}></div>
+                                                        </div>
+                                                        <span className="stat-num">{teamMembers[selectedMember].stats.mp}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Right: Powers & Commands */}
+                                            <div className="modal-info-side">
+                                                <div className="modal-icon">{teamMembers[selectedMember].icon}</div>
+                                                <h2 className="pixel-title-small mt-2">
+                                                    {teamMembers[selectedMember].name}
+                                                </h2>
+                                                <h3 className={`role-badge bg-${teamMembers[selectedMember].color} mt-2 mb-4`}>
+                                                    CLASS: {teamMembers[selectedMember].role.toUpperCase()}
+                                                </h3>
+
+                                                <div className="command-list">
+                                                    <h4 className="gold-text mb-2">COMMAND LIST (SPECIALS)</h4>
+                                                    {teamMembers[selectedMember].powers.map((power, i) => (
+                                                        <div key={i} className="power-item">
+                                                            <span className={`power-name text-${teamMembers[selectedMember].color}`}>
+                                                                ▶ {power.name}
+                                                            </span>
+                                                            <p className="power-desc">{power.desc}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
                                 </div>
-                            ))}
+                            )}
+
+                        </div>
+                    </div>
+
+                    {/* Hardware branding & buttons on the monitor */}
+                    <div className="monitor-hardware-bottom">
+                        <div className="monitor-logo">JIGYASA_TRON 2000</div>
+                        <div className="monitor-buttons">
+                            <div className="pwr-btn"></div>
+                            <div className="menu-btn" onClick={scrollUp}></div>
+                            <div className="menu-btn" onClick={scrollDown}></div>
                         </div>
                     </div>
                 </div>
 
-                <div className="about-gb-controls">
-                    <div className="about-dpad">
-                        <div className="about-dpad-row">
-                            <div className="about-btn up" onClick={scrollUp} title="Scroll Up" />
-                        </div>
-                        <div className="about-dpad-row">
-                            <div className="about-btn left" />
-                            <div className="about-btn center" />
-                            <div className="about-btn right" />
-                        </div>
-                        <div className="about-dpad-row">
-                            <div className="about-btn down" onClick={scrollDown} title="Scroll Down" />
-                        </div>
-                    </div>
+                {/* PC STAND */}
+                <div className="pc-stand-neck"></div>
+                <div className="pc-stand-base"></div>
 
-                    <div className="about-action-buttons">
-                        <div className="about-action a" onClick={scrollUp} title="Scroll Up">
-                            X
-                        </div>
-                        <div className="about-action b" onClick={scrollDown} title="Scroll Down">
-                            Y
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     );

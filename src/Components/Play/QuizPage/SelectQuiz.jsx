@@ -5,13 +5,12 @@ import { fetchCategories } from "../../../api/quizApi";
 import auth from "../../../api/auth";
 import QuizBackground3D from "./QuizBackground3D";
 
-
-const LoadingPage = ({ text = "Loading Categories..." }) => {
+const LoadingPage = ({ text = "LOADING DATABASE..." }) => {
   return (
-    <div className="loading-screen pixelify-sans-font">
-      <div className="loader-text">{text}</div>
-      <div className="loading-bar">
-        <div className="progress"></div>
+    <div className="retro-loading-screen">
+      <div className="loader-text blink-slow">{text}</div>
+      <div className="pixel-loading-bar">
+        <div className="pixel-progress"></div>
       </div>
     </div>
   );
@@ -51,7 +50,7 @@ function SelectQuiz() {
 
   const handleStartQuiz = () => {
     if (!selectedCategory && categories.length > 0) {
-      alert("Please select a category");
+      alert("ERROR: Please select a target sector (Category) first.");
       return;
     }
     
@@ -74,39 +73,57 @@ function SelectQuiz() {
 
   return (
     <>
-      <div className="select-quiz-page">
-        <QuizBackground3D />
+      <div className="select-quiz-page crt-screen">
+        
+        {/* Render 3D background behind the UI */}
+        <div className="bg-3d-layer">
+          <QuizBackground3D />
+        </div>
+
         <div className="select-quiz-container">
-          <div className="select-quiz-box pixelify-sans-font">
-            <h1 className="select-title">Choose Your Subject</h1>
+          <div className="retro-panel mission-select-box">
+            
+            <div className="mission-header text-center">
+              <h1 className="pixel-title gold-text">MISSION SELECT</h1>
+              <p className="pixel-subtitle blue-text mt-2">Configure Your Quest Parameters</p>
+            </div>
             
             {loading ? (
               <LoadingPage />
             ) : (
               <>
+                <h2 className="pixel-title-small green-text mb-4 mt-4 text-center">
+                  1. SELECT TARGET SECTOR
+                </h2>
+                
                 <div className="categories-grid">
                   {categories.map((category) => (
                     <div
                       key={category.id}
-                      className={`category-card ${selectedCategory === category.id ? "selected" : ""}`}
+                      className={`category-card ${selectedCategory === category.id ? "selected-card" : ""}`}
                       onClick={() => handleCategorySelect(category.id)}
                     >
-                      <div className="category-icon">📚</div>
+                      <div className="category-icon">📂</div>
                       <h3 className="category-name">{category.name}</h3>
-                      <p className="category-id">ID: {category.id}</p>
+                      <p className="category-id blue-text">ID: {category.id}</p>
                     </div>
                   ))}
                 </div>
 
-                <div className="quiz-settings">
-                  <div className="settings-row">
-                    <label>
-                      Number of Questions:
+                <div className="mission-settings-panel mt-4">
+                  <h2 className="pixel-title-small purple-text mb-4">
+                    2. MISSION SETTINGS
+                  </h2>
+                  
+                  <div className="quiz-settings-grid">
+                    <div className="pixel-form-group">
+                      <label className="gold-text">Number of Stages (1-20):</label>
                       <input
                         type="number"
                         min={1}
                         max={20}
                         value={amountInput}
+                        className="pixel-input text-center"
                         onChange={(e) => {
                           setAmountInput(e.target.value);
                           if (e.target.value !== "") {
@@ -120,46 +137,50 @@ function SelectQuiz() {
                           }
                         }}
                       />
-                    </label>
-                  </div>
+                    </div>
 
-                  <div className="settings-row">
-                    <label>
-                      Difficulty Level:
-                      <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-                        <option value="easy">Easy</option>
-                        <option value="medium">Medium</option>
-                        <option value="hard">Hard</option>
+                    <div className="pixel-form-group">
+                      <label className="gold-text">Threat Level:</label>
+                      <select 
+                        value={difficulty} 
+                        onChange={(e) => setDifficulty(e.target.value)}
+                        className="pixel-select"
+                      >
+                        <option value="easy">Lvl 1: Easy</option>
+                        <option value="medium">Lvl 2: Medium</option>
+                        <option value="hard">Lvl 3: Hard</option>
                       </select>
-                    </label>
+                    </div>
                   </div>
-                </div>
-
-                <div className="action-buttons">
-                  <button
-                    className="start-btn primary"
-                    onClick={handleStartQuiz}
-                    disabled={!selectedCategory}
-                  >
-                    Start Quiz
-                  </button>
-                  <button
-                    className="start-btn secondary"
-                    onClick={handleContinueWithoutCategory}
-                  >
-                    Random Quiz
-                  </button>
                 </div>
 
                 {selectedCategory && (
-                  <div className="selected-info">
+                  <div className="rpg-dialogue-box mt-4 text-center">
                     <p>
-                      Selected Category: <strong>
+                      TARGET LOCKED: <span className="green-text">
                         {categories.find((c) => c.id === selectedCategory)?.name}
-                      </strong>
+                      </span>
                     </p>
                   </div>
                 )}
+
+                <div className="action-buttons mt-4">
+                  <button
+                    className="pixel-btn btn-green pulse-btn"
+                    onClick={handleStartQuiz}
+                    disabled={!selectedCategory}
+                  >
+                    [ LAUNCH QUEST ]
+                  </button>
+                  
+                  <button
+                    className="pixel-btn btn-purple"
+                    onClick={handleContinueWithoutCategory}
+                  >
+                    [ RANDOM ENCOUNTER ]
+                  </button>
+                </div>
+                
               </>
             )}
           </div>

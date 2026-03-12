@@ -1,115 +1,119 @@
-@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-.pixelify-sans-font {
-  font-family: "Pixelify Sans", sans-serif;
-  font-weight: 700;
-}
-
-.page4 {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 100vh;
-  width: 100%;
-  color: white;
-  background: radial-gradient(circle at center, #000 60%, #111);
-  padding: 60px;
+.page-4-container {
+  font-family: 'Press Start 2P', monospace;
+  background-color: #000000;
+  color: #e0e0e0;
+  min-height: 100vh;
+  padding: 4rem 2rem;
   box-sizing: border-box;
-}
-
-.left1 {
-  flex: 1;
-  padding: 40px;
-  border: 3px solid #fff;
-  box-shadow: 3px 3px 0 #00ffff;
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 8px;
-  margin-right: 30px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
-.left1 h2 {
-  color: #ff00ff;
-  font-size: 2.2rem;
-  margin-bottom: 20px;
-  text-shadow: 2px 2px 0 #000, 4px 4px 0 #00ffff;
+.p4-layout {
+  max-width: 1200px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 40px;
 }
 
-.right1 {
+/* Section Sizing */
+.chart-section {
+  flex: 1.5;
+  min-width: 320px;
+}
+
+.text-section {
   flex: 1;
-  padding: 40px;
-  border: 3px solid #fff;
-  box-shadow: 3px 3px 0 #ff00ff;
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 8px;
-  text-align: left;
-  font-family: "Pixelify Sans", sans-serif;
+  min-width: 300px;
 }
 
-.right1 h3 {
-  color: #00ffff;
-  font-size: 2.1rem;
-  margin-bottom: 15px;
-  text-shadow: 2px 2px 0 #000, 4px 4px 0 #ff00ff;
+/* Typography Utilities */
+.mt-4 { margin-top: 2rem; }
+
+.pixel-title {
+  font-size: 24px;
+  text-shadow: 4px 4px 0 #333;
+  margin: 0;
+  text-align: center;
 }
 
-.right1 p {
-  font-size: 1.3rem;
-  line-height: 1.6;
-  /* text-shadow: 1px 1px 0 #000, 2px 2px 0 #00ffff; */
+.pixel-title-small {
+  font-size: 16px;
+  text-shadow: 2px 2px 0 #000;
+  margin: 0;
+  border-bottom: 2px dashed #555;
+  padding-bottom: 15px;
 }
 
-@media (max-width: 900px) {
-  .page4 {
+.gold-text { color: #ffd700; }
+.blue-text { color: #00f0ff; }
+.green-text { color: #39ff14; }
+
+/* Panels */
+.retro-panel {
+  background-color: #111122;
+  border: 4px solid #fff;
+  padding: 30px 20px;
+  box-shadow: 8px 8px 0px 0px rgba(255,255,255,0.15);
+}
+
+.rpg-dialogue-box.analysis-box {
+  background-color: #0000aa;
+  border: 4px solid #ffffff;
+  border-radius: 4px;
+  padding: 30px;
+  box-shadow: 
+    inset 0 0 0 4px #aaaaff,
+    8px 8px 0px rgba(255,255,255,0.15);
+}
+
+/* Custom Chart Adjustments */
+.chart-wrapper {
+  background: #000;
+  padding: 20px 10px 10px 0px;
+  border: 2px inset #555;
+}
+
+/* Lists */
+.pixel-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pixel-list li {
+  font-size: 10px;
+  margin-bottom: 20px;
+  line-height: 1.8;
+  display: flex;
+  align-items: flex-start;
+  color: #fff;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.pixel-list li span {
+  margin-right: 15px;
+  font-size: 12px;
+}
+
+/* Animations */
+.blink { animation: blink 1.5s step-end infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* Mobile Adjustments */
+@media (max-width: 850px) {
+  .p4-layout {
     flex-direction: column;
-    height: auto;
   }
-
-  .left1, .right1 {
-    margin: 20px 0;
-    width: 100%;
+  .pixel-title {
+    font-size: 18px;
   }
-}
-
-@media (max-width: 768px) {
-  .page4 {
-    padding: 40px 30px;
-  }
-
-  .left1 h2 {
-    font-size: 1.8rem;
-  }
-
-  .right1 h3 {
-    font-size: 1.7rem;
-  }
-
-  .right1 p {
-    font-size: 1.1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .page4 {
-    padding: 30px 15px;
-  }
-
-  .left1, .right1 {
-    padding: 25px;
-  }
-
-  .left1 h2 {
-    font-size: 1.5rem;
-  }
-
-  .right1 h3 {
-    font-size: 1.4rem;
-  }
-
-  .right1 p {
-    font-size: 1rem;
+  .rpg-dialogue-box.analysis-box {
+    padding: 20px;
   }
 }

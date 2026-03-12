@@ -1,217 +1,131 @@
-@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-.page-3 {
-  position: relative;
+.page-3-container {
+  font-family: 'Press Start 2P', monospace;
+  background-color: #000000;
+  color: #e0e0e0;
   min-height: 100vh;
-  background: #111;
-  color: #fff;
-  font-family: "Pixelify Sans", sans-serif;
+  padding: 4rem 2rem;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+}
+
+.p3-content {
+  max-width: 1100px;
+  width: 100%;
+}
+
+/* Typography Utilities */
+.text-center { text-align: center; }
+.mb-4 { margin-bottom: 3rem; }
+
+.pixel-title {
+  font-size: 28px;
+  text-shadow: 4px 4px 0 #333;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.pixel-title-small {
+  font-size: 14px;
+  text-shadow: 2px 2px 0 #000;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border-bottom: 2px dashed #555;
+  padding-bottom: 15px;
+  line-height: 1.4;
+}
+
+.pixel-text-small {
+  font-size: 10px;
+  color: #ccc;
+  line-height: 1.8;
+  text-align: center;
+}
+
+/* Theme Colors */
+.gold-text { color: #ffd700; }
+.blue-text { color: #00f0ff; }
+.green-text { color: #39ff14; }
+.purple-text { color: #b000ff; }
+.red-text { color: #ff003c; }
+
+.bg-gold { background-color: #ffd700; color: #000; }
+.bg-blue { background-color: #00f0ff; color: #000; }
+.bg-green { background-color: #39ff14; color: #000; }
+.bg-purple { background-color: #b000ff; color: #fff; }
+.bg-red { background-color: #ff003c; color: #fff; }
+
+/* RPG Dialogue Box Intro */
+.rpg-dialogue-box {
+  background-color: #0000aa;
+  border: 4px solid #ffffff;
+  border-radius: 4px;
+  padding: 20px 30px;
+  box-shadow: 
+    inset 0 0 0 4px #aaaaff,
+    8px 8px 0px rgba(255,255,255,0.1);
+  margin: 2rem auto;
+  max-width: 800px;
+}
+
+.rpg-dialogue-box p {
+  color: #ffffff;
+  text-shadow: 2px 2px 0px #000;
+  line-height: 1.8;
+  font-size: 11px;
+  margin: 0;
+}
+
+/* Feature Cards Flex Grid */
+.features-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 4rem;
+}
+
+.feature-card {
+  flex: 1 1 300px;
+  max-width: 340px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 60px 0;
-  overflow: hidden;
 }
 
-/* === Top Heading Section === */
-.start {
-  text-align: center;
-  max-width: 900px;
-  margin-bottom: 80px;
+.retro-panel {
+  background-color: #111122;
+  border: 4px solid #fff;
+  padding: 30px 20px;
+  box-shadow: 8px 8px 0px 0px rgba(255,255,255,0.15);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
 }
 
-.heading h2 {
-  font-size: 2.8rem;
-  text-shadow: 2px 2px 0 #000, 4px 4px 0 #ff00ff;
-  color: #fff;
-  margin-bottom: 20px;
+.retro-panel:hover {
+  transform: translateY(-8px);
+  border-color: #00f0ff;
+  box-shadow: 12px 12px 0px 0px rgba(0,240,255,0.3);
 }
 
-.heading h2 span {
-  color: #00ffff;
-}
-
-.content p {
-  font-size: 1.3rem;
-  font-weight: 600;
-  line-height: 1.8;
-  color: #ddd;
-  /* text-shadow: 1px 1px 0 #000, 2px 2px 0 #00ffff; */
-}
-
-.content p span {
-  color: #ff00ff;
-}
-
-.boxes {
+/* RPG Ability Icons */
+.feature-icon {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #fff;
+  box-shadow: 4px 4px 0 0 #000;
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 40px;
-  margin-bottom: 60px;
+  align-items: center;
+  margin: -60px auto 20px auto; /* Pops it out of the top center of the card */
+  font-size: 28px;
 }
 
-.box {
-  background: rgba(0, 0, 0, 0.6);
-  border: 3px solid #fff;
-  box-shadow: 4px 4px 0 #00ffff;
-  border-radius: 8px;
-  padding: 25px 30px;
-  width: 300px;
-  text-align: center;
-  transition: all 0.1s steps(1, end);
-}
-
-.box:hover {
-  transform: translate(-3px, -3px);
-  box-shadow: 4px 4px 0 #ff00ff;
-}
-
-.box img {
-  width: 100px;
-  height: 100px;
-  object-fit: contain;
-  margin-bottom: 15px;
-  filter: drop-shadow(3px 3px 0 #ff00ff);
-}
-
-.box h3 {
-  color: #ff00ff;
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-  text-shadow: 1px 1px 0 #000, 2px 2px 0 #00ffff;
-}
-
-.box p {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #fff;
-  text-shadow: 1px 1px 0 #000;
-}
-
-.boxes1 {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 50px;
-}
-
-.box1 {
-  background: rgba(0, 0, 0, 0.6);
-  border: 3px solid #fff;
-  box-shadow: 4px 4px 0 #00ffff;
-  border-radius: 8px;
-  padding: 25px 30px;
-  width: 350px;
-  text-align: center;
-  transition: all 0.1s steps(1, end);
-}
-
-.box1:hover {
-  transform: translate(-3px, -3px);
-  box-shadow: 4px 4px 0 #ff00ff;
-}
-
-.box1 img {
-  width: 100px;
-  height: 100px;
-  object-fit: contain;
-  margin-bottom: 15px;
-  filter: drop-shadow(3px 3px 0 #00ffff);
-}
-
-.box1 h3 {
-  color: #00ffff;
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-  text-shadow: 1px 1px 0 #000, 2px 2px 0 #ff00ff;
-}
-
-.box1 p {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #fff;
-  text-shadow: 1px 1px 0 #000;
-}
-.icon {
-  font-size: 80px;
-  margin-bottom: 20px;
-  color: #ff00ff;
-  text-shadow: 2px 2px 0 #000, 3px 3px 0 #00ffff;
-  transition: all 0.1s steps(1, end);
-}
-
-.box:hover .icon,
-.box1:hover .icon {
-  color: #00ffff;
-  transform: translate(-2px, -2px);
-  text-shadow: 2px 2px 0 #000, 3px 3px 0 #ff00ff;
-}
-
-/* Responsive Design */
+/* Mobile Adjustments */
 @media (max-width: 768px) {
-  .page-3 {
-    padding: 40px 0;
-  }
-
-  .heading h2 {
-    font-size: 2.2rem;
-  }
-
-  .content p {
-    font-size: 1.1rem;
-  }
-
-  .boxes, .boxes1 {
-    gap: 25px;
-  }
-
-  .box, .box1 {
-    width: 100%;
-    max-width: 400px;
-  }
-}
-
-@media (max-width: 480px) {
-  .page-3 {
-    padding: 30px 0;
-  }
-
-  .start {
-    margin-bottom: 50px;
-    padding: 0 10px;
-  }
-
-  .heading h2 {
-    font-size: 1.8rem;
-  }
-
-  .content p {
-    font-size: 1rem;
-  }
-
-  .boxes, .boxes1 {
-    gap: 20px;
-  }
-
-  .box, .box1 {
-    padding: 20px 25px;
-  }
-
-  .box h3, .box1 h3 {
-    font-size: 1.3rem;
-  }
-
-  .box p, .box1 p {
-    font-size: 0.9rem;
-  }
-
-  .box img, .box1 img {
-    width: 80px;
-    height: 80px;
-  }
-
-  .icon {
-    font-size: 60px;
-  }
+  .pixel-title { font-size: 20px; }
+  .rpg-dialogue-box p { font-size: 9px; }
+  .feature-card { max-width: 100%; }
 }
