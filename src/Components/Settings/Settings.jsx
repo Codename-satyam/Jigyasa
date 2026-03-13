@@ -46,7 +46,7 @@ function Settings() {
         if (!user) return;
 
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-        setSaveMessage('Preferences saved locally');
+        setSaveMessage('SYS.MSG: PREFERENCES SAVED LOCALLY');
 
         const timeoutId = window.setTimeout(() => {
             setSaveMessage('');
@@ -67,7 +67,7 @@ function Settings() {
         const nextUser = auth.updateCurrentUser({ avatarId });
         if (nextUser) {
             setUser(nextUser);
-            setSaveMessage('Avatar updated');
+            setSaveMessage('SYS.MSG: AVATAR OVERRIDE SUCCESSFUL');
         }
     };
 
@@ -82,7 +82,7 @@ function Settings() {
         ];
 
         keysToRemove.forEach((key) => localStorage.removeItem(key));
-        setSaveMessage('Local learning cache cleared');
+        setSaveMessage('SYS.MSG: LOCAL CACHE PURGED');
     };
 
     const handleLogout = () => {
@@ -95,162 +95,186 @@ function Settings() {
     }
 
     return (
-        <div className="settings-page">
-            <div className="settings-shell">
-                <div className="settings-topbar">
+        <div className="cyber-settings-page">
+            <div className="cyber-settings-shell">
+                
+                {/* TOP BAR */}
+                <div className="cyber-topbar">
                     <BackButton />
-                    <button type="button" className="settings-ghost" onClick={() => navigate('/dashboard')}>
-                        Dashboard
+                    <button type="button" className="cyber-ghost-btn" onClick={() => navigate('/dashboard')}>
+                        [ RETURN TO DASHBOARD ]
                     </button>
                 </div>
 
-                <div className="settings-hero">
-                    <div>
-                        <p className="settings-kicker">Student preferences</p>
-                        <h1>Settings</h1>
-                        <p className="settings-subtitle">
-                            Tune your quiz experience, update your avatar, and manage what stays on this device.
+                {/* HERO / HEADER */}
+                <div className="cyber-hero">
+                    <div className="hero-text-block">
+                        <p className="cyber-kicker gold-text">USER PREFERENCES</p>
+                        <h1 className="pixel-title text-shadow-blue">SYSTEM CONFIG</h1>
+                        <p className="cyber-subtitle blue-text">
+                            &gt; Calibrate your parameters, select your digital avatar, and manage system memory.
                         </p>
                     </div>
-                    <div className="settings-profile-card">
-                        <span className="settings-avatar-preview">{selectedAvatar.emoji}</span>
-                        <div>
-                            <h2>{user.name}</h2>
-                            <p>{user.email}</p>
-                            <span className="settings-role">{user.role}</span>
+                    <div className="cyber-profile-card">
+                        <div className="cyber-avatar-preview border-cyan">{selectedAvatar.emoji}</div>
+                        <div className="profile-details">
+                            <h2 className="cyan-text">{user.name}</h2>
+                            <p className="gray-text">{user.email}</p>
+                            <span className="cyber-role-badge bg-magenta">{user.role}</span>
                         </div>
                     </div>
                 </div>
 
-                {saveMessage && <div className="settings-banner">{saveMessage}</div>}
+                {/* SAVE NOTIFICATION BANNER */}
+                {saveMessage && (
+                    <div className="cyber-banner blink">
+                        {saveMessage}
+                    </div>
+                )}
 
-                <div className="settings-grid">
-                    <section className="settings-card">
-                        <div className="settings-card-header">
-                            <h3>Profile</h3>
-                            <p>Pick the avatar that appears in your learning space.</p>
+                {/* GRID PANELS */}
+                <div className="cyber-settings-grid">
+                    
+                    {/* AVATAR SECTION */}
+                    <section className="cyber-card border-magenta">
+                        <div className="cyber-card-header bg-magenta">
+                            <h3>OPERATIVE ID</h3>
+                            <p>Select your visual representation for the grid.</p>
                         </div>
-                        <div className="settings-avatar-grid">
+                        <div className="cyber-avatar-grid">
                             {auth.AVATAR_OPTIONS.map((avatar) => (
                                 <button
                                     key={avatar.id}
                                     type="button"
-                                    className={`settings-avatar-option ${user.avatarId === avatar.id ? 'active' : ''}`}
+                                    className={`cyber-avatar-option ${user.avatarId === avatar.id ? 'active-avatar' : ''}`}
                                     onClick={() => selectAvatar(avatar.id)}
                                 >
-                                    <span className="settings-avatar-emoji">{avatar.emoji}</span>
-                                    <span>{avatar.name}</span>
+                                    <span className="cyber-avatar-emoji">{avatar.emoji}</span>
+                                    <span className="avatar-name">{avatar.name}</span>
                                 </button>
                             ))}
                         </div>
                     </section>
 
-                    <section className="settings-card">
-                        <div className="settings-card-header">
-                            <h3>Learning preferences</h3>
-                            <p>Set defaults that make quizzes feel right for you.</p>
+                    {/* LEARNING PREFS SECTION */}
+                    <section className="cyber-card border-cyan">
+                        <div className="cyber-card-header bg-cyan">
+                            <h3>SIMULATION PARAMETERS</h3>
+                            <p>Set base difficulties and targets for your sessions.</p>
                         </div>
+                        <div className="cyber-card-body">
+                            <label className="cyber-field">
+                                <span className="field-label">THREAT LEVEL (DIFFICULTY)</span>
+                                <select
+                                    className="cyber-select"
+                                    value={settings.preferredDifficulty}
+                                    onChange={(event) => updatePreference('preferredDifficulty', event.target.value)}
+                                >
+                                    <option value="easy">EASY (NOVICE)</option>
+                                    <option value="medium">MEDIUM (STANDARD)</option>
+                                    <option value="hard">HARD (VETERAN)</option>
+                                </select>
+                            </label>
 
-                        <label className="settings-field">
-                            <span>Preferred difficulty</span>
-                            <select
-                                value={settings.preferredDifficulty}
-                                onChange={(event) => updatePreference('preferredDifficulty', event.target.value)}
-                            >
-                                <option value="easy">Easy</option>
-                                <option value="medium">Medium</option>
-                                <option value="hard">Hard</option>
-                            </select>
-                        </label>
+                            <label className="cyber-field">
+                                <span className="field-label">STAGES PER RUN (QUIZ LENGTH)</span>
+                                <select
+                                    className="cyber-select"
+                                    value={settings.quizLength}
+                                    onChange={(event) => updatePreference('quizLength', Number(event.target.value))}
+                                >
+                                    <option value={5}>5 STAGES</option>
+                                    <option value={10}>10 STAGES</option>
+                                    <option value={15}>15 STAGES</option>
+                                    <option value={20}>20 STAGES</option>
+                                </select>
+                            </label>
 
-                        <label className="settings-field">
-                            <span>Default quiz length</span>
-                            <select
-                                value={settings.quizLength}
-                                onChange={(event) => updatePreference('quizLength', Number(event.target.value))}
-                            >
-                                <option value={5}>5 questions</option>
-                                <option value={10}>10 questions</option>
-                                <option value={15}>15 questions</option>
-                                <option value={20}>20 questions</option>
-                            </select>
-                        </label>
-
-                        <label className="settings-field">
-                            <span>Daily learning goal</span>
-                            <select
-                                value={settings.dailyGoal}
-                                onChange={(event) => updatePreference('dailyGoal', Number(event.target.value))}
-                            >
-                                <option value={10}>10 minutes</option>
-                                <option value={20}>20 minutes</option>
-                                <option value={30}>30 minutes</option>
-                                <option value={45}>45 minutes</option>
-                            </select>
-                        </label>
-                    </section>
-
-                    <section className="settings-card">
-                        <div className="settings-card-header">
-                            <h3>Experience</h3>
-                            <p>Control how lively the app feels on this device.</p>
-                        </div>
-
-                        <label className="settings-toggle-row">
-                            <div>
-                                <strong>Sound effects</strong>
-                                <p>Keep game and quiz feedback sounds enabled.</p>
-                            </div>
-                            <input
-                                type="checkbox"
-                                checked={settings.soundEffects}
-                                onChange={(event) => updatePreference('soundEffects', event.target.checked)}
-                            />
-                        </label>
-
-                        <label className="settings-toggle-row">
-                            <div>
-                                <strong>Reduced motion</strong>
-                                <p>Use fewer animations for a calmer interface.</p>
-                            </div>
-                            <input
-                                type="checkbox"
-                                checked={settings.reducedMotion}
-                                onChange={(event) => updatePreference('reducedMotion', event.target.checked)}
-                            />
-                        </label>
-
-                        <label className="settings-toggle-row">
-                            <div>
-                                <strong>Show hints</strong>
-                                <p>Keep helper cues visible in learning flows.</p>
-                            </div>
-                            <input
-                                type="checkbox"
-                                checked={settings.showHints}
-                                onChange={(event) => updatePreference('showHints', event.target.checked)}
-                            />
-                        </label>
-                    </section>
-
-                    <section className="settings-card settings-card-accent">
-                        <div className="settings-card-header">
-                            <h3>Account actions</h3>
-                            <p>Use these carefully. They affect only this browser.</p>
-                        </div>
-
-                        <div className="settings-action-stack">
-                            <button type="button" className="settings-secondary" onClick={clearLearningData}>
-                                Clear local progress cache
-                            </button>
-                            <button type="button" className="settings-primary" onClick={() => navigate('/play/quiz-select')}>
-                                Start a quiz
-                            </button>
-                            <button type="button" className="settings-danger" onClick={handleLogout}>
-                                Log out
-                            </button>
+                            <label className="cyber-field">
+                                <span className="field-label">DAILY UPTIME GOAL</span>
+                                <select
+                                    className="cyber-select"
+                                    value={settings.dailyGoal}
+                                    onChange={(event) => updatePreference('dailyGoal', Number(event.target.value))}
+                                >
+                                    <option value={10}>10 MINUTES</option>
+                                    <option value={20}>20 MINUTES</option>
+                                    <option value={30}>30 MINUTES</option>
+                                    <option value={45}>45 MINUTES</option>
+                                </select>
+                            </label>
                         </div>
                     </section>
+
+                    {/* SENSORY SETTINGS SECTION */}
+                    <section className="cyber-card border-gold">
+                        <div className="cyber-card-header bg-gold">
+                            <h3>SENSORY FEEDBACK</h3>
+                            <p>Adjust visual and auditory system responses.</p>
+                        </div>
+                        <div className="cyber-card-body">
+                            <label className="cyber-toggle-row">
+                                <div className="toggle-info">
+                                    <strong className="gold-text">AUDIO CUES</strong>
+                                    <p>Enable game and menu sound effects.</p>
+                                </div>
+                                <input
+                                    className="cyber-checkbox border-gold"
+                                    type="checkbox"
+                                    checked={settings.soundEffects}
+                                    onChange={(event) => updatePreference('soundEffects', event.target.checked)}
+                                />
+                            </label>
+
+                            <label className="cyber-toggle-row">
+                                <div className="toggle-info">
+                                    <strong className="gold-text">STATIC RENDER (REDUCED MOTION)</strong>
+                                    <p>Minimize UI animations for performance.</p>
+                                </div>
+                                <input
+                                    className="cyber-checkbox border-gold"
+                                    type="checkbox"
+                                    checked={settings.reducedMotion}
+                                    onChange={(event) => updatePreference('reducedMotion', event.target.checked)}
+                                />
+                            </label>
+
+                            <label className="cyber-toggle-row">
+                                <div className="toggle-info">
+                                    <strong className="gold-text">GUIDANCE MODULE (HINTS)</strong>
+                                    <p>Display helper text during simulations.</p>
+                                </div>
+                                <input
+                                    className="cyber-checkbox border-gold"
+                                    type="checkbox"
+                                    checked={settings.showHints}
+                                    onChange={(event) => updatePreference('showHints', event.target.checked)}
+                                />
+                            </label>
+                        </div>
+                    </section>
+
+                    {/* SYSTEM COMMANDS SECTION */}
+                    <section className="cyber-card border-red">
+                        <div className="cyber-card-header bg-red">
+                            <h3>SYSTEM OVERRIDES</h3>
+                            <p>Critical commands. Actions cannot be undone.</p>
+                        </div>
+                        <div className="cyber-card-body">
+                            <div className="cyber-action-stack">
+                                <button type="button" className="cyber-btn btn-hollow-red" onClick={clearLearningData}>
+                                    [ PURGE CACHE ]
+                                </button>
+                                <button type="button" className="cyber-btn btn-solid-green pulse-btn" onClick={() => navigate('/play/quiz-select')}>
+                                    [ INITIATE MISSION ]
+                                </button>
+                                <button type="button" className="cyber-btn btn-solid-red" onClick={handleLogout}>
+                                    [ TERMINATE SESSION ]
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
                 </div>
             </div>
         </div>

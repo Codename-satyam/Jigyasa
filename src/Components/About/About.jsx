@@ -86,14 +86,28 @@ const teamMembers = [
 function About() {
     const screenRef = useRef(null);
     const [selectedMember, setSelectedMember] = useState(null);
+    const [isScreenOn, setIsScreenOn] = useState(true);
+
+    const onOff = () => {
+        setIsScreenOn((currentValue) => !currentValue);
+        setSelectedMember(null);
+    };
 
     const scrollUp = () => {
+        if (!isScreenOn) {
+            return;
+        }
+
         if (screenRef.current) {
             screenRef.current.scrollBy({ top: -150, behavior: "smooth" });
         }
     };
 
     const scrollDown = () => {
+        if (!isScreenOn) {
+            return;
+        }
+
         if (screenRef.current) {
             screenRef.current.scrollBy({ top: 150, behavior: "smooth" });
         }
@@ -104,6 +118,10 @@ function About() {
     };
 
     const openModal = (index) => {
+        if (!isScreenOn) {
+            return;
+        }
+
         setSelectedMember(index);
     };
 
@@ -126,7 +144,10 @@ function About() {
                 <div className="pc-monitor-bezel">
                     <div className="pc-monitor-screen">
 
-                        <div className="screen-content-wrapper" ref={screenRef}>
+                        <div
+                            className={`screen-content-wrapper ${isScreenOn ? '' : 'screen-off'}`.trim()}
+                            ref={screenRef}
+                        >
 
                             <div className="about-header text-center">
                                 <h1 className="pixel-title gold-text">SYSTEM DIRECTORY</h1>
@@ -241,6 +262,19 @@ function About() {
                         <div className="monitor-logo">JIGYASA_TRON 2000</div>
                         <div className="monitor-buttons">
                             <div className="pwr-btn"></div>
+                            <div
+                                className={`on-off ${isScreenOn ? 'is-on' : 'is-off'}`}
+                                onClick={onOff}
+                                role="button"
+                                aria-label={isScreenOn ? 'Turn screen off' : 'Turn screen on'}
+                                tabIndex={0}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter' || event.key === ' ') {
+                                        event.preventDefault();
+                                        onOff();
+                                    }
+                                }}
+                            ></div>
                             <div className="menu-btn" onClick={scrollUp}></div>
                             <div className="menu-btn" onClick={scrollDown}></div>
                         </div>

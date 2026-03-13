@@ -10,18 +10,13 @@ import gameend from "../../../../Assets/g6/game-end.png";
 import { riddles } from "./riddles";
 import { enemyPool } from "./enemyPool";
 
-
-
-
 function RiddleRPG() {
-
     /* ================= AUDIO REFS ================= */
     const attackSoundRef = useRef(new Audio(slash));
     const damageSoundRef = useRef(new Audio(damage));
     const victorySoundRef = useRef(new Audio(victory));
 
     /* ================= PLAYER ================= */
-
     const [player, setPlayer] = useState({
         level: 1,
         xp: 0,
@@ -33,9 +28,7 @@ function RiddleRPG() {
     });
 
     /* ================= ENEMY ================= */
-
     const getEnemy = (level, playerMaxHp = 100) => {
-        // Force ADMIN at levels 4 and 8
         if (level === 4 || level === 8) {
             const adminData = enemyPool.find(e => e.name === "ADMIN");
             if (adminData) {
@@ -50,34 +43,25 @@ function RiddleRPG() {
             }
         }
 
-        // Regular enemy spawning for other levels
         const pool = enemyPool.filter(
             e => e.name !== "ADMIN" && e.baseHp + e.hpPerLevel * (level - 1) <= playerMaxHp * 1.5
         );
 
-        const enemyData =
-            pool.length > 0
-                ? pool[Math.floor(Math.random() * pool.length)]
-                : enemyPool[0];
-
-        const maxHp =
-            enemyData.baseHp + enemyData.hpPerLevel * (level - 1);
+        const enemyData = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : enemyPool[0];
+        const maxHp = enemyData.baseHp + enemyData.hpPerLevel * (level - 1);
 
         return {
             ...enemyData,
             level,
             maxHp,
             hp: maxHp,
-            damage:
-                enemyData.baseDamage +
-                (enemyData.damagePerLevel || 0) * (level - 1)
+            damage: enemyData.baseDamage + (enemyData.damagePerLevel || 0) * (level - 1)
         };
     };
 
     const [enemy, setEnemy] = useState(() => getEnemy(1, 100));
 
     /* ================= UI STATE ================= */
-
     const [current, setCurrent] = useState(0);
     const [input, setInput] = useState("");
     const [message, setMessage] = useState("");
@@ -96,28 +80,20 @@ function RiddleRPG() {
     const isVictory = enemy.hp <= 0;
     const isDefeat = player.hp <= 0;
 
-    const nextRiddle = () =>
-        setCurrent(prev => (prev + 1) % riddles.length);
+    const nextRiddle = () => setCurrent(prev => (prev + 1) % riddles.length);
 
     /* ================= ENEMY ATTACK ================= */
-
     const enemyAttack = () => {
         setShake(true);
-
-        // Play damage sound when enemy attacks
         damageSoundRef.current.currentTime = 0;
         damageSoundRef.current.play().catch(e => console.log("Audio play failed:", e));
 
         const finalDamage = enemy.damage;
-
         setDamagePopup({ value: `-${finalDamage}`, type: "player" });
-
         setPlayerDamaged(true);
+        
         clearTimeout(playerDamageTimerRef.current);
-        playerDamageTimerRef.current = setTimeout(
-            () => setPlayerDamaged(false),
-            400
-        );
+        playerDamageTimerRef.current = setTimeout(() => setPlayerDamaged(false), 400);
 
         setPlayer(prev => ({
             ...prev,
@@ -129,7 +105,6 @@ function RiddleRPG() {
     };
 
     /* ================= XP SYSTEM ================= */
-
     const gainXP = amount => {
         setPlayer(prev => {
             let xp = prev.xp + amount;
@@ -147,72 +122,52 @@ function RiddleRPG() {
             }
 
             return {
-                ...prev,
-                level,
-                xp,
-                xpToLevel,
-                maxHp,
-                hp: maxHp,
-                maxMana,
-                mana: maxMana
+                ...prev, level, xp, xpToLevel, maxHp, hp: maxHp, maxMana, mana: maxMana
             };
         });
     };
 
     /* ================= ATTACK ================= */
-
     const attack = (power = false) => {
         if (isDefeat || victoryScreen) return;
-
         if (power && player.mana < 20) {
-            setMessage("Not enough mana!");
+            setMessage("SYSTEM: Insufficient Mana!");
             return;
         }
 
-        const correct =
-            input.trim().toLowerCase() ===
-            riddles[current].answer.toLowerCase();
+        const correct = input.trim().toLowerCase() === riddles[current].answer.toLowerCase();
 
         if (!correct) {
-            setMessage("Wrong answer! Enemy attacks!");
+            setMessage("INCORRECT! Enemy strikes back!");
             enemyAttack();
             nextRiddle();
             setInput("");
             return;
         }
 
-        // Play attack sound on successful hit
         attackSoundRef.current.currentTime = 0;
         attackSoundRef.current.play().catch(e => console.log("Audio play failed:", e));
 
         setPlayerAttacking(true);
         clearTimeout(playerAttackTimerRef.current);
-        playerAttackTimerRef.current = setTimeout(
-            () => setPlayerAttacking(false),
-            200
-        );
+        playerAttackTimerRef.current = setTimeout(() => setPlayerAttacking(false), 200);
 
         const baseDamage = power ? 40 : 20;
-        const damage =
-            Math.random() < 0.2 ? baseDamage * 2 : baseDamage;
+        const damage = Math.random() < 0.2 ? baseDamage * 2 : baseDamage;
 
         if (damage > baseDamage) {
-            setMessage("🔥 Critical Hit!");
+            setMessage("CRITICAL HIT!");
+        } else {
+            setMessage("TARGET STRUCK!");
         }
 
         setShake(true);
         setDamagePopup({ value: `-${damage}`, type: "enemy" });
 
-        setEnemy(prev => ({
-            ...prev,
-            hp: Math.max(0, prev.hp - damage)
-        }));
+        setEnemy(prev => ({ ...prev, hp: Math.max(0, prev.hp - damage) }));
 
         if (power) {
-            setPlayer(prev => ({
-                ...prev,
-                mana: prev.mana - 20
-            }));
+            setPlayer(prev => ({ ...prev, mana: prev.mana - 20 }));
         }
 
         setTimeout(() => setShake(false), 300);
@@ -223,22 +178,16 @@ function RiddleRPG() {
     };
 
     /* ================= EFFECTS ================= */
-
     useEffect(() => {
         if (isVictory && !xpAwardedRef.current) {
             gainXP(40);
-            
-            // Check if defeated enemy was ADMIN
             if (enemy.name === "ADMIN") {
                 setGameCompleted(true);
             } else {
                 setVictoryScreen(true);
             }
-            
-            // Play victory sound when player wins
             victorySoundRef.current.currentTime = 0;
             victorySoundRef.current.play().catch(e => console.log("Audio play failed:", e));
-            
             xpAwardedRef.current = true;
         }
     }, [isVictory, enemy.name]);
@@ -263,30 +212,16 @@ function RiddleRPG() {
     }, []);
 
     /* ================= CONTINUE / RESTART ================= */
-
     const continueGame = () => {
         setVictoryScreen(false);
         const newEnemy = getEnemy(player.level, player.maxHp);
         setEnemy(newEnemy);
-        
-        // Show ADMIN popup if it's ADMIN
-        if (newEnemy.name === "ADMIN") {
-            setAdminPopup(true);
-        }
-        
+        if (newEnemy.name === "ADMIN") setAdminPopup(true);
         xpAwardedRef.current = false;
     };
 
     const restartGame = () => {
-        setPlayer({
-            level: 1,
-            xp: 0,
-            xpToLevel: 50,
-            maxHp: 100,
-            hp: 100,
-            maxMana: 50,
-            mana: 50
-        });
+        setPlayer({ level: 1, xp: 0, xpToLevel: 50, maxHp: 100, hp: 100, maxMana: 50, mana: 50 });
         setEnemy(getEnemy(1, 100));
         setVictoryScreen(false);
         setGameCompleted(false);
@@ -294,232 +229,185 @@ function RiddleRPG() {
     };
 
     /* ================= PERCENTAGES ================= */
-
     const hpPercent = (player.hp / player.maxHp) * 100;
     const enemyPercent = (enemy.hp / enemy.maxHp) * 100;
     const xpPercent = (player.xp / player.xpToLevel) * 100;
     const manaPercent = (player.mana / player.maxMana) * 100;
 
     /* ================= RENDER ================= */
-
     return (
         <div className="g6-body">
-            <div className={`riddle-container ${shake ? "shake" : ""}`}>
-                <h1>Riddle RPG ⚔️</h1>
-                <p className="g6-subtitle">ANSWER THE RIDDLE · DEFEAT YOUR FOE · CLAIM GLORY</p>
+            <div className={`rpg-container retro-panel ${shake ? "shake" : ""}`}>
+                
+                {/* JRPG BATTLE STAGE */}
+                <div className="rpg-battle-stage">
+                    
+                    {/* PLAYER SIDE */}
+                    <div className="battle-character player-side">
+                        <div className="character-stats-panel border-blue">
+                            <div className="char-head">
+                                <span className="blue-text">HERO</span>
+                                <span className="gold-text">LV {player.level}</span>
+                            </div>
+                            
+                            <div className="rpg-stat-row">
+                                <span className="stat-label">HP</span>
+                                <div className="rpg-bar-bg">
+                                    <div className={`rpg-bar-fill ${player.hp < player.maxHp * 0.3 ? "bg-red blink" : "bg-green"}`} style={{ width: `${hpPercent}%` }} />
+                                </div>
+                                <span className="stat-num">{player.hp}/{player.maxHp}</span>
+                            </div>
 
-                <div className="battle-area">
-                    <div className="character player-card1">
-                        <div className="character-header">
-                            <span className="hero-tag">HERO</span>
-                            <h3 className="level-badge">
-                                LV {player.level}
-                            </h3>
+                            <div className="rpg-stat-row">
+                                <span className="stat-label">MP</span>
+                                <div className="rpg-bar-bg">
+                                    <div className="rpg-bar-fill bg-blue" style={{ width: `${manaPercent}%` }} />
+                                </div>
+                                <span className="stat-num">{player.mana}/{player.maxMana}</span>
+                            </div>
+
+                            <div className="rpg-stat-row">
+                                <span className="stat-label">XP</span>
+                                <div className="rpg-bar-bg">
+                                    <div className="rpg-bar-fill bg-gold" style={{ width: `${xpPercent}%` }} />
+                                </div>
+                                <span className="stat-num">{player.xp}/{player.xpToLevel}</span>
+                            </div>
                         </div>
 
-                        <img
-                            src={playerAttacking ? knightattack : (playerDamaged ? knightdamage : knight)}
-                            alt="Player"
-                            className="character-portrait"
-                        />
-
-                        <div className="stats-container">
-                            <div className="stat-row">
-                                <span className="g6-stat-label">HP</span>
-                                <div className="healthbar-track">
-                                    <div
-                                        className={`player-fill ${
-                                            player.hp <
-                                            player.maxHp * 0.3
-                                                ? "low-hp"
-                                                : ""
-                                        }`}
-                                        style={{ width: `${hpPercent}%` }}
-                                    />
-                                    <span className="hp-text">
-                                        {player.hp}/{player.maxHp}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="stat-row">
-                                <span className="g6-stat-label">MP</span>
-                                <div className="healthbar-track">
-                                    <div
-                                        className="mana-fill"
-                                        style={{ width: `${manaPercent}%` }}
-                                    />
-                                    <span className="hp-text">
-                                        {player.mana}/{player.maxMana}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="stat-row">
-                                <span className="g6-stat-label">EXP</span>
-                                <div className="healthbar-track">
-                                    <div
-                                        className="xp-fill"
-                                        style={{ width: `${xpPercent}%` }}
-                                    />
-                                    <span className="hp-text">
-                                        {player.xp}/{player.xpToLevel}
-                                    </span>
-                                </div>
-                            </div>
+                        <div className="character-sprite-box">
+                            <img
+                                src={playerAttacking ? knightattack : (playerDamaged ? knightdamage : knight)}
+                                alt="Player"
+                                className="sprite-img"
+                            />
+                            {damagePopup?.type === "player" && (
+                                <div className="damage-text player-damage">{damagePopup.value}</div>
+                            )}
                         </div>
                     </div>
 
-                    <div className="vs-divider">
-                        <span>VS</span>
-                        <div className="vs-sparks">✦</div>
+                    <div className="vs-badge blink-slow text-center">
+                        <span className="red-text">V</span><span className="blue-text">S</span>
                     </div>
 
-                    <div className="character enemy-card">
-                        <div className="character-header">
-                            <h3 className="enemy-name">
-                                {enemy.name}
-                            </h3>
-                            <span className="enemy-level">
-                                Lv {enemy.level}
-                            </span>
-                        </div>
-
-                        <img
-                            src={enemy.Image || knight}
-                            alt="Enemy"
-                            className="character-portrait enemy-portrait"
-                        />
-
-                        <div className="stats-container">
-                            <div className="stat-row">
-                                <span className="g6-stat-label">HP</span>
-                                <div className="healthbar-track">
-                                    <div
-                                        className={`enemy-fill ${
-                                            enemy.hp <
-                                            enemy.maxHp * 0.3
-                                                ? "low-hp"
-                                                : ""
-                                        }`}
-                                        style={{ width: `${enemyPercent}%` }}
-                                    />
-                                    <span className="hp-text">
-                                        {enemy.hp}/{enemy.maxHp}
-                                    </span>
+                    {/* ENEMY SIDE */}
+                    <div className="battle-character enemy-side">
+                        <div className="character-stats-panel border-red">
+                            <div className="char-head">
+                                <span className="red-text">{enemy.name}</span>
+                                <span className="gold-text">LV {enemy.level}</span>
+                            </div>
+                            
+                            <div className="rpg-stat-row">
+                                <span className="stat-label">HP</span>
+                                <div className="rpg-bar-bg">
+                                    <div className="rpg-bar-fill bg-red" style={{ width: `${enemyPercent}%` }} />
                                 </div>
+                                <span className="stat-num">{enemy.hp}/{enemy.maxHp}</span>
                             </div>
                         </div>
+
+                        <div className="character-sprite-box">
+                            <img
+                                src={enemy.Image || knight}
+                                alt="Enemy"
+                                className="sprite-img enemy-img"
+                            />
+                            {damagePopup?.type === "enemy" && (
+                                <div className="damage-text enemy-damage">{damagePopup.value}</div>
+                            )}
+                        </div>
                     </div>
+
                 </div>
 
-                {damagePopup && (
-                    <div className={`damage-popup ${damagePopup.type}`}>
-                        {damagePopup.value}
+                {/* BOTTOM RPG PANELS */}
+                <div className="rpg-bottom-hud">
+                    
+                    {/* RIDDLE DIALOGUE BOX */}
+                    <div className="rpg-dialogue-box">
+                        <h3 className="dialogue-name gold-text">▶ THE ENIGMA:</h3>
+                        {!isDefeat && !victoryScreen ? (
+                            <p className="dialogue-text typing-effect">{riddles[current].question}</p>
+                        ) : (
+                            <p className="dialogue-text">...</p>
+                        )}
+                        {message && <span className="system-message blink">{message}</span>}
                     </div>
-                )}
 
-                {!isDefeat && !victoryScreen && (
-                    <>
-                        <div className="riddle-box">
-                            <span className="riddle-label">◈ RIDDLE ◈</span>
-                            <p className="riddle-text">{riddles[current].question}</p>
-                        </div>
-
-                        <input
-                            className="g6-input"
-                            value={input}
-                            onChange={(e) =>
-                                setInput(e.target.value)
-                            }
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter")
-                                    attack(false);
-                            }}
-                            placeholder="► Type your answer here..."
-                        />
-
-                        <div className="g6-action-row">
-                            <button
-                                className="g6-button g6-btn-attack"
-                                onClick={() => attack(false)}
-                            >
-                                ⚔ ATTACK
-                            </button>
-
-                            <button
-                                className="g6-button g6-btn-power"
-                                onClick={() => attack(true)}
-                                disabled={player.mana < 20}
-                            >
-                                💥 POWER STRIKE
-                                <span className="btn-cost">20 MP</span>
-                            </button>
-                        </div>
-                    </>
-                )}
-
-                {message && (
-                    <div className="message">{message}</div>
-                )}
-
-                {isDefeat && (
-                    <div className="defeat-screen">
-                        <div className="defeat-content">
-                            <img
-                                src={gameend}
-                                alt="Game over"
-                                className="gamend"
+                    {/* COMMAND MENU */}
+                    <div className="rpg-command-menu">
+                        <div className="command-header bg-blue text-black">COMMANDS</div>
+                        <div className="command-body">
+                            <input
+                                className="pixel-input mb-2"
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === "Enter") attack(false); }}
+                                placeholder="&gt; INPUT ANSWER..."
+                                disabled={isDefeat || victoryScreen}
                             />
-                            <h2>YOU WERE DEFEATED</h2>
-                            <button
-                                className="g6-button"
-                                onClick={restartGame}
-                            >
-                                Restart
+                            <div className="command-actions">
+                                <button className="pixel-btn btn-dark w-100 mb-2 text-left" onClick={() => attack(false)} disabled={isDefeat || victoryScreen}>
+                                    <span className="gold-text">▶</span> ATTACK
+                                </button>
+                                <button className="pixel-btn btn-dark w-100 text-left" onClick={() => attack(true)} disabled={player.mana < 20 || isDefeat || victoryScreen}>
+                                    <span className="purple-text">▶</span> POWER STRIKE <span className="blue-text" style={{fontSize: '8px'}}>[20 MP]</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                {/* OVERLAY SCREENS */}
+                {isDefeat && (
+                    <div className="modal-overlay">
+                        <div className="in-screen-modal-content border-red text-center">
+                            <img src={gameend} alt="Game over" className="game-over-img mb-4" />
+                            <h2 className="pixel-title red-text blink mb-4">YOU PERISHED</h2>
+                            <button className="pixel-btn btn-red pulse-btn mx-auto" onClick={restartGame}>
+                                [ RESTART JOURNEY ]
                             </button>
                         </div>
                     </div>
                 )}
 
                 {victoryScreen && (
-                    <div className="victory-screen">
-                        <div className="victory-content">
-                            <h1>🏆 VICTORY</h1>
-                            <p>You defeated the enemy!</p>
-                            <button
-                                className="g6-button"
-                                onClick={continueGame}
-                            >
-                                Continue
+                    <div className="modal-overlay">
+                        <div className="in-screen-modal-content border-gold text-center">
+                            <h1 className="pixel-title gold-text mb-2">VICTORY!</h1>
+                            <p className="pixel-subtitle green-text mb-4">+40 EXP ACQUIRED</p>
+                            <button className="pixel-btn btn-green pulse-btn mx-auto" onClick={continueGame}>
+                                [ PROCEED TO NEXT FLOOR ]
                             </button>
                         </div>
                     </div>
                 )}
 
                 {gameCompleted && (
-                    <div className="victory-screen game-completed">
-                        <div className="victory-content">
-                            <h1 className="game-completed-title">🎮 GAME COMPLETED 🎮</h1>
-                            <p className="admin-defeated-text">You defeated ADMIN!</p>
-                            <p>Final Level: {player.level}</p>
-                            <button
-                                className="g6-button"
-                                onClick={restartGame}
-                            >
-                                Play Again
+                    <div className="modal-overlay">
+                        <div className="in-screen-modal-content border-purple text-center">
+                            <h1 className="pixel-title purple-text blink mb-2">SYSTEM CONQUERED</h1>
+                            <p className="green-text mb-2">ADMIN HAS BEEN DEFEATED.</p>
+                            <p className="blue-text mb-4">Final Level Reached: {player.level}</p>
+                            <button className="pixel-btn btn-purple pulse-btn mx-auto" onClick={restartGame}>
+                                [ START NEW GAME+ ]
                             </button>
                         </div>
                     </div>
                 )}
 
                 {adminPopup && (
-                    <div className="admin-popup-overlay">
-                        <div className="admin-popup-content">
-                            <h1 className="admin-popup-text">ADMIN HAS ARRIVED</h1>
+                    <div className="modal-overlay admin-flash">
+                        <div className="admin-warning-box text-center">
+                            <h1 className="huge-text red-text blink-fast">WARNING!</h1>
+                            <h2 className="pixel-title mt-2">ADMIN HAS ARRIVED</h2>
                         </div>
                     </div>
                 )}
+
             </div>
         </div>
     );

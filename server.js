@@ -18,7 +18,6 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:4001',
-  'http://192.168.100.22:3000',
   process.env.CLIENT_ORIGIN
 ].filter(Boolean);
 
