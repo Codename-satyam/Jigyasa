@@ -93,6 +93,14 @@
   box-sizing: border-box;
   scrollbar-width: thin;
   scrollbar-color: #00f0ff #111;
+  transition: opacity 0.25s ease, filter 0.25s ease, background-color 0.25s ease;
+}
+
+.screen-content-wrapper.screen-off {
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background-color: #000;
 }
 
 .screen-content-wrapper::-webkit-scrollbar { width: 8px; }
@@ -122,6 +130,29 @@
   border-radius: 50%;
   background-color: #39ff14;
   box-shadow: inset 2px 2px 2px rgba(0,0,0,0.5), 0 0 10px #39ff14;
+}
+.on-off{
+  width: 30px;
+  height: 10px;
+  background-color: #b22222;
+  border-radius: 5px;
+  box-shadow: inset 1px 1px 2px #fff, inset -1px -1px 2px rgba(0,0,0,0.5);
+  cursor: pointer;
+}
+
+.on-off.is-on {
+  background-color: #39ff14;
+  box-shadow: inset 1px 1px 2px #fff, inset -1px -1px 2px rgba(0,0,0,0.5), 0 0 8px rgba(57,255,20,0.8);
+}
+
+.on-off.is-off {
+  background-color: #b22222;
+  box-shadow: inset 1px 1px 2px #fff, inset -1px -1px 2px rgba(0,0,0,0.5), 0 0 6px rgba(178,34,34,0.6);
+}
+
+.on-off:focus-visible {
+  outline: 2px solid #00f0ff;
+  outline-offset: 2px;
 }
 
 .menu-btn {

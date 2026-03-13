@@ -1,393 +1,326 @@
-/* =========================================================
-   g6.css - Retro RPG Style
-========================================================= */
-
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
-
-:root {
-  /* Classic RPG Color Palette */
-  --bg-dark: #0d1117;
-  --rpg-blue: #081b33;
-  --rpg-border: #d4d4d4;
-  --gold: #f8c522;
-  --text-light: #e0e0e0;
-  --hp-green: #39ff14;
-  --hp-red: #ff3333;
-  --mp-blue: #00ccff;
-  --xp-gold: #ffaa00;
-  --damage-enemy: #ffea00;
-  --damage-player: #ff003c;
-}
-
-/* ================= BACKGROUND & WRAPPER ================= */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 .g6-body {
+  font-family: 'Press Start 2P', monospace;
+  background-color: #000000;
+  color: #fff;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: var(--bg-dark);
-  background-image: 
-    radial-gradient(circle at center, #1a2332 0%, #0d1117 100%);
-  font-family: 'VT323', monospace;
-  color: var(--text-light);
-  margin: 0;
-  padding: 20px;
+  padding: 2rem;
   box-sizing: border-box;
 }
 
-.riddle-container {
-  position: relative;
-  background-color: var(--rpg-blue);
+/* Typography & Colors */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.mt-2 { margin-top: 1rem; }
+.mt-4 { margin-top: 2rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-4 { margin-bottom: 2rem; }
+.w-100 { width: 100%; box-sizing: border-box; }
+
+.pixel-title { font-size: 24px; text-shadow: 3px 3px 0 #333; margin: 0; }
+.pixel-subtitle { font-size: 10px; margin: 0; line-height: 1.6;}
+.huge-text { font-size: 48px; text-shadow: 4px 4px 0 #000; margin: 0; }
+
+.gold-text { color: #ffd700; }
+.blue-text { color: #00f0ff; }
+.green-text { color: #39ff14; }
+.purple-text { color: #b000ff; }
+.red-text { color: #ff003c; }
+
+.bg-blue { background-color: #00f0ff; }
+.bg-green { background-color: #39ff14; }
+.bg-red { background-color: #ff003c; }
+.bg-gold { background-color: #ffd700; }
+.text-black { color: #000; }
+
+.border-blue { border: 4px solid #00f0ff; }
+.border-red { border: 4px solid #ff003c; }
+.border-gold { border: 4px solid #ffd700; }
+.border-purple { border: 4px solid #b000ff; }
+
+/* Main Retro Panel Container */
+.rpg-container {
+  background-color: #050505;
+  border: 4px solid #fff;
   width: 100%;
-  max-width: 800px;
-  padding: 30px;
-  /* Classic retro double border effect */
-  border: 4px solid var(--rpg-border);
+  max-width: 1000px;
+  padding: 20px;
   box-shadow: 
-    inset 0 0 0 4px #000, 
-    inset 0 0 0 6px var(--rpg-border), 
-    0 10px 30px rgba(0, 0, 0, 0.8);
-  border-radius: 8px;
-  text-align: center;
-  overflow: hidden;
-}
-
-h1 {
-  font-family: 'Press Start 2P', cursive;
-  color: var(--gold);
-  text-shadow: 3px 3px 0 #000;
-  font-size: 1.8rem;
-  margin-top: 0;
-  margin-bottom: 10px;
-  letter-spacing: 2px;
-}
-
-.g6-subtitle {
-  font-size: 1.4rem;
-  color: #a0aab5;
-  margin-bottom: 30px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-/* ================= BATTLE AREA ================= */
-
-.battle-area {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  position: relative;
-}
-
-.character {
-  width: 40%;
-  background: rgba(0, 0, 0, 0.4);
-  border: 2px solid #334;
-  padding: 15px;
-  border-radius: 5px;
-  box-shadow: inset 0 0 10px #000;
-}
-
-.character-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  font-family: 'Press Start 2P', cursive;
-  font-size: 0.7rem;
-}
-
-.hero-tag { color: var(--mp-blue); }
-.enemy-name { color: var(--hp-red); margin: 0; }
-.level-badge, .enemy-level { color: var(--gold); }
-
-/* Retro pixel rendering for images */
-.character-portrait {
-  width: 120px;
-  height: 120px;
-  object-fit: contain;
-  margin-bottom: 15px;
-  image-rendering: pixelated; 
-  filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.5));
-}
-
-.enemy-portrait {
-  transform: scaleX(-1); /* Flips enemy to face player */
-}
-
-/* ================= STATS & BARS ================= */
-
-.stats-container {
+    inset 0 0 20px rgba(0,0,0,0.8),
+    10px 10px 0px 0px rgba(255,255,255,0.1);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.stat-row {
-  display: flex;
-  align-items: center;
-  font-size: 1.2rem;
-}
-
-.g6-stat-label {
-  width: 35px;
-  text-align: left;
-  font-weight: bold;
-  font-family: 'Press Start 2P', cursive;
-  font-size: 0.6rem;
-}
-
-.healthbar-track {
-  flex-grow: 1;
-  background-color: #000;
-  height: 16px;
-  border: 2px solid #444;
+  gap: 20px;
   position: relative;
 }
 
-.player-fill, .enemy-fill, .mana-fill, .xp-fill {
+/* =========================================
+   BATTLE STAGE (Top Half)
+   ========================================= */
+.rpg-battle-stage {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  background-color: #111;
+  border: 4px dashed #333;
+  padding: 20px;
+  min-height: 350px;
+  position: relative;
+}
+
+.battle-character {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 40%;
+  z-index: 2;
+}
+
+.enemy-side {
+  align-items: flex-end;
+}
+
+/* Stat Panels */
+.character-stats-panel {
+  background: #000;
+  padding: 15px;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 4px 4px 0 0 #222;
+}
+
+.char-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #333;
+  padding-bottom: 5px;
+}
+
+.rpg-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.stat-label { font-size: 8px; width: 25px; color: #aaa; }
+.stat-num { font-size: 8px; width: 45px; text-align: right; }
+
+.rpg-bar-bg {
+  flex-grow: 1;
+  height: 12px;
+  background: #222;
+  border: 2px solid #555;
+  padding: 1px;
+}
+
+.rpg-bar-fill {
   height: 100%;
   transition: width 0.3s ease-in-out;
 }
 
-.player-fill { background-color: var(--hp-green); }
-.enemy-fill { background-color: var(--hp-red); }
-.mana-fill { background-color: var(--mp-blue); }
-.xp-fill { background-color: var(--xp-gold); }
-
-.hp-text {
-  position: absolute;
-  top: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: #fff;
-  font-size: 1.1rem;
-  text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
-  line-height: 16px;
-}
-
-/* Low HP Blinking Alert */
-.low-hp {
-  background-color: var(--hp-red) !important;
-  animation: pulse-danger 1s infinite alternate;
-}
-
-/* ================= VS DIVIDER ================= */
-
-.vs-divider {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-family: 'Press Start 2P', cursive;
-  font-size: 1.5rem;
-  color: var(--gold);
-  text-shadow: 2px 2px 0 #000;
-}
-
-.vs-sparks {
-  font-size: 2rem;
-  animation: float 2s infinite ease-in-out alternate;
-}
-
-/* ================= RIDDLE & INPUT ================= */
-
-.riddle-box {
-  background: rgba(0, 0, 0, 0.6);
-  border: 2px solid #555;
-  padding: 20px;
-  margin-bottom: 20px;
-  text-align: left;
-}
-
-.riddle-label {
-  color: var(--gold);
-  font-family: 'Press Start 2P', cursive;
-  font-size: 0.8rem;
-  display: block;
-  margin-bottom: 10px;
-}
-
-.riddle-text {
-  font-size: 1.6rem;
-  line-height: 1.4;
-  margin: 0;
-}
-
-.g6-input {
-  width: 100%;
-  background-color: #000;
-  color: var(--hp-green);
-  font-family: 'VT323', monospace;
-  font-size: 1.8rem;
-  padding: 10px 15px;
-  border: 2px solid #555;
-  box-sizing: border-box;
-  margin-bottom: 20px;
-  outline: none;
-}
-
-.g6-input:focus {
-  border-color: var(--gold);
-  box-shadow: 0 0 10px rgba(248, 197, 34, 0.5);
-}
-
-.g6-input::placeholder {
-  color: #335533;
-}
-
-/* ================= BUTTONS ================= */
-
-.g6-action-row {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-}
-
-.g6-button {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 0.8rem;
-  padding: 15px 20px;
-  border: none;
-  cursor: pointer;
-  color: #fff;
-  text-transform: uppercase;
-  box-shadow: 4px 4px 0 #000;
-  transition: all 0.1s;
+/* Sprites & Damage Numbers */
+.character-sprite-box {
   position: relative;
+  height: 150px;
+  display: flex;
+  align-items: flex-end;
 }
 
-.g6-button:active:not(:disabled) {
-  transform: translate(4px, 4px);
-  box-shadow: 0 0 0 #000;
+.sprite-img {
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(4px 4px 0px #000);
 }
 
-.g6-button:disabled {
-  background-color: #555 !important;
-  color: #888;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: translate(4px, 4px);
+.enemy-img {
+  transform: scaleX(-1); /* Flips enemy to face player */
 }
 
-.g6-btn-attack {
-  background-color: #b22222;
-  border: 2px solid #ff4444;
+.damage-text {
+  position: absolute;
+  top: -20px;
+  font-size: 24px;
+  font-weight: bold;
+  animation: float-up 0.8s ease-out forwards;
+  text-shadow: 2px 2px 0 #000;
+  z-index: 10;
 }
-.g6-btn-attack:hover:not(:disabled) { background-color: #d12a2a; }
 
-.g6-btn-power {
-  background-color: #4b0082;
-  border: 2px solid #9932cc;
+.player-damage { color: #ff003c; left: 50%; }
+.enemy-damage { color: #ffd700; right: 50%; }
+
+@keyframes float-up {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-40px) scale(1.5); opacity: 0; }
+}
+
+/* VS Badge */
+.vs-badge {
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  font-size: 32px;
+  text-shadow: 4px 4px 0 #000;
+}
+
+/* =========================================
+   BOTTOM HUD (Dialogue & Commands)
+   ========================================= */
+.rpg-bottom-hud {
+  display: flex;
+  gap: 20px;
+}
+
+/* Dialogue Box */
+.rpg-dialogue-box {
+  background-color: #0000aa; /* Classic Final Fantasy Blue */
+  border: 4px solid #fff;
+  padding: 20px;
+  flex-grow: 1;
+  box-shadow: inset 0 0 0 4px #aaaaff, 6px 6px 0px 0px rgba(0,0,0,0.8);
+  position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 5px;
-}
-.g6-btn-power:hover:not(:disabled) { background-color: #5d00a1; }
-
-.btn-cost {
-  color: var(--mp-blue);
-  font-size: 0.6rem;
 }
 
-/* ================= POPUPS & SCREENS ================= */
+.dialogue-name { font-size: 10px; margin: 0 0 15px 0; border-bottom: 2px dashed #aaaaff; padding-bottom: 10px;}
+.dialogue-text { font-size: 12px; line-height: 1.8; margin: 0; }
 
-.message {
-  margin-top: 15px;
-  font-family: 'Press Start 2P', cursive;
-  color: #fff;
-  font-size: 0.9rem;
-  background: rgba(0, 0, 0, 0.8);
-  padding: 10px;
-  border: 2px dashed var(--gold);
-}
-
-.damage-popup {
+.system-message {
   position: absolute;
-  font-family: 'Press Start 2P', cursive;
-  font-size: 2rem;
-  font-weight: bold;
-  pointer-events: none;
-  z-index: 100;
-  animation: float-up 0.8s ease-out forwards;
-  text-shadow: 3px 3px 0 #000;
+  bottom: 15px;
+  right: 20px;
+  font-size: 8px;
+  color: #ff003c;
+  background: #000;
+  padding: 5px 10px;
+  border: 1px solid #ff003c;
 }
 
-.damage-popup.player {
-  color: var(--damage-player);
-  top: 30%;
-  left: 20%;
+/* Command Menu */
+.rpg-command-menu {
+  width: 300px;
+  background: #111;
+  border: 4px solid #fff;
+  box-shadow: 6px 6px 0px 0px rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
 }
 
-.damage-popup.enemy {
-  color: var(--damage-enemy);
-  top: 30%;
-  right: 20%;
+.command-header {
+  padding: 10px;
+  font-size: 10px;
+  text-align: center;
 }
 
-.defeat-screen, .victory-screen, .admin-popup-overlay {
+.command-body {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.pixel-input {
+  font-family: inherit;
+  background: #000;
+  color: #fff;
+  border: 2px solid #555;
+  padding: 12px;
+  font-size: 10px;
+  box-shadow: inset 2px 2px 0 #000;
+}
+.pixel-input:focus { outline: none; border-color: #00f0ff; }
+
+/* Buttons */
+.pixel-btn {
+  font-family: inherit;
+  font-size: 10px;
+  padding: 15px;
+  cursor: pointer;
+  border: 2px solid #555;
+  color: #fff;
+  transition: transform 0.1s, border-color 0.2s;
+  box-shadow: 4px 4px 0 0 #000;
+}
+
+.pixel-btn:hover:not(:disabled) { border-color: #fff; transform: translateY(-2px); }
+.pixel-btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 0 transparent; }
+.pixel-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-dark { background: #222; }
+.btn-red { background: #ff003c; border-color: #fff; }
+.btn-green { background: #2e8b57; border-color: #fff; }
+.btn-purple { background: #8a2be2; border-color: #fff; }
+
+/* =========================================
+   MODALS & OVERLAYS
+   ========================================= */
+.modal-overlay {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0, 0, 0, 0.85);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 200;
-  backdrop-filter: blur(3px);
+  z-index: 50;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-.victory-content h1 { color: var(--gold); font-size: 2.5rem; }
-.victory-content p { font-size: 1.5rem; }
-
-.defeat-content h2 { color: var(--hp-red); font-family: 'Press Start 2P'; margin-top: 20px;}
-.gamend { width: 150px; image-rendering: pixelated; filter: drop-shadow(0 0 10px red); }
-
-.game-completed-title { color: var(--mp-blue) !important; font-size: 2rem !important; }
-.admin-defeated-text { color: var(--gold); }
-
-.admin-popup-text {
-  color: var(--hp-red);
-  font-family: 'Press Start 2P', cursive;
-  font-size: 2.5rem;
-  animation: glitch 0.2s infinite;
-  text-shadow: 4px 4px 0px #000;
+.in-screen-modal-content {
+  background-color: #050505;
+  padding: 40px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 10px 10px 0 0 #000;
 }
 
-/* ================= ANIMATIONS ================= */
-
-@keyframes float-up {
-  0% { transform: translateY(0) scale(1); opacity: 1; }
-  100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+.game-over-img {
+  width: 100%;
+  max-width: 200px;
+  filter: drop-shadow(4px 4px 0px #ff003c);
 }
 
-@keyframes pulse-danger {
-  from { background-color: var(--hp-red); }
-  to { background-color: #550000; }
+.admin-flash { background: rgba(255, 0, 60, 0.3); }
+.admin-warning-box { background: #000; border: 4px dashed #ff003c; padding: 40px; box-shadow: 0 0 50px #ff003c; }
+
+/* Animations */
+.shake { animation: shake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+@keyframes shake {
+  10%, 90% { transform: translate3d(-2px, 0, 0); }
+  20%, 80% { transform: translate3d(4px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+  40%, 60% { transform: translate3d(8px, 0, 0); }
 }
 
-@keyframes float {
-  from { transform: translateY(-5px); }
-  to { transform: translateY(5px); }
+.blink { animation: blink 1s step-end infinite; }
+.blink-slow { animation: blink 2s step-end infinite; }
+.blink-fast { animation: blink 0.5s step-end infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+.pulse-btn { animation: pulse 2s infinite; }
+@keyframes pulse {
+  0% { box-shadow: 4px 4px 0 0 #000, 0 0 0 0 rgba(255, 255, 255, 0.5); }
+  70% { box-shadow: 4px 4px 0 0 #000, 0 0 0 10px rgba(255, 255, 255, 0); }
+  100% { box-shadow: 4px 4px 0 0 #000, 0 0 0 0 rgba(255, 255, 255, 0); }
 }
 
-.shake {
-  animation: screen-shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
-}
-
-@keyframes screen-shake {
-  10%, 90% { transform: translate3d(-2px, 2px, 0); }
-  20%, 80% { transform: translate3d(4px, -2px, 0); }
-  30%, 50%, 70% { transform: translate3d(-6px, 4px, 0); }
-  40%, 60% { transform: translate3d(6px, -4px, 0); }
-}
-
-@keyframes glitch {
-  0% { transform: translate(0) }
-  20% { transform: translate(-4px, 4px) }
-  40% { transform: translate(-4px, -4px) }
-  60% { transform: translate(4px, 4px) }
-  80% { transform: translate(4px, -4px) }
-  100% { transform: translate(0) }
+/* Mobile Adjustments */
+@media (max-width: 850px) {
+  .rpg-battle-stage { flex-direction: column; gap: 40px; }
+  .battle-character { width: 100%; }
+  .enemy-side { align-items: flex-start; }
+  .vs-badge { top: 50%; bottom: auto; transform: translate(-50%, -50%); }
+  .rpg-bottom-hud { flex-direction: column; }
+  .rpg-command-menu { width: 100%; }
+  .enemy-img { transform: scaleX(1); } /* reset flip on mobile so they stack normally */
 }

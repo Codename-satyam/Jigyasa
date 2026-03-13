@@ -4,36 +4,73 @@ import { Link } from 'react-router-dom';
 
 function HomePage() {
   return (
-    <div className="home-page">
-      <video src={back} autoPlay loop muted playsInline className="background"></video>
+    <div className="home-page pixelify-sans-font">
+      
+      {/* Background Video with Dark Overlay */}
+      <video src={back} autoPlay loop muted playsInline className="background-video"></video>
+      <div className="video-scan-overlay"></div>
 
-      <div className="right">
-        <div className="left">
-          <h1>Welcome to Jigyasa!</h1>
-          <center><p>We make Learning Fun and Engaging!</p></center>
+      <div className="hero-container">
+        
+        {/* THE WILD ANIMATED TITLE */}
+        <div className="hero-title-wrapper">
+          <h2 className="system-boot blue-text">SYSTEM BOOT SEQUENCE INITIATED...</h2>
+          <div className="wild-hero-title">
+            <span className="hero-letter">J</span>
+            <span className="hero-letter">i</span>
+            <span className="hero-letter">g</span>
+            <span className="hero-letter">y</span>
+            <span className="hero-letter">a</span>
+            <span className="hero-letter">s</span>
+            <span className="hero-letter">a</span>
+          </div>
+          <p className="hero-subtitle">WE MAKE LEARNING AN EPIC QUEST</p>
         </div>
-        <h2>What We Do</h2>
-        <p>
-          At <strong>Jigyasa</strong>, we make learning fun and engaging!
-          Take part in quizzes across various topics — from science to pop culture —
-          and challenge yourself or your friends.
-        </p>
 
-        <h3>How It Works</h3>
-        <ul>
-          <li>Choose your quiz category.</li>
-          <li>Answer timed questions.</li>
-          <li>Earn points and climb the leaderboard!</li>
-        </ul>
+        <div className="arcade-panels-wrapper">
+          {/* Left Panel: What We Do */}
+          <div className="retro-panel info-panel border-magenta">
+            <div className="panel-header bg-magenta text-black">
+              &gt; MISSION_BRIEFING.TXT
+            </div>
+            <div className="panel-body">
+              <p>
+                At <strong className="gold-text">Jigyasa</strong>, we make learning fun and engaging!
+                Take part in trial quests across various sectors — from deep science to pop culture —
+                and challenge yourself or your guildmates.
+              </p>
+            </div>
+          </div>
 
-        <div style={{display:'flex',gap:12,marginTop:12,justifyContent:'center'}}>
-          <Link to="/play" className="pixel-button" style={{textDecoration:'none'}}>
-            Play Now
-          </Link>
-          <Link to="/contact" className="pixel-button" style={{textDecoration:'none'}}>
-            Contact Us
-          </Link>
+          {/* Right Panel: How It Works */}
+          <div className="retro-panel info-panel border-cyan">
+            <div className="panel-header bg-cyan text-black">
+              &gt; EXECUTE_PROTOCOL.EXE
+            </div>
+            <div className="panel-body">
+              <ul className="hacker-list">
+                <li><span className="cyan-text">[1]</span> Select your target zone (Category).</li>
+                <li><span className="cyan-text">[2]</span> Defeat timed challenges.</li>
+                <li><span className="cyan-text">[3]</span> Harvest EXP and dominate the leaderboard!</li>
+              </ul>
+            </div>
+          </div>
         </div>
+
+        {/* Arcade Call to Action */}
+        <div className="cta-section">
+          <h3 className="insert-coin blink-fast gold-text">INSERT COIN TO START</h3>
+          
+          <div className="action-buttons">
+            <Link to="/play" className="pixel-btn btn-green pulse-btn">
+              [ INITIALIZE PLAY ]
+            </Link>
+            <Link to="/contact" className="pixel-btn btn-purple">
+              [ COMMS LINK ]
+            </Link>
+          </div>
+        </div>
+
       </div>
     </div>
   );
