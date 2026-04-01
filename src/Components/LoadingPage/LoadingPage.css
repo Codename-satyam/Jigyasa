@@ -1,132 +1,104 @@
-@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap'); 
+/* Assuming you are importing your pixel font either in HTML or here */
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap');
 
-.loading-page {
-  position: fixed;
+.pixelify-sans-font {
+  font-family: 'Pixelify Sans', monospace;
+}
+
+.retro-loading-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #0b0b0b; /* Deep arcade black */
+  color: #39ff14; /* Neon terminal green */
+  overflow: hidden;
+  position: relative;
+}
+
+/* Simulated CRT Scanlines */
+.retro-loading-page::before {
+  content: " ";
+  display: block;
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: radial-gradient(circle at center, #000000 70%, #111111 100%);
-  display: flex;
-  justify-content: center;   
-  align-items: center;       
-  z-index: 9999;
-  color: #fff;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(
+      rgba(18, 16, 16, 0) 50%, 
+      rgba(0, 0, 0, 0.25) 50%
+    );
+  z-index: 2;
+  background-size: 100% 4px;
+  pointer-events: none; /* Let clicks pass through */
+}
+
+.retro-loading-content {
   text-align: center;
+  z-index: 3; /* Keep text above scanlines */
+  width: 80%;
+  max-width: 400px;
 }
 
-.loading-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.loading-content h1 {
-  font-family: "Pixelify Sans", sans-serif;
-  font-weight: 700;
-  font-size: 3rem;
-  text-shadow: 2px 2px 0 #ff00ff, 4px 4px 0 #00ffff;
-  margin-bottom: 10px;
+.loading-title {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  text-transform: uppercase;
   letter-spacing: 2px;
+  animation: blink 1.2s infinite step-end;
 }
 
-.loading-content p {
-  font-family: "Pixelify Sans", sans-serif;
-  font-weight: 400;
+/* --- Progress Bar --- */
+.progress-bar-container {
+  width: 100%;
+  height: 24px;
+  background-color: transparent;
+  border: 3px solid #39ff14;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #39ff14;
+  /* Step-end transition makes the bar jump in chunks like an old game */
+  transition: width 0.2s steps(10, end); 
+}
+
+.progress-percentage {
   font-size: 1.2rem;
-  text-shadow: 1px 1px 0 #000, 2px 2px 0 #ff00ff;
-  color: #ccc;
-  margin-top: 5px;
+  margin-top: 15px;
 }
 
-
-.pixel-spinner {
-  position: relative;
-  width: 80px;
-  height: 80px;
+/* --- Bouncing Pixel Sprite --- */
+.sprite-container {
+  height: 60px;
+  margin-bottom: 20px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
   justify-content: center;
-  align-items: center;
-  margin-bottom: 30px;
-  animation: rotate 2s linear infinite;
+  align-items: flex-end;
 }
 
-.pixel-block {
-  width: 28px;
-  height: 28px;
-  background-color: #ff00ff;
-  box-shadow: 0 0 12px #ff00ff, 0 0 24px #00ffff;
-  animation: blink 1.2s infinite alternate;
+/* Creates a simple space-invader/blocky shape using box-shadow */
+.pixel-sprite {
+  width: 15px;
+  height: 15px;
+  background-color: #ff0055; /* Neon pink accent */
+  box-shadow: 
+    -15px 0 0 #ff0055, 
+    15px 0 0 #ff0055, 
+    0 -15px 0 #ff0055;
+  animation: bounce 0.4s infinite alternate ease-in;
 }
 
-.block1 { animation-delay: 0s; }
-.block2 { animation-delay: 0.2s; }
-.block3 { animation-delay: 0.4s; }
-.block4 { animation-delay: 0.6s; }
-
+/* --- Animations --- */
 @keyframes blink {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-    background-color: #00ffff;
-  }
-  100% {
-    opacity: 0.4;
-    transform: scale(0.6);
-    background-color: #ff00ff;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; } /* Hard cut blink for retro feel */
 }
 
-@keyframes rotate {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .loading-content h1 {
-    font-size: 2.5rem;
-  }
-
-  .loading-content p {
-    font-size: 1rem;
-  }
-
-  .pixel-spinner {
-    width: 70px;
-    height: 70px;
-  }
-
-  .pixel-block {
-    width: 24px;
-    height: 24px;
-  }
-}
-
-@media (max-width: 480px) {
-  .loading-content h1 {
-    font-size: 2rem;
-  }
-
-  .loading-content p {
-    font-size: 0.9rem;
-  }
-
-  .pixel-spinner {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 20px;
-  }
-
-  .pixel-block {
-    width: 20px;
-    height: 20px;
-  }
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-30px); }
 }

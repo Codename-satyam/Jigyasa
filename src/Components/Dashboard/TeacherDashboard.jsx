@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import auth from '../../api/auth';
 import scores from '../../api/scores';
-import quizManager from '../../api/quizManager';
+import teacherQuizzes from '../../api/teacherQuizzes';
 import './TeacherDashboard.css';
 
 function TeacherDashboard() {
@@ -12,6 +12,7 @@ function TeacherDashboard() {
   const [myQuizzes, setMyQuizzes] = useState([]);
   const [activeTab, setActiveTab] = useState('scores');
   const [studentScoresSummary, setStudentScoresSummary] = useState([]);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     const user = auth.getCurrentUser();
@@ -24,11 +25,16 @@ function TeacherDashboard() {
 
   useEffect(() => {
     const loadData = async () => {
-      const summaryData = await scores.getAllStudentsScoresSummary();
-      setStudentScoresSummary(summaryData || []);
+      try {
+        const summaryData = await scores.getAllStudentsScoresSummary();
+        setStudentScoresSummary(summaryData || []);
 
-      if (current) {
-        setMyQuizzes(quizManager.getQuizzesByTeacher(current.id));
+        if (current) {
+          const teacherOwnedQuizzes = await teacherQuizzes.getTeacherOwnedQuizzes(current.id);
+          setMyQuizzes(teacherOwnedQuizzes || []);
+        }
+      } catch (error) {
+        setLoadError('Failed to load teacher dashboard data.');
       }
     };
     if (current) {
@@ -40,7 +46,7 @@ function TeacherDashboard() {
     return {
       totalStudents: studentScoresSummary.length,
       totalQuizzes: myQuizzes.length,
-      publishedQuizzes: myQuizzes.filter((q) => q.isPublished).length,
+      publishedQuizzes: myQuizzes.filter((q) => q.isPublished || q.ispublished).length,
       averageStudentScore: studentScoresSummary.length > 0
         ? Math.round(studentScoresSummary.reduce((sum, s) => sum + s.averageScore, 0) / studentScoresSummary.length)
         : 0
@@ -54,6 +60,15 @@ function TeacherDashboard() {
   const handleLogout = () => {
     auth.logout();
     navigate('/login');
+  };
+
+  const handleDeleteQuiz = async (quizId) => {
+    try {
+      await teacherQuizzes.deleteTeacherQuiz(quizId);
+      setMyQuizzes((currentQuizzes) => currentQuizzes.filter((quiz) => String(quiz.id) !== String(quizId)));
+    } catch (error) {
+      setLoadError('Failed to delete quiz. Please try again.');
+    }
   };
 
   return (
@@ -77,6 +92,8 @@ function TeacherDashboard() {
           </button>
         </div>
       </motion.div>
+
+      {loadError && <p className="pixel-text blink" style={{ color: '#ff6b6b' }}>{loadError}</p>}
 
       <motion.div
         className="teacher-panel-stats stats-grid"
@@ -189,20 +206,19 @@ function TeacherDashboard() {
             ) : (
               <div className="quizzes-grid">
                 {myQuizzes.map((quiz) => (
-                  <div key={quiz.id} className="pixel-card quest-card">
+                  <div key={quiz.id || quiz._id} className="pixel-card quest-card">
                     <h3>{quiz.title}</h3>
                     <p className="pixel-text-small mb-2">{quiz.description}</p>
                     <div className="quiz-meta mb-2">
                       <span className="badge-blue">Stages: {quiz.questions?.length || 0}</span>
-                      <span className={`badge-${quiz.difficulty === 'Hard' ? 'red' : 'green'}`}>
+                      <span className={`badge-${String(quiz.difficulty).toLowerCase() === 'hard' ? 'red' : 'green'}`}>
                         Lvl: {quiz.difficulty || 'Normal'}
                       </span>
                     </div>
                     <div className="quiz-actions action-buttons">
-                      <Link to={`/edit-quiz/${quiz.id}`} className="pixel-btn-small btn-blue">Edit</Link>
-                      <Link to={`/quiz-responses/${quiz.id}`} className="pixel-btn-small btn-purple">Logs</Link>
+                      <Link to={`/play/teacher-quiz/${quiz.id || quiz._id}`} className="pixel-btn-small btn-blue">Preview</Link>
                       <button 
-                        onClick={() => quizManager.deleteQuiz(quiz.id)} 
+                        onClick={() => handleDeleteQuiz(quiz.id || quiz._id)} 
                         className="pixel-btn-small btn-red"
                       >
                         Destroy

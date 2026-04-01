@@ -5,6 +5,7 @@ import auth from "../../../api/auth";
 import { addScore } from "../../../api/scores";
 import QuizBackground3D from "./QuizBackground3D";
 import { useSearchParams } from "react-router-dom";
+import { addDailyLearningMinutes, getUserSettings, subscribeSettingsChanges } from "../../../api/settings";
 
 const LoadingPage = ({ text = "LOADING QUEST DATA..." }) => {
   return (
@@ -19,11 +20,12 @@ const LoadingPage = ({ text = "LOADING QUEST DATA..." }) => {
 
 function QuizPage() {
   const [searchParams] = useSearchParams();
+  const [userSettings, setUserSettings] = useState(() => getUserSettings());
   
   // Get parameters from URL query string
   const urlCategory = searchParams.get("category") || null;
-  const urlAmount = searchParams.get("amount") ? Number(searchParams.get("amount")) : 5;
-  const urlDifficulty = searchParams.get("difficulty") || "easy";
+  const urlAmount = searchParams.get("amount") ? Number(searchParams.get("amount")) : Number(userSettings.quizLength) || 10;
+  const urlDifficulty = searchParams.get("difficulty") || userSettings.preferredDifficulty || "medium";
   
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -33,10 +35,20 @@ function QuizPage() {
   const [showScore, setShowScore] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState(null);
+  const [quizStartedAt, setQuizStartedAt] = useState(null);
+  const [dailyMinutes, setDailyMinutes] = useState(0);
 
   const [amount, setAmount] = useState(urlAmount);
   const [difficulty, setDifficulty] = useState(urlDifficulty);
   const [categoryId, setCategoryId] = useState(urlCategory);
+
+  useEffect(() => {
+    const unsubscribe = subscribeSettingsChanges((nextSettings) => {
+      setUserSettings(nextSettings);
+    });
+
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     // Load categories once
@@ -85,6 +97,7 @@ function QuizPage() {
     try {
       const qs = await fetchQuiz({ amount, category: categoryId, difficulty });
       setQuestions(qs);
+      setQuizStartedAt(Date.now());
     } catch (e) {
       setError("Failed to load questions. Using local questions.");
     } finally {
@@ -101,6 +114,12 @@ function QuizPage() {
     if (next < questions.length) {
       setCurrentQuestion(next);
     } else {
+      if (quizStartedAt) {
+        const elapsedMs = Date.now() - quizStartedAt;
+        const elapsedMinutes = Math.max(1, Math.round(elapsedMs / 60000));
+        const nextDaily = addDailyLearningMinutes(elapsedMinutes);
+        setDailyMinutes(nextDaily.minutes);
+      }
       setShowScore(true);
     }
   };
@@ -118,9 +137,11 @@ function QuizPage() {
     <div className="quiz-page-wrapper">
       
       {/* Render 3D background behind the UI */}
-      <div className="bg-3d-layer">
-        <QuizBackground3D />
-      </div>
+      {!userSettings.reducedMotion && (
+        <div className="bg-3d-layer">
+          <QuizBackground3D />
+        </div>
+      )}
       
       <div className="quiz-container">
         <div className="retro-panel arcade-monitor">
@@ -205,6 +226,14 @@ function QuizPage() {
                   <h2 className="pixel-title-small text-center" dangerouslySetInnerHTML={{ __html: questions[currentQuestion].question }}></h2>
                 </div>
 
+                {userSettings.showHints && (
+                  <div className="rpg-dialogue-box mb-4">
+                    <p>
+                      HINT: Difficulty is <span className="green-text">{difficulty.toUpperCase()}</span>. Eliminate options that don&apos;t match the question keywords before your final pick.
+                    </p>
+                  </div>
+                )}
+
                 {/* UPGRADED RPG BATTLE MENU FOR OPTIONS */}
                 <div className="rpg-options-menu">
                   {questions[currentQuestion].options.map((option, index) => (
@@ -229,6 +258,7 @@ function QuizPage() {
                   <span className="blue-text">FINAL EXP SECURED</span>
                   <h1 className="huge-score green-text">{score} / {questions.length}</h1>
                   <span className="pixel-text-small mt-2">Accuracy: {Math.round((score / questions.length) * 100)}%</span>
+                  <span className="pixel-text-small mt-2">Daily progress: {dailyMinutes} / {userSettings.dailyGoal} minutes</span>
                 </div>
 
                 <button className="pixel-btn btn-purple pulse-btn mx-auto" onClick={handleRestart}>

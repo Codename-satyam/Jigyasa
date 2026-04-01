@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import auth from '../../api/auth';
-import quizManager from '../../api/quizManager';
+import teacherQuizzes from '../../api/teacherQuizzes';
 import './CreateQuiz.css';
 
 // Component wrappers (assuming you have these available, or remove if not)
@@ -64,7 +64,7 @@ function CreateQuiz() {
     }
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     setError(null);
 
     if (!quizTitle.trim()) {
@@ -87,16 +87,14 @@ function CreateQuiz() {
     try {
       setIsPublishing(true);
 
-      const quiz = quizManager.createQuiz({
+      const quiz = await teacherQuizzes.createTeacherQuiz({
         title: quizTitle,
         description: quizDescription,
         questions: validQuestions,
-        createdBy: current.id,
-        createdByName: current.name,
         difficulty
       });
 
-      quizManager.publishQuiz(quiz.id, true);
+      await teacherQuizzes.publishTeacherQuiz(quiz.id);
 
       setTimeout(() => {
         setIsPublishing(false);
@@ -109,7 +107,7 @@ function CreateQuiz() {
     }
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
     setError(null);
 
     if (!quizTitle.trim()) {
@@ -120,14 +118,11 @@ function CreateQuiz() {
     try {
       setIsPublishing(true);
 
-      quizManager.createQuiz({
+      await teacherQuizzes.createTeacherQuiz({
         title: quizTitle,
         description: quizDescription,
         questions: questions.filter(q => q.question.trim()),
-        createdBy: current.id,
-        createdByName: current.name,
-        difficulty,
-        isPublished: false
+        difficulty
       });
 
       setTimeout(() => {

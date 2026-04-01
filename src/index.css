@@ -27,3 +27,10 @@ code {
   overflow-x: hidden;
   max-width: 100vw;
 }
+
+html.reduced-motion *,
+body.reduced-motion * {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}

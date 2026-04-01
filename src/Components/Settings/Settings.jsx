@@ -3,27 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import auth from '../../api/auth';
 import BackButton from '../BackButton';
-
-const SETTINGS_KEY = 'jq_settings';
-
-const DEFAULT_SETTINGS = {
-    soundEffects: true,
-    reducedMotion: false,
-    showHints: true,
-    preferredDifficulty: 'medium',
-    quizLength: 10,
-    dailyGoal: 20,
-};
-
-function readStoredSettings() {
-    try {
-        const raw = localStorage.getItem(SETTINGS_KEY);
-        if (!raw) return DEFAULT_SETTINGS;
-        return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
-    } catch (error) {
-        return DEFAULT_SETTINGS;
-    }
-}
+import { clearDailyMinutesProgress, DEFAULT_SETTINGS, getUserSettings, saveUserSettings } from '../../api/settings';
 
 function Settings() {
     const navigate = useNavigate();
@@ -39,13 +19,13 @@ function Settings() {
         }
 
         setUser(currentUser);
-        setSettings(readStoredSettings());
+        setSettings(getUserSettings());
     }, [navigate]);
 
     useEffect(() => {
         if (!user) return;
 
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        saveUserSettings(settings);
         setSaveMessage('SYS.MSG: PREFERENCES SAVED LOCALLY');
 
         const timeoutId = window.setTimeout(() => {
@@ -78,10 +58,11 @@ function Settings() {
             'jq_scores',
             'jq_lastVisitedTopics',
             'jq_videoProgress',
-            'jq_completedVideos'
+            'jq_completedVideos',
         ];
 
         keysToRemove.forEach((key) => localStorage.removeItem(key));
+        clearDailyMinutesProgress();
         setSaveMessage('SYS.MSG: LOCAL CACHE PURGED');
     };
 

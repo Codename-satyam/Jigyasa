@@ -23,52 +23,78 @@ function LeaderBoard() {
         
         loadLeaderboard();
     }, []);
+
     return (
-        <div className="leaderboard-container">
-            <h2 className="leaderboard-title">🏆 Global Leaderboard</h2>
-            <p className="leaderboard-subtitle">Top performers across all quizzes</p>
-            {loading ? (
-                <div className="loading">Loading leaderboard...</div>
-            ):(
-                <table className="leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Name</th>
-                            <th>Score %</th>
-                            <th>Quiz Title</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {leaderboardData.length === 0 ? (
-                            <tr>
-                                <td colSpan={4} className="leaderboard-empty">No scores yet</td>
-                            </tr>
-                        ) : (
-                            leaderboardData.map((entry, index) => {
-                                const displayScore = entry.percentage !== undefined 
-                                    ? `${Math.round(entry.percentage)}%` 
-                                    : (entry.score !== undefined ? `${entry.score}` : '0%');
-                                const userName = entry.userId?.name || entry.name || 'Anonymous';
-                                const quizTitle = entry.quizTitle || 'Quiz';
-                                
-                                return (
-                                    <tr key={entry._id || index} className={index < 3 ? `rank-${index + 1}` : ''}>
-                                        <td className="rank-cell">
-                                            {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
+        <div className="leaderboard-page crt-screen">
+            <div className="arcade-leaderboard-container retro-panel border-gold">
+                
+                {/* THE RADAR SCANLINE */}
+                <div className="scanline"></div>
+
+                <div className="leaderboard-header text-center mb-4">
+                    <h2 className="pixel-title gold-text glitch-effect">🏆 GLOBAL TOP 10</h2>
+                    <p className="pixel-subtitle blue-text mt-2">ELITE OPERATIVES ACROSS ALL ZONES</p>
+                </div>
+
+                {loading ? (
+                    <div className="loading-screen text-center green-text blink-slow">
+                        CONNECTING TO MAINFRAME...
+                    </div>
+                ) : (
+                    <div className="table-wrapper">
+                        <table className="cyber-table">
+                            <thead>
+                                <tr className="cyber-table-header">
+                                    <th className="text-center">RANK</th>
+                                    <th className="text-left">OPERATIVE</th>
+                                    <th className="text-center">EXP %</th>
+                                    <th className="text-right">ZONE DETAILS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {leaderboardData.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={4} className="empty-row text-center red-text blink">
+                                            NO DATA FRAGS FOUND
                                         </td>
-                                        <td>{userName}</td>
-                                        <td className="score-cell">{displayScore}</td>
-                                        <td className="quiz-cell">{quizTitle}</td>
                                     </tr>
-                                );
-                            })
-                        )}
-                    </tbody>
-                </table>
-            )}
+                                ) : (
+                                    leaderboardData.slice(0, 10).map((entry, index) => {
+                                        const displayScore = entry.percentage !== undefined 
+                                            ? `${Math.round(entry.percentage)}%` 
+                                            : (entry.score !== undefined ? `${entry.score}` : '0%');
+                                        const userName = entry.userId?.name || entry.name || 'ANONYMOUS';
+                                        const quizTitle = entry.quizTitle || 'UNKNOWN QUEST';
+                                        
+                                        let rankClass = "standard-rank";
+                                        if (index === 0) rankClass = "rank-1 gold-text";
+                                        if (index === 1) rankClass = "rank-2 cyan-text";
+                                        if (index === 2) rankClass = "rank-3 magenta-text";
+
+                                        return (
+                                            <tr 
+                                                key={entry._id || index} 
+                                                className={`cyber-table-row ${rankClass}`}
+                                                /* STAGGERED ENTRANCE ANIMATION DELAY */
+                                                style={{ animationDelay: `${index * 0.15}s` }}
+                                            >
+                                                <td className="rank-cell text-center">
+                                                    {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `[${index + 1}]`}
+                                                </td>
+                                                <td className="name-cell text-left">{userName}</td>
+                                                <td className="score-cell text-center glitch-hover">{displayScore}</td>
+                                                <td className="quiz-cell text-right">{quizTitle}</td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
         </div>
-    )
+    );
 }
 
 export default LeaderBoard;

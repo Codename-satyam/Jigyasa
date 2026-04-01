@@ -41,6 +41,7 @@ const Notes = lazy(() => import("./Components/Play/Notes/Notes.jsx"));
 // Quiz
 const QuizPage = lazy(() => import("./Components/Play/QuizPage/QuizPage.jsx"));
 const SelectQuiz = lazy(() => import("./Components/Play/QuizPage/SelectQuiz.jsx"));
+const TeacherQuizAttempt = lazy(() => import("./Components/Play/QuizPage/TeacherQuizAttempt.jsx"));
 
 // Games
 const Games = lazy(() => import("./Components/Play/Games/Games.jsx"));
@@ -101,6 +102,14 @@ function AnimatedRoutes() {
             <PageTransition>
               <Navbar />
               <QuizPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/play/teacher-quiz/:quizId"
+          element={
+            <PageTransition>
+              <TeacherQuizAttempt />
             </PageTransition>
           }
         />

@@ -1,174 +1,371 @@
-import { useEffect, useState, useCallback } from "react";
-import quizData from "./data/data1";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import "./g3.css";
-import correctSound from "./data/sounds/correct.mp3";
-import wrongSound from "./data/sounds/wrong.mp3";
-import timeoutSound from "./data/sounds/timeout.mp3";
-import gamesTracker from "../../../../api/gamesTracker";
-import auth from "../../../../api/auth";
 
-const CORRECT_SOUND = new Audio(correctSound);
-const WRONG_SOUND = new Audio(wrongSound);
-const TIMEOUT_SOUND = new Audio(timeoutSound);
+// Helper to deeply clone the 2D grid
+const cloneGrid = (grid) => grid.map(row => [...row]);
 
-// Function to shuffle an array
-const shuffleArray = (array) => {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+const DIRECTIONS = [
+  [1, 0],
+  [-1, 0],
+  [0, 1],
+  [0, -1],
+];
+
+function collectReachableCells(grid) {
+  const size = grid.length;
+  const queue = [[0, 0]];
+  const visited = new Set(["0,0"]);
+
+  while (queue.length > 0) {
+    const [row, col] = queue.shift();
+
+    for (const [dr, dc] of DIRECTIONS) {
+      const nextRow = row + dr;
+      const nextCol = col + dc;
+      const key = `${nextRow},${nextCol}`;
+
+      if (
+        nextRow < 0 ||
+        nextCol < 0 ||
+        nextRow >= size ||
+        nextCol >= size ||
+        visited.has(key) ||
+        grid[nextRow][nextCol] === "X"
+      ) {
+        continue;
+      }
+
+      visited.add(key);
+      queue.push([nextRow, nextCol]);
+    }
   }
-  return shuffled;
-};
 
-// Function to get 10 random questions
-const getRandomQuestions = () => {
-  return shuffleArray(quizData).slice(0, 10);
-};
+  return visited;
+}
 
-function QuizGame() {
-  const [randomizedQuestions] = useState(() => getRandomQuestions());
-  const [current, setCurrent] = useState(0);
-  const [score, setScore] = useState(0);
-  const [selected, setSelected] = useState(null);
-  const [showResult, setShowResult] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(10);
-  const [reveal, setReveal] = useState(false);
+function isPlayableGrid(grid, targetsExpected) {
+  const size = grid.length;
+  const reachable = collectReachableCells(grid);
 
-  const question = randomizedQuestions[current];
-  const progressPercent = Math.round(((current + 1) / randomizedQuestions.length) * 100);
+  if (!reachable.has(`${size - 1},${size - 1}`)) {
+    return false;
+  }
 
-  const moveNext = useCallback(() => {
-    if (current + 1 < randomizedQuestions.length) {
-      setCurrent(prev => prev + 1);
-      setSelected(null);
-      setReveal(false);
-      setTimeLeft(10);
-    } else {
-      setShowResult(true);
-      
-      // Record game play
-      const user = auth.getCurrentUser();
-      if (user) {
-        gamesTracker.recordGamePlay({
-          email: user.email,
-          gameType: 'monument',
-          gameName: 'Monument Game',
-          score: score,
-          date: new Date().toISOString()
-        });
+  let reachableTargets = 0;
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      if (grid[row][col] === "T" && reachable.has(`${row},${col}`)) {
+        reachableTargets += 1;
       }
     }
-  }, [current, randomizedQuestions.length, score]);
+  }
 
+  return reachableTargets === targetsExpected;
+}
+
+const generateGrid = (size, blocks, targets) => {
+  const totalCells = size * size;
+  const reservedCells = 2;
+  const maxTargets = Math.max(1, Math.min(targets, totalCells - reservedCells - 1));
+  const maxBlocks = Math.max(1, Math.min(blocks, totalCells - reservedCells - maxTargets));
+
+  for (let attempt = 0; attempt < 80; attempt++) {
+    const grid = Array(size)
+      .fill()
+      .map(() => Array(size).fill(""));
+
+    grid[0][0] = "S";
+    grid[size - 1][size - 1] = "E";
+
+    let placedBlocks = 0;
+    while (placedBlocks < maxBlocks) {
+      const row = Math.floor(Math.random() * size);
+      const col = Math.floor(Math.random() * size);
+
+      if (grid[row][col] === "") {
+        grid[row][col] = "X";
+        placedBlocks++;
+      }
+    }
+
+    let placedTargets = 0;
+    while (placedTargets < maxTargets) {
+      const row = Math.floor(Math.random() * size);
+      const col = Math.floor(Math.random() * size);
+
+      if (grid[row][col] === "") {
+        grid[row][col] = "T";
+        placedTargets++;
+      }
+    }
+
+    if (isPlayableGrid(grid, maxTargets)) {
+      return grid;
+    }
+  }
+
+  const fallbackGrid = Array(size)
+    .fill()
+    .map(() => Array(size).fill(""));
+
+  fallbackGrid[0][0] = "S";
+  fallbackGrid[size - 1][size - 1] = "E";
+
+  let targetsPlaced = 0;
+  for (let i = 1; i < size - 1 && targetsPlaced < maxTargets; i++) {
+    fallbackGrid[i][Math.min(i, size - 2)] = "T";
+    targetsPlaced++;
+  }
+
+  return fallbackGrid;
+};
+
+function PathGame() {
+  const [level, setLevel] = useState(1);
+  const [size, setSize] = useState(5);
+  const [blocks, setBlocks] = useState(5);
+  const [targetsTotal, setTargetsTotal] = useState(2);
+
+  const [grid, setGrid] = useState([]);
+  const [player, setPlayer] = useState({ r: 0, c: 0 });
+  const [moves, setMoves] = useState(0);
+  const [targets, setTargets] = useState(targetsTotal);
+  const [maxMoves, setMaxMoves] = useState(12);
+  const [statusMessage, setStatusMessage] = useState("Extract all data frags, then reach the portal.");
+  
+  // New Game State Trackers
+  const [gameStarted, setGameStarted] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const movesRef = useRef(moves);
+  const targetsRef = useRef(targets);
+  const levelRef = useRef(level);
+  const maxMovesRef = useRef(maxMoves);
+  const gridRef = useRef(grid);
+  const sizeRef = useRef(size);
+
+  useEffect(() => { movesRef.current = moves; }, [moves]);
+  useEffect(() => { targetsRef.current = targets; }, [targets]);
+  useEffect(() => { levelRef.current = level; }, [level]);
+  useEffect(() => { maxMovesRef.current = maxMoves; }, [maxMoves]);
+  useEffect(() => { gridRef.current = grid; }, [grid]);
+  useEffect(() => { sizeRef.current = size; }, [size]);
+
+  const scaleDifficulty = useCallback((lvl) => {
+    let newSize = Math.min(5 + Math.floor(lvl / 2), 10);
+    let newBlocks = 5 + lvl * 2;
+    let newTargets = Math.min(2 + Math.floor(lvl / 2), 6);
+    let newMoves = newSize * 2 + lvl * 2;
+
+    const totalCells = newSize * newSize;
+    const maxSafeBlocks = Math.max(1, totalCells - 2 - newTargets);
+    newBlocks = Math.min(newBlocks, maxSafeBlocks);
+
+    setSize(newSize);
+    setBlocks(newBlocks);
+    setTargetsTotal(newTargets);
+    setMaxMoves(newMoves);
+    setTargets(newTargets);
+    setStatusMessage("Extract all data frags, then reach the portal.");
+    setIsTransitioning(false);
+
+    let g = generateGrid(newSize, newBlocks, newTargets);
+    setGrid(g);
+    setPlayer({ r: 0, c: 0 });
+    setMoves(0);
+  }, []);
+
+  // Initialize first level
   useEffect(() => {
-    if (timeLeft === 0 && !selected) {
-      TIMEOUT_SOUND.play().catch(() => {});
-      moveNext();
+    scaleDifficulty(level);
+  }, [level, scaleDifficulty]);
+
+  const handleRestart = () => {
+    setGameOver(false);
+    setLevel(1);
+    scaleDifficulty(1);
+  };
+
+  const move = useCallback((dr, dc) => {
+    // Prevent movement if game hasn't started, is over, or is transitioning
+    if (!gameStarted || gameOver || isTransitioning) return;
+
+    const activeGrid = gridRef.current;
+    const activeSize = sizeRef.current;
+    const nextRow = player.r + dr;
+    const nextCol = player.c + dc;
+
+    if (
+      nextRow < 0 ||
+      nextCol < 0 ||
+      nextRow >= activeSize ||
+      nextCol >= activeSize ||
+      activeGrid[nextRow][nextCol] === "X"
+    ) {
       return;
     }
 
-    if (timeLeft <= 0 || selected) return;
+    const destination = activeGrid[nextRow][nextCol];
+    const pickedTarget = destination === "T";
 
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) return 0;
-        return prev - 1;
+    const nextMoves = movesRef.current + 1;
+    const nextTargets = pickedTarget ? targetsRef.current - 1 : targetsRef.current;
+
+    setMoves(nextMoves);
+    setTargets(nextTargets);
+    setPlayer({ r: nextRow, c: nextCol });
+
+    if (pickedTarget) {
+      setGrid((prevGrid) => {
+        const newGrid = cloneGrid(prevGrid);
+        newGrid[nextRow][nextCol] = "";
+        return newGrid;
       });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timeLeft, selected, moveNext]);
-
-  const handleOptionClick = (option) => {
-    if (selected) return;
-
-    setSelected(option);
-    setReveal(true);
-
-    if (option === question.answer) {
-      CORRECT_SOUND.play().catch(() => {});
-      setScore(prev => prev + 1);
-    } else {
-      WRONG_SOUND.play().catch(() => {});
+      setStatusMessage("Data frag extracted!");
     }
 
-    setTimeout(moveNext, 1500);
-  };
+    if (destination === "E" && nextTargets === 0) {
+      setStatusMessage("Portal unlocked! Sequence complete.");
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setLevel((currentLevel) => currentLevel + 1);
+      }, 300);
+      return;
+    }
 
-  const restartGame = () => {
-    setCurrent(0);
-    setScore(0);
-    setSelected(null);
-    setReveal(false);
-    setShowResult(false);
-    setTimeLeft(10);
-  };
+    if (destination === "E" && nextTargets > 0) {
+      setStatusMessage("Collect all frags before extraction.");
+    }
 
-  if (showResult) {
-    return (
-      <div className="g3-game-page">
-        <div className="g3-container g3-result-container">
-          <h2>🎉 Quiz Completed!</h2>
-          <p className="g3-result-label">Final Score</p>
-          <h1 className="g3-final-score">{score} / {randomizedQuestions.length}</h1>
-          <button className="g3-restart-btn" onClick={restartGame}>Play Again</button>
-        </div>
-      </div>
-    );
-  }
+    if (nextMoves >= maxMovesRef.current && !(destination === "E" && nextTargets === 0)) {
+      setStatusMessage("System cycles depleted! Trace detected.");
+      setGameOver(true);
+    }
+  }, [player, isTransitioning, gameStarted, gameOver, scaleDifficulty]);
+
+  // Keyboard controls
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+        e.preventDefault();
+      }
+      if (e.key === "ArrowUp") move(-1, 0);
+      if (e.key === "ArrowDown") move(1, 0);
+      if (e.key === "ArrowLeft") move(0, -1);
+      if (e.key === "ArrowRight") move(0, 1);
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [move]);
+
+  if (grid.length === 0) return <div className="loading-screen text-center gold-text blink">LOADING GRID...</div>;
 
   return (
-    <div className="g3-game-page">
-      <div className="g3-container">
-        <div className="g3-top">
-          <span>Q {current + 1}/{randomizedQuestions.length}</span>
-          <span className={`g3-timer ${timeLeft <= 3 ? "danger" : ""}`}>
-            ⏱ {timeLeft}s
-          </span>
-        </div>
-
-        <div className="g3-progress-wrap" aria-label="quiz progress">
-          <div className="g3-progress-track">
-            <div className="g3-progress-fill" style={{ width: `${progressPercent}%` }}></div>
+    <div className="cyber-path-page">
+      <div className="arcade-cabinet retro-panel border-cyan">
+        
+        {/* HUD / TOP CONSOLE */}
+        <div className="cabinet-header">
+          <h1 className="pixel-title cyan-text glitch-effect text-center mb-4">NEON PATH</h1>
+          
+          <div className="header-stats">
+            <div className="stat-block border-blue">
+              <span className="stat-label">SYS_LEVEL</span>
+              <span className="stat-value">{level}</span>
+            </div>
+            <div className="stat-block border-red">
+              <span className="stat-label">CYCLES LEFT</span>
+              <span className={`stat-value ${maxMoves - moves <= 3 ? 'red-text blink' : ''}`}>
+                {maxMoves - moves}
+              </span>
+            </div>
+            <div className="stat-block border-gold">
+              <span className="stat-label">DATA FRAGS</span>
+              <span className="stat-value gold-text">{targets}</span>
+            </div>
           </div>
-          <span>{progressPercent}%</span>
+
+          <div className="rpg-dialogue-box mt-4">
+            <p className="status-line typing-text">&gt; {statusMessage}</p>
+          </div>
         </div>
 
-        <div className="g3-image-frame">
-          <img
-            src={question.image}
-            alt="quiz"
-            className={`g3-image ${reveal ? "reveal" : ""}`}
-            loading="eager"
-          />
+        {/* MAIN GAME GRID */}
+        <div className="cyber-grid-container mt-4">
+          <div 
+            className="cyber-grid" 
+            style={{ 
+              gridTemplateColumns: `repeat(${size}, 1fr)`,
+              gridTemplateRows: `repeat(${size}, 1fr)` 
+            }}
+          >
+            {grid.map((row, r) =>
+              row.map((cell, c) => {
+                const isPlayer = player.r === r && player.c === c;
+                return (
+                  <div
+                    key={`${r}-${c}`}
+                    className={`cell 
+                      ${cell === "X" ? "block firewall" : ""} 
+                      ${cell === "S" ? "start-zone" : ""} 
+                      ${cell === "E" ? "end-portal" : ""} 
+                      ${cell === "T" ? "target-frag" : ""}
+                    `}
+                  >
+                    {cell === "T" && <span className="star-icon blink-fast">✦</span>}
+                    {isPlayer && <div className="player-avatar"></div>}
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
 
-        <h3 className="g3-question">{question.question}</h3>
+        {/* ================= OVERLAY MODALS ================= */}
+        
+        {/* START GAME MODAL */}
+        {!gameStarted && (
+          <div className="modal-overlay">
+            <div className="in-screen-modal-content border-cyan text-center">
+              <h2 className="pixel-title cyan-text glitch-effect mb-4">NEON PATH</h2>
+              <div className="rpg-dialogue-box bg-dark mb-4">
+                <p className="green-text mb-2">INFILTRATE THE MAINFRAME.</p>
+                <p className="gold-text mb-2">EXTRACT THE DATA FRAGS.</p>
+                <p className="red-text">ESCAPE BEFORE CYCLES DEPLETE.</p>
+              </div>
+              <button className="pixel-btn btn-green pulse-btn mx-auto mt-2" onClick={() => setGameStarted(true)}>
+                [ INITIATE HACK ]
+              </button>
+            </div>
+          </div>
+        )}
 
-        <div className="g3-options">
-          {question.options.map(option => (
-            <button
-              key={option}
-              className={`g3-option-btn
-                ${selected &&
-                  (option === question.answer
-                    ? "correct"
-                    : option === selected
-                    ? "wrong"
-                    : "")}`}
-              onClick={() => handleOptionClick(option)}
-              disabled={selected !== null}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
+        {/* GAME OVER MODAL */}
+        {gameOver && (
+          <div className="modal-overlay">
+            <div className="in-screen-modal-content border-red text-center">
+              <h2 className="pixel-title red-text blink mb-2">SYSTEM FAILURE</h2>
+              <p className="gold-text mb-4">CYCLES DEPLETED. TRACE DETECTED.</p>
+              
+              <div className="final-stats-box mb-4">
+                <div className="stat-row">
+                  <span className="blue-text">MAINFRAME LEVEL REACHED:</span>
+                  <span className="cyan-text huge-text">{level}</span>
+                </div>
+              </div>
+              
+              <button className="pixel-btn btn-red pulse-btn mx-auto" onClick={handleRestart}>
+                [ REBOOT SYSTEM ]
+              </button>
+            </div>
+          </div>
+        )}
 
-        <p className="g3-score">Score: {score}</p>
       </div>
     </div>
   );
 }
 
-export default QuizGame;
+export default PathGame;

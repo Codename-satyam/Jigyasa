@@ -1,164 +1,234 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-.leaderboard-container {
-    min-height: 100vh;
-    background: radial-gradient(circle at top, #1a1a2e, #0f0f1b);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 60px 20px;
-    font-family: 'Press Start 2P', cursive;
-    color: #fff;
+.leaderboard-page {
+  font-family: 'Press Start 2P', monospace;
+  background-color: #000000;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 2rem;
+  box-sizing: border-box;
 }
 
-.leaderboard-title {
-    font-size: 28px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    color: #00f5ff;
-    text-shadow: 
-        0 0 5px #00f5ff,
-        0 0 15px #00f5ff,
-        0 0 30px #00f5ff;
-    animation: glow 1.5s infinite alternate;
+/* Base Arcade Panel */
+.arcade-leaderboard-container {
+  background-color: #050505;
+  border: 4px solid #ffd700;
+  padding: 40px;
+  width: 100%;
+  max-width: 950px;
+  box-shadow: 
+    inset 0 0 40px rgba(0,0,0,0.9),
+    15px 15px 0px 0px rgba(255, 215, 0, 0.15);
+  position: relative;
+  overflow: hidden; /* Keeps the scanline inside the box */
 }
 
-.leaderboard-subtitle {
-    font-size: 10px;
-    color: #ff00cc;
-    margin-bottom: 40px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+/* CRT Scanline Effect */
+.scanline {
+  width: 100%;
+  height: 15px;
+  background: linear-gradient(to bottom, rgba(0,240,255,0), rgba(0,240,255,0.4), rgba(0,240,255,0));
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  pointer-events: none;
+  animation: radar-sweep 4s linear infinite;
 }
 
-@keyframes glow {
-    from { text-shadow: 0 0 5px #00f5ff, 0 0 10px #00f5ff; }
-    to { text-shadow: 0 0 15px #00f5ff, 0 0 30px #00f5ff; }
+@keyframes radar-sweep {
+  0% { top: -5%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 105%; opacity: 0; }
 }
 
-.leaderboard-table {
-    width: 100%;
-    max-width: 800px;
-    border-collapse: collapse;
-    background: rgba(20, 20, 40, 0.95);
-    border: 3px solid #00f5ff;
-    box-shadow: 
-        0 0 20px #00f5ff,
-        inset 0 0 20px rgba(0, 245, 255, 0.2);
-    border-radius: 10px;
-    overflow: hidden;
+/* Typography Utilities */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+.mt-2 { margin-top: 1rem; }
+.mb-4 { margin-bottom: 2rem; }
+
+.pixel-title { font-size: 28px; text-shadow: 4px 4px 0 #333; margin: 0; letter-spacing: 2px;}
+.pixel-subtitle { font-size: 10px; margin: 0; letter-spacing: 2px;}
+
+.gold-text { color: #ffd700; text-shadow: 2px 2px 0 #000; }
+.cyan-text { color: #00f0ff; text-shadow: 2px 2px 0 #000; }
+.magenta-text { color: #ff003c; text-shadow: 2px 2px 0 #000; }
+.blue-text { color: #0055ff; }
+.green-text { color: #39ff14; }
+.red-text { color: #ff0000; }
+
+/* =========================================
+   CYBERPUNK TABLE STYLING
+   ========================================= */
+.table-wrapper {
+  overflow-x: auto;
+  border: 4px solid #333;
+  background-color: #111;
+  box-shadow: inset 0 0 20px #000;
+  position: relative;
+  z-index: 2;
 }
 
-.leaderboard-table thead {
-    background: linear-gradient(90deg, #ff00cc, #3333ff);
+.cyber-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+  min-width: 650px; 
 }
 
-.leaderboard-table th {
-    padding: 18px;
-    font-size: 12px;
-    text-align: center;
-    color: #fff;
-    letter-spacing: 2px;
+/* Table Headers */
+.cyber-table-header {
+  background-color: #1a1a24;
+  border-bottom: 4px solid #fff;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.5);
 }
 
-.leaderboard-table td {
-    padding: 18px;
-    text-align: center;
-    font-size: 11px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+.cyber-table th {
+  padding: 20px 15px;
+  color: #00f0ff;
+  letter-spacing: 1px;
 }
 
-.leaderboard-table tbody tr {
-    transition: all 0.3s ease;
+/* Table Rows */
+.cyber-table-row {
+  border-bottom: 2px dashed #333;
+  background-color: #050505;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  
+  /* Start hidden for the entrance animation */
+  opacity: 0;
+  transform: translateX(-40px) skewX(10deg);
+  animation: slide-in-row 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-.leaderboard-table tbody tr:hover {
-    background: rgba(0, 245, 255, 0.1);
-    transform: scale(1.02);
+@keyframes slide-in-row {
+  100% { opacity: 1; transform: translateX(0) skewX(0deg); }
 }
 
-.leaderboard-table tbody tr:nth-child(1) {
-    background: linear-gradient(90deg, #ffd70033, #ffcc0033);
-    color: #ffd700;
-    font-weight: bold;
+.cyber-table td {
+  padding: 20px 15px;
+  line-height: 1.5;
 }
 
-.leaderboard-table tbody tr:nth-child(2) {
-    background: linear-gradient(90deg, #c0c0c033, #aaaaaa33);
-    color: #c0c0c0;
+/* =========================================
+   AGGRESSIVE HOVER STATE
+   ========================================= */
+.cyber-table-row:hover {
+  background-color: #1a1a24;
+  transform: scale(1.02) translateX(10px) !important; /* Pop out and slide right */
+  box-shadow: 
+    -8px 0 0 var(--neon-accent, #00f0ff), /* Chunky left border */
+    10px 10px 0px rgba(0,0,0,0.8);
+  z-index: 10;
 }
 
-.leaderboard-table tbody tr:nth-child(3) {
-    background: linear-gradient(90deg, #cd7f3233, #b8733333);
-    color: #cd7f32;
+/* Make the score pulse when hovered */
+.cyber-table-row:hover .glitch-hover {
+  animation: score-pulse 0.5s infinite alternate;
+  color: #fff;
+  text-shadow: 0 0 10px var(--neon-accent, #00f0ff);
 }
 
-.leaderboard-empty {
-    padding: 30px;
-    font-size: 12px;
-    color: #ff4d6d;
+@keyframes score-pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.2); }
 }
 
-.rank-cell {
-    font-size: 16px !important;
-    font-weight: bold;
-    letter-spacing: 2px;
+.empty-row {
+  padding: 40px !important;
+  font-size: 12px;
 }
 
-.score-cell {
-    color: #00ff00;
-    font-weight: bold;
-    font-size: 12px !important;
-}
-
-.quiz-cell {
-    color: #ff9500;
-    font-size: 10px !important;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
+/* =========================================
+   TOP 3 HIGHLIGHTS
+   ========================================= */
 .rank-1 {
-    animation: pulse-gold 1s infinite;
+  --neon-accent: #ffd700;
+  background-color: rgba(255, 215, 0, 0.05);
+  border-left: 6px solid #ffd700;
+  font-size: 12px; 
+}
+.rank-1 .rank-cell { animation: float-trophy 2s ease-in-out infinite; }
+
+.rank-2 {
+  --neon-accent: #00f0ff;
+  background-color: rgba(0, 240, 255, 0.05);
+  border-left: 6px solid #00f0ff;
 }
 
-.rank-2, .rank-3 {
-    animation: pulse-silver 1s infinite;
+.rank-3 {
+  --neon-accent: #ff003c;
+  background-color: rgba(255, 0, 60, 0.05);
+  border-left: 6px solid #ff003c;
 }
 
-@keyframes pulse-gold {
-    0%, 100% { box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.3); }
-    50% { box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.6); }
+/* Standard Ranks (4-10) */
+.standard-rank {
+  --neon-accent: #fff;
+  color: #ccc;
+  border-left: 6px solid #444;
 }
 
-@keyframes pulse-silver {
-    0%, 100% { box-shadow: inset 0 0 10px rgba(192, 192, 192, 0.2); }
-    50% { box-shadow: inset 0 0 20px rgba(192, 192, 192, 0.4); }
+/* Animations */
+@keyframes float-trophy {
+  0%, 100% { transform: translateY(0); text-shadow: 0 0 10px #ffd700; }
+  50% { transform: translateY(-3px); text-shadow: 0 5px 15px #ffd700; }
 }
 
-.loading {
-    font-size: 14px;
-    color: #ff00cc;
-    text-shadow: 0 0 10px #ff00cc;
-    animation: blink 1s infinite alternate;
+.blink { animation: blink 1s step-end infinite; }
+.blink-slow { animation: blink 2s step-end infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+.glitch-effect { animation: glitch 3s infinite; }
+@keyframes glitch {
+  0%, 96%, 98%, 100% { transform: translate(0); text-shadow: 3px 3px 0 #000; }
+  97% { transform: translate(-2px, 2px); text-shadow: -3px 0 #ff003c, 3px 0 #00f0ff; }
+  99% { transform: translate(2px, -2px); text-shadow: 3px 0 #ff003c, -3px 0 #00f0ff; }
 }
 
-@keyframes blink {
-    from { opacity: 0.5; }
-    to { opacity: 1; }
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .arcade-leaderboard-container { padding: 20px; border-width: 2px; }
+  .pixel-title { font-size: 16px; }
+  .pixel-subtitle { font-size: 8px; }
+  .cyber-table { font-size: 8px; }
+  .rank-1 { font-size: 10px; }
+  .cyber-table td, .cyber-table th { padding: 15px 10px; }
+}
+/* =========================================
+   GIANT ARCADE MEDALS
+   ========================================= */
+.rank-1 .rank-cell {
+  font-size: 28px; /* Huge Gold Medal */
+  line-height: 1;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-    .leaderboard-title {
-        font-size: 18px;
-        text-align: center;
-    }
+.rank-2 .rank-cell {
+  font-size: 24px; /* Big Silver Medal */
+  line-height: 1;
+}
 
-    .leaderboard-table th,
-    .leaderboard-table td {
-        padding: 12px;
-        font-size: 9px;
-    }
+.rank-3 .rank-cell {
+  font-size: 20px; /* Chunky Bronze Medal */
+  line-height: 1;
+}
+
+/* Optional: Make the rank numbers (4-10) slightly bigger too so they don't look tiny next to the medals */
+.standard-rank .rank-cell {
+  font-size: 12px;
+  color: #fff;
+}
+
+/* Mobile Adjustment for Medals */
+@media (max-width: 768px) {
+  .rank-1 .rank-cell { font-size: 20px; }
+  .rank-2 .rank-cell { font-size: 18px; }
+  .rank-3 .rank-cell { font-size: 16px; }
 }

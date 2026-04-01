@@ -90,8 +90,8 @@ function Games() {
             >
               <div className="card-icon">🎯</div>
               <div className="card-content">
-                <h3>Guess the Guy</h3>
-                <p>Who's hiding from you?</p>
+                <h3>GK Mania</h3>
+                <p>Test your general knowledge</p>
               </div>
               <div className="card-badge">LEVEL 2</div>
             </motion.button>
@@ -105,10 +105,10 @@ function Games() {
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate("/play/games/g3")}
             >
-              <div className="card-icon">🏛️</div>
+              <div className="card-icon">⚡</div>
               <div className="card-content">
-                <h3>What is this wonder</h3>
-                <p>Name the Monument</p>
+                <h3>GridQuest</h3>
+                <p>Navigate the Grid and Solve the Puzzle</p>
               </div>
               <div className="card-badge">LEVEL 3</div>
             </motion.button>

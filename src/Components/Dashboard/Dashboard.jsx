@@ -6,17 +6,22 @@ import auth from '../../api/auth';
 import data from '../Play/Videos/data.js';
 import { getSubjectProgress } from '../../api/progressTracker.js';
 import { Link } from 'react-router-dom';
+import { getDailyMinutesProgress, getUserSettings } from '../../api/settings';
 
 function Dashboard() {
   const [user, setUser] = useState(null);
   const [link] = useState('/leaderboard');
   const [scores, setScores] = useState([]);
   const [games, setGames] = useState([]);
+  const [settings, setSettings] = useState(() => getUserSettings());
+  const [dailyProgress, setDailyProgress] = useState(() => getDailyMinutesProgress());
   const [teacher] = useState('/teacher-dashboard');
 
   useEffect(() => {
     const current = auth.getCurrentUser();
     setUser(current);
+    setSettings(getUserSettings());
+    setDailyProgress(getDailyMinutesProgress());
   }, []);
 
   useEffect(() => {
@@ -198,6 +203,7 @@ function Dashboard() {
       }
     ];
   }, [totals.completedLessons, myScores, games, user]);
+  
   return (
     <div className="dashboard-root">
       <div className="dashboard-shell">
@@ -254,10 +260,31 @@ function Dashboard() {
                 <span className="dash-stat-label">Quizzes taken</span>
                 <span className="stat-value">{myScores.length}</span>
               </div>
+              <div>
+                <span className="dash-stat-label">Daily goal</span>
+                <span className="stat-value">{dailyProgress.minutes}/{settings.dailyGoal} min</span>
+              </div>
             </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: `${totals.completionRate}%` }} />
+            
+            {/* UPDATED RPG PROGRESS BARS */}
+            <div className="rpg-progress-container">
+              <div className="rpg-progress-row">
+                <span className="rpg-progress-label">TOTAL EXP</span>
+                <div className="rpg-progress-track">
+                  <div className="rpg-progress-fill exp-fill" style={{ width: `${totals.completionRate}%` }}></div>
+                </div>
+                <span className="rpg-progress-pct">{totals.completionRate}%</span>
+              </div>
+
+              <div className="rpg-progress-row">
+                <span className="rpg-progress-label">DAILY QST</span>
+                <div className="rpg-progress-track">
+                  <div className="rpg-progress-fill daily-fill" style={{ width: `${Math.min(100, Math.round((dailyProgress.minutes / settings.dailyGoal) * 100))}%` }}></div>
+                </div>
+                <span className="rpg-progress-pct">{Math.min(100, Math.round((dailyProgress.minutes / settings.dailyGoal) * 100))}%</span>
+              </div>
             </div>
+
           </div>
 
           <div className="dash-card achievements">

@@ -4,6 +4,8 @@ import "./SelectQuiz.css";
 import { fetchCategories } from "../../../api/quizApi";
 import auth from "../../../api/auth";
 import QuizBackground3D from "./QuizBackground3D";
+import { getUserSettings } from "../../../api/settings";
+import teacherQuizzes from "../../../api/teacherQuizzes";
 
 const LoadingPage = ({ text = "LOADING DATABASE..." }) => {
   return (
@@ -18,12 +20,14 @@ const LoadingPage = ({ text = "LOADING DATABASE..." }) => {
 
 function SelectQuiz() {
   const navigate = useNavigate();
+  const [userSettings] = useState(() => getUserSettings());
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [amount, setAmount] = useState(5);
-  const [amountInput, setAmountInput] = useState("5");
-  const [difficulty, setDifficulty] = useState("easy");
+  const [amount, setAmount] = useState(() => Number(userSettings.quizLength) || 10);
+  const [amountInput, setAmountInput] = useState(() => String(Number(userSettings.quizLength) || 10));
+  const [difficulty, setDifficulty] = useState(() => userSettings.preferredDifficulty || "medium");
+  const [publishedTeacherQuizzes, setPublishedTeacherQuizzes] = useState([]);
 
   useEffect(() => {
     const currentUser = auth.getCurrentUser();
@@ -42,6 +46,24 @@ function SelectQuiz() {
       setLoading(false);
     });
     return () => (mounted = false);
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    teacherQuizzes
+      .getPublishedTeacherQuizzes()
+      .then((quizzes) => {
+        if (!mounted) return;
+        setPublishedTeacherQuizzes(Array.isArray(quizzes) ? quizzes : []);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setPublishedTeacherQuizzes([]);
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleCategorySelect = (categoryId) => {
@@ -114,6 +136,12 @@ function SelectQuiz() {
                   <h2 className="pixel-title-small purple-text mb-4">
                     2. MISSION SETTINGS
                   </h2>
+
+                  <div className="rpg-dialogue-box mb-4">
+                    <p>
+                      DEFAULT PROFILE: <span className="green-text">{userSettings.preferredDifficulty.toUpperCase()}</span> / <span className="green-text">{userSettings.quizLength} STAGES</span> / <span className="green-text">{userSettings.dailyGoal} MIN GOAL</span>
+                    </p>
+                  </div>
                   
                   <div className="quiz-settings-grid">
                     <div className="pixel-form-group">
@@ -179,6 +207,33 @@ function SelectQuiz() {
                   >
                     [ RANDOM ENCOUNTER ]
                   </button>
+                </div>
+
+                {/* TEACHER QUESTS SECTION */}
+                <div className="mission-settings-panel border-cyan mt-4">
+                  <h2 className="pixel-title-small cyan-text mb-4">3. TEACHER QUESTS</h2>
+                  
+                  {publishedTeacherQuizzes.length === 0 ? (
+                    <div className="rpg-dialogue-box text-center">
+                      <p className="gray-text">NO TEACHER QUESTS PUBLISHED YET.</p>
+                    </div>
+                  ) : (
+                    <div className="categories-grid">
+                      {publishedTeacherQuizzes.map((quiz) => (
+                        <div key={quiz.id} className="category-card teacher-card border-blue">
+                          <div className="category-icon">🧙</div>
+                          <h3 className="category-name">{quiz.title}</h3>
+                          <p className="category-id cyan-text mb-2">Difficulty: {quiz.difficulty || 'medium'}</p>
+                          <button
+                            className="pixel-btn-small btn-blue w-100 mt-auto"
+                            onClick={() => navigate(`/play/teacher-quiz/${quiz.id}`)}
+                          >
+                            [ ATTEMPT ]
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 
               </>

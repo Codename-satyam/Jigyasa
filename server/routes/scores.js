@@ -53,13 +53,13 @@ router.post('/', verifyToken, async (req, res) => {
   }
 });
 
-// Get all scores (admin only) or user's scores
+// Get all scores (admin/teacher) or user's scores
 router.get('/', verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
     
-    // Admin gets all scores
-    if (user.role === 'admin') {
+    // Admins and teachers get all scores
+    if (user.role === 'admin' || user.role === 'teacher') {
       const scores = await Score.find()
         .populate('userId', 'name email')
         .populate('quizId', 'title topic difficulty')
