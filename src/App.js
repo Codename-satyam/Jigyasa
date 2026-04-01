@@ -6,6 +6,7 @@ import { AnimatePresence } from "framer-motion";
 import Navbar from "./Components/Navbar/Navbar.jsx";
 import PageTransition from "./Components/PageTransition.jsx";
 import LoadingPage from "./Components/LoadingPage/LoadingPage.jsx";
+import BackButton from "./Assets/BackButton/BackButton.jsx";
 import ProtectedRoute from "./Components/Auth/ProtectedRoute.jsx";
 import RoleProtectedRoute from "./Components/Auth/RoleProtectedRoute.jsx";
 import AdminProtectedRoute from "./Components/Auth/AdminProtectedRoute.jsx";
@@ -22,10 +23,10 @@ const Page6 = lazy(() => import("./Components/HomePage/Page6/Page6.jsx"));
 const Footer = lazy(() => import("./Components/HomePage/Footer/Footer.jsx"));
 const Contact = lazy(() => import("./Components/ContactUs/Contact.jsx"));
 const About = lazy(() => import("./Components/About/About.jsx"));
-const Dashboard = lazy(() => import("./Components/Dashboard/Dashboard.jsx"));
-const TeacherDashboard = lazy(() => import("./Components/Dashboard/TeacherDashboard.jsx"));
-const CreateQuiz = lazy(() => import("./Components/Dashboard/CreateQuiz.jsx"));
-const Admin = lazy(() => import("./Components/Dashboard/Admin.jsx"));
+const Dashboard = lazy(() => import("./Components/Dashboard/User/Dashboard.jsx"));
+const TeacherDashboard = lazy(() => import("./Components/Dashboard/Teacher/TeacherDashboard.jsx"));
+const CreateQuiz = lazy(() => import("./Components/Dashboard/Quiz/CreateQuiz.jsx"));
+const Admin = lazy(() => import("./Components/Dashboard/Admin/Admin.jsx"));
 
 // Play
 const PlayLanding = lazy(() => import("./Components/Play/PlayLanding/PlayLanding.jsx"));
@@ -66,10 +67,12 @@ const NotFound = lazy(() => import("./Components/Error/Error404.jsx"));
 
 function AnimatedRoutes() {
   const location = useLocation();
+  const isHomePage = location.pathname === "/home";
 
   return (
     <AnimatePresence mode="wait">
       <Suspense fallback={<LoadingPage />}>
+      {!isHomePage && <BackButton />}
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
         <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />

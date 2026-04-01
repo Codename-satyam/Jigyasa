@@ -2,7 +2,7 @@ import './Settings.css';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import auth from '../../api/auth';
-import BackButton from '../BackButton';
+import BackButton from '../../Assets/BackButton/BackButton';
 import { clearDailyMinutesProgress, DEFAULT_SETTINGS, getUserSettings, saveUserSettings } from '../../api/settings';
 
 function Settings() {

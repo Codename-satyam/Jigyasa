@@ -1,12 +1,12 @@
 import React, {useEffect, useMemo, useState } from 'react';
 import './Dashboard.css';
-import scoresApi from '../../api/scores';
-import gamesTracker from '../../api/gamesTracker';
-import auth from '../../api/auth';
-import data from '../Play/Videos/data.js';
-import { getSubjectProgress } from '../../api/progressTracker.js';
+import scoresApi from '../../../api/scores.js';
+import gamesTracker from '../../../api/gamesTracker.js';
+import auth from '../../../api/auth.js';
+import data from '../../Play/Videos/data.js';
+import { getSubjectProgress } from '../../../api/progressTracker.js';
 import { Link } from 'react-router-dom';
-import { getDailyMinutesProgress, getUserSettings } from '../../api/settings';
+import { getDailyMinutesProgress, getUserSettings } from '../../../api/settings.js';
 
 function Dashboard() {
   const [user, setUser] = useState(null);

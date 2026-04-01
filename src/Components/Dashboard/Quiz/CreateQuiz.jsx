@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import auth from '../../api/auth';
-import teacherQuizzes from '../../api/teacherQuizzes';
+import auth from '../../../api/auth.js';
+import teacherQuizzes from '../../../api/teacherQuizzes.js';
 import './CreateQuiz.css';
 
 // Component wrappers (assuming you have these available, or remove if not)
-import PageTransition from '../PageTransition.jsx';
-import FadeInWhenVisible from '../FadeInWhenVisible.jsx';
+import PageTransition from '../../PageTransition.jsx';
+import FadeInWhenVisible from '../../FadeInWhenVisible.jsx';
 
 function CreateQuiz() {
   const navigate = useNavigate();

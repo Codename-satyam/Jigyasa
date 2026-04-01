@@ -1,31 +1,53 @@
-const express = require('express');
-const router = express.Router();
-const Game = require('../models/Game');
-const { verifyToken } = require('../middleware/auth');
-const { isValidString, isValidPositiveInt, sanitizeString, safeMax } = require('../middleware/validate');
+// server/routes/game.js
+// Identical to the original, with one addition:
+//   after POST / saves a game → fires mlClient.trainAsync() with the user's
+//   full game history so the ML model retrains immediately (non-blocking).
 
-// Save game score (with input validation)
+const express = require('express');
+const router  = express.Router();
+const Game    = require('../models/Game');
+const { verifyToken }                                  = require('../middleware/auth');
+const { isValidString, isValidPositiveInt,
+        sanitizeString, safeMax }                      = require('../middleware/validate');
+const { trainAsync }                                   = require('./ml/mlClient');   // ← NEW
+
+// ── POST / — save a new game score ───────────────────────────────────────────
 router.post('/', verifyToken, async (req, res) => {
   try {
     const { gameId, gameName, score, level, timePlayed } = req.body;
 
-    if (!isValidString(gameName, 100)) {
+    if (!isValidString(gameName, 100))
       return res.status(400).json({ success: false, error: 'Invalid game name' });
-    }
-    if (!isValidPositiveInt(Number(score), 1000000)) {
+    if (!isValidPositiveInt(Number(score), 1_000_000))
       return res.status(400).json({ success: false, error: 'Invalid score' });
-    }
-    
+
     const game = new Game({
-      userId: req.userId,
-      gameId: sanitizeString(gameId || '', 100),
-      gameName: sanitizeString(gameName, 100),
-      score: Number(score) || 0,
-      level: isValidPositiveInt(Number(level), 10000) ? Number(level) : 0,
-      timePlayed: isValidPositiveInt(Number(timePlayed), 86400) ? Number(timePlayed) : 0,
+      userId:     req.userId,
+      gameId:     sanitizeString(gameId || '', 100),
+      gameName:   sanitizeString(gameName, 100),
+      score:      Number(score) || 0,
+      level:      isValidPositiveInt(Number(level),      10_000) ? Number(level)      : 0,
+      timePlayed: isValidPositiveInt(Number(timePlayed), 86_400) ? Number(timePlayed) : 0,
     });
 
     await game.save();
+
+    // ── Trigger ML retraining (non-blocking) ─────────────────────────────────
+    // We fire-and-forget so the HTTP response is not delayed.
+    // Fetch the full user history and hand it to the Python microservice.
+    setImmediate(async () => {
+      try {
+        const allGames = await Game
+          .find({ userId: req.userId })
+          .sort({ timestamp: 1 })    // chronological order matters for trend features
+          .lean();
+        trainAsync(String(req.userId), allGames);  // non-blocking inside too
+      } catch (e) {
+        console.warn('[game.js] Failed to fetch history for ML retraining:', e.message);
+      }
+    });
+    // ─────────────────────────────────────────────────────────────────────────
+
     res.json({ success: true, message: 'Game score saved', game });
   } catch (err) {
     console.error('Save game error:', err);
@@ -33,7 +55,7 @@ router.post('/', verifyToken, async (req, res) => {
   }
 });
 
-// Get all game scores for user
+// ── GET / — all scores for this user ─────────────────────────────────────────
 router.get('/', verifyToken, async (req, res) => {
   try {
     const games = await Game.find({ userId: req.userId }).sort({ timestamp: -1 });
@@ -44,16 +66,13 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
-// Get game by ID
+// ── GET /:id ──────────────────────────────────────────────────────────────────
 router.get('/:id', verifyToken, async (req, res) => {
   try {
     const game = await Game.findById(req.params.id).populate('userId', 'name avatarId');
     if (!game) return res.status(404).json({ success: false, error: 'Game not found' });
-    
-    if (game.userId._id.toString() !== req.userId.toString()) {
+    if (game.userId._id.toString() !== req.userId.toString())
       return res.status(403).json({ success: false, error: 'Can only view your own games' });
-    }
-
     res.json({ success: true, game });
   } catch (err) {
     console.error('Get game error:', err);
@@ -61,10 +80,12 @@ router.get('/:id', verifyToken, async (req, res) => {
   }
 });
 
-// Get games by game name / ID
+// ── GET /name/:gameName ───────────────────────────────────────────────────────
 router.get('/name/:gameName', verifyToken, async (req, res) => {
   try {
-    const games = await Game.find({ userId: req.userId, gameName: req.params.gameName }).sort({ timestamp: -1 });
+    const games = await Game
+      .find({ userId: req.userId, gameName: req.params.gameName })
+      .sort({ timestamp: -1 });
     res.json({ success: true, games });
   } catch (err) {
     console.error('Get games by name error:', err);
@@ -72,10 +93,11 @@ router.get('/name/:gameName', verifyToken, async (req, res) => {
   }
 });
 
-// Get game leaderboard (public)
+// ── GET /leaderboard/:gameName — public ───────────────────────────────────────
 router.get('/leaderboard/:gameName', async (req, res) => {
   try {
-    const leaderboard = await Game.find({ gameName: req.params.gameName })
+    const leaderboard = await Game
+      .find({ gameName: req.params.gameName })
       .populate('userId', 'name avatarId')
       .sort({ score: -1, level: -1, timePlayed: 1 })
       .limit(10);
@@ -86,19 +108,18 @@ router.get('/leaderboard/:gameName', async (req, res) => {
   }
 });
 
-// Get user game statistics
+// ── GET /stats/:gameName ──────────────────────────────────────────────────────
 router.get('/stats/:gameName', verifyToken, async (req, res) => {
   try {
     const games = await Game.find({ userId: req.userId, gameName: req.params.gameName });
-    
     const stats = {
-      totalPlayed: games.length,
-      highestScore: safeMax(games.map(g => g.score)),
-      highestLevel: safeMax(games.map(g => g.level)),
-      averageScore: games.length > 0 ? (games.reduce((a, b) => a + b.score, 0) / games.length).toFixed(2) : 0,
+      totalPlayed:     games.length,
+      highestScore:    safeMax(games.map(g => g.score)),
+      highestLevel:    safeMax(games.map(g => g.level)),
+      averageScore:    games.length > 0
+        ? (games.reduce((a, b) => a + b.score, 0) / games.length).toFixed(2) : 0,
       totalTimePlayed: games.reduce((a, b) => a + (b.timePlayed || 0), 0),
     };
-
     res.json({ success: true, stats });
   } catch (err) {
     console.error('Get stats error:', err);
@@ -106,21 +127,18 @@ router.get('/stats/:gameName', verifyToken, async (req, res) => {
   }
 });
 
-// Update game score
+// ── PUT /:id ──────────────────────────────────────────────────────────────────
 router.put('/:id', verifyToken, async (req, res) => {
   try {
     const game = await Game.findById(req.params.id);
     if (!game) return res.status(404).json({ success: false, error: 'Game not found' });
-    
-    if (game.userId.toString() !== req.userId.toString()) {
+    if (game.userId.toString() !== req.userId.toString())
       return res.status(403).json({ success: false, error: 'Can only update your own games' });
-    }
 
-    // Only allow updating score, level, timePlayed
     const allowed = {};
-    if (req.body.score !== undefined && isValidPositiveInt(Number(req.body.score), 1000000)) allowed.score = Number(req.body.score);
-    if (req.body.level !== undefined && isValidPositiveInt(Number(req.body.level), 10000)) allowed.level = Number(req.body.level);
-    if (req.body.timePlayed !== undefined && isValidPositiveInt(Number(req.body.timePlayed), 86400)) allowed.timePlayed = Number(req.body.timePlayed);
+    if (req.body.score      !== undefined && isValidPositiveInt(Number(req.body.score),      1_000_000)) allowed.score      = Number(req.body.score);
+    if (req.body.level      !== undefined && isValidPositiveInt(Number(req.body.level),      10_000))    allowed.level      = Number(req.body.level);
+    if (req.body.timePlayed !== undefined && isValidPositiveInt(Number(req.body.timePlayed), 86_400))    allowed.timePlayed = Number(req.body.timePlayed);
 
     const updatedGame = await Game.findByIdAndUpdate(req.params.id, allowed, { new: true });
     res.json({ success: true, game: updatedGame });
@@ -130,16 +148,13 @@ router.put('/:id', verifyToken, async (req, res) => {
   }
 });
 
-// Delete game
+// ── DELETE /:id ───────────────────────────────────────────────────────────────
 router.delete('/:id', verifyToken, async (req, res) => {
   try {
     const game = await Game.findById(req.params.id);
     if (!game) return res.status(404).json({ success: false, error: 'Game not found' });
-    
-    if (game.userId.toString() !== req.userId.toString()) {
+    if (game.userId.toString() !== req.userId.toString())
       return res.status(403).json({ success: false, error: 'Can only delete your own games' });
-    }
-
     await Game.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Game deleted' });
   } catch (err) {

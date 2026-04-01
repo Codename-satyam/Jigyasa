@@ -14,22 +14,53 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-// Allow multiple origins for development
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:4001',
-  process.env.CLIENT_ORIGIN
-].filter(Boolean);
+const PORT = Number(process.env.PORT) || 4000;
+const HOST = process.env.HOST || 'localhost';
+
+const normalizeOrigin = (origin) => String(origin || '').replace(/\/$/, '').toLowerCase();
+const parseOrigins = (value) =>
+  String(value || '')
+    .split(',')
+    .map((item) => normalizeOrigin(item.trim()))
+    .filter(Boolean);
+
+const corsAllowAll = /^true$/i.test(String(process.env.CORS_ALLOW_ALL || ''));
+const allowedOrigins = new Set(
+  [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:4000',
+    'http://127.0.0.1:4000',
+    'http://localhost:4001',
+    'http://127.0.0.1:4001',
+    `http://localhost:${PORT}`,
+    `http://127.0.0.1:${PORT}`,
+    process.env.CLIENT_ORIGIN,
+    ...parseOrigins(process.env.ALLOWED_ORIGINS),
+  ]
+    .map(normalizeOrigin)
+    .filter(Boolean)
+);
+
+if (corsAllowAll) {
+  console.warn('⚠️ CORS_ALLOW_ALL=true: all origins are allowed');
+} else {
+  console.log('CORS allowed origins:', Array.from(allowedOrigins));
+}
 
 app.use(cors({ 
   origin: function(origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests or direct server calls)
     if (!origin) return callback(null, true);
+
+    if (corsAllowAll) return callback(null, true);
+
+    const normalizedOrigin = normalizeOrigin(origin);
     
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (allowedOrigins.has(normalizedOrigin)) {
       callback(null, true);
     } else {
-      console.log('❌ CORS blocked origin:', origin, '(allowed:', allowedOrigins, ')');
+      console.log('❌ CORS blocked origin:', origin, '(allowed:', Array.from(allowedOrigins), ')');
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -66,14 +97,18 @@ const scoresRoutes = require('./server/routes/scores');
 const progressRoutes = require('./server/routes/progress');
 const gameRoutes = require('./server/routes/game');
 const flagsRoutes = require('./server/routes/flags');
+const difficultyRoutes = require('./server/routes/difficulty');
+
 
 // ==================== REGISTER ROUTES ====================
 app.use('/api/users', userRoutes);
+app.use('/api/difficulty', difficultyRoutes);
 app.use('/api/quizzes', quizzesRoutes);
 app.use('/api/scores', scoresRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/games', gameRoutes);
 app.use('/api/flags', flagsRoutes);
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -248,5 +283,7 @@ app.get(/.*/, (req, res) => {
   res.sendFile(path.join(buildPath, 'index.html'));
 });
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`✅ Server listening on http://localhost:${PORT}`));
+app.listen(PORT, HOST, () => {
+  const hostForLog = HOST === '0.0.0.0' ? 'localhost' : HOST;
+  console.log(`✅ Server listening on http://${hostForLog}:${PORT}`);
+});

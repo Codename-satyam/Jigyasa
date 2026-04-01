@@ -1,0 +1,37 @@
+/* BackButton.css - 8-BIT PIXEL THEME */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.retro-back-btn {
+    position: fixed;
+    top: 85px;
+    left: 20px;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    
+    /* 8-Bit Aesthetics */
+    background-color: #ffcc00; /* Arcade Yellow */
+    color: #000;
+    border: 3px solid #000;
+    padding: 12px 18px;
+    
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.7rem; /* This font renders huge, so keep it small */
+    text-transform: uppercase;
+    
+    /* The magic blocky shadow */
+    box-shadow: 5px 5px 0px #000;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.retro-back-btn:hover {
+    background-color: #ffea00;
+}
+
+/* The actual "button press" mechanic */
+.retro-back-btn:active {
+    transform: translate(5px, 5px); /* Moves down and right */
+    box-shadow: 0px 0px 0px #000; /* Shadow disappears to simulate pressing flat */
+}

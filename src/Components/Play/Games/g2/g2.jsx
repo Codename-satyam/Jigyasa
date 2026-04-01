@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import quizData from "./data/data";
 import "./g2.css";
 import correctSound from "./data/sounds/correct.mp3";
@@ -6,6 +6,7 @@ import wrongSound from "./data/sounds/wrong.mp3";
 import timeoutSound from "./data/sounds/timeout.mp3";
 import gamesTracker from "../../../../api/gamesTracker";
 import auth from "../../../../api/auth";
+import { useDifficulty } from "../../../../api/useDifficulty";
 
 const CORRECT_SOUND = new Audio(correctSound);
 const WRONG_SOUND = new Audio(wrongSound);
@@ -20,13 +21,30 @@ const shuffleArray = (array) => {
   return shuffled;
 };
 
-const getRandomQuestions = () => {
-  return shuffleArray(quizData).slice(0, 10);
+const getRandomQuestions = (count) => {
+  const safeCount = Math.max(5, Math.min(count, quizData.length));
+  return shuffleArray(quizData).slice(0, safeCount);
+};
+
+function scoreToG2Config(score) {
+  const safeScore = Math.max(0, Math.min(1, score ?? 0.5));
+  if (safeScore >= 0.67) return { questionCount: 12, secondsPerQuestion: 7 };
+  if (safeScore >= 0.34) return { questionCount: 10, secondsPerQuestion: 10 };
+  return { questionCount: 8, secondsPerQuestion: 14 };
 }
 
 
 function QuizGame() {
-  const [randomizedQuestions, setRandomizedQuestions] = useState(() => getRandomQuestions());
+  const {
+    difficulty_score: mlScore,
+    loading: mlLoading,
+  } = useDifficulty("guess");
+
+  const [difficultyApplied, setDifficultyApplied] = useState(false);
+  const [questionCount, setQuestionCount] = useState(10);
+  const [secondsPerQuestion, setSecondsPerQuestion] = useState(10);
+  const [randomizedQuestions, setRandomizedQuestions] = useState(() => getRandomQuestions(10));
+  const sessionStartRef = useRef(Date.now());
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState(null);
@@ -37,12 +55,25 @@ function QuizGame() {
   const question = randomizedQuestions[current];
   const progressPercent = Math.round(((current + 1) / randomizedQuestions.length) * 100);
 
+  useEffect(() => {
+    if (mlLoading || difficultyApplied) return;
+
+    const config = scoreToG2Config(mlScore);
+    const safeQuestionCount = Math.min(config.questionCount, quizData.length);
+
+    setQuestionCount(safeQuestionCount);
+    setSecondsPerQuestion(config.secondsPerQuestion);
+    setTimeLeft(config.secondsPerQuestion);
+    setRandomizedQuestions(getRandomQuestions(safeQuestionCount));
+    setDifficultyApplied(true);
+  }, [mlLoading, mlScore, difficultyApplied]);
+
   const moveNext = useCallback((finalScore = score) => {
     if (current + 1 < randomizedQuestions.length) {
       setCurrent(prev => prev + 1);
       setSelected(null);
       setReveal(false);
-      setTimeLeft(10);
+      setTimeLeft(secondsPerQuestion);
       return;
     }
 
@@ -50,15 +81,18 @@ function QuizGame() {
 
     const user = auth.getCurrentUser();
     if (user) {
+      const elapsedSeconds = Math.max(0, Math.floor((Date.now() - sessionStartRef.current) / 1000));
       gamesTracker.recordGamePlay({
         email: user.email,
         gameType: 'guess',
         gameName: 'Guess the Guy',
         score: finalScore,
+        level: 1,
+        timePlayed: elapsedSeconds,
         date: new Date().toISOString()
       });
     }
-  }, [current, randomizedQuestions.length, score]);
+  }, [current, randomizedQuestions.length, score, secondsPerQuestion]);
 
   useEffect(() => {
     if (timeLeft === 0 && !selected) {
@@ -99,13 +133,14 @@ function QuizGame() {
   };
 
   const restartGame = () => {
-    setRandomizedQuestions(getRandomQuestions());
+    sessionStartRef.current = Date.now();
+    setRandomizedQuestions(getRandomQuestions(questionCount));
     setCurrent(0);
     setScore(0);
     setSelected(null);
     setReveal(false);
     setShowResult(false);
-    setTimeLeft(10);
+    setTimeLeft(secondsPerQuestion);
   };
 
   if (showResult) {

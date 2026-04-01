@@ -3,12 +3,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // API imports
-import * as authApi from '../../api/auth';
-import { apiCall } from '../../api/client';
+import * as authApi from '../../../api/auth.js';
+import { apiCall } from '../../../api/client.js';
 
 // Component imports
-import PageTransition from '../PageTransition.jsx';
-import FadeInWhenVisible from '../FadeInWhenVisible.jsx';
+import PageTransition from '../../PageTransition.jsx';
+import FadeInWhenVisible from '../../FadeInWhenVisible.jsx';
 
 // ==================== ADMIN FUNCTIONS ====================
 
