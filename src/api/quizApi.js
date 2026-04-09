@@ -1,5 +1,10 @@
 
-const QUIZ_API_BASE = process.env.REACT_APP_QUIZ_API_BASE || "http://localhost:4000";
+const defaultQuizApiBase =
+  typeof window !== 'undefined'
+    ? `${window.location.protocol}//${window.location.hostname}:4000`
+    : 'http://localhost:4000';
+
+const QUIZ_API_BASE = process.env.REACT_APP_QUIZ_API_BASE || defaultQuizApiBase;
 
 function shuffle(arr) {
   return arr

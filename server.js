@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 const PORT = Number(process.env.PORT) || 4000;
-const HOST = process.env.HOST || 'localhost';
+const HOST = process.env.HOST || '0.0.0.0';
 
 const normalizeOrigin = (origin) => String(origin || '').replace(/\/$/, '').toLowerCase();
 const parseOrigins = (value) =>
@@ -175,7 +175,6 @@ function stripCodeFences(text) {
 
 app.post('/api/generate-quiz', async (req, res) => {
   console.log('\n🔵 /api/generate-quiz called');
-  console.log('Request body:', req.body);
   
   if (!GEMINI_KEY) {
     console.log('❌ GEMINI_KEY is empty');

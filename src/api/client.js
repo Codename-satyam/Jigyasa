@@ -1,5 +1,10 @@
 // API Client - Centralized configuration for backend communication
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+const defaultApiBaseUrl =
+  typeof window !== 'undefined'
+    ? `${window.location.protocol}//${window.location.hostname}:4000`
+    : 'http://localhost:4000';
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || defaultApiBaseUrl;
 
 export const apiCall = async (endpoint, method = 'GET', data = null) => {
   const token = localStorage.getItem('token');

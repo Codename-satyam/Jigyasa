@@ -1,389 +1,321 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Outfit:wght@300;400;600&display=swap');
 
-.about-page {
-  font-family: 'Press Start 2P', monospace;
-  background-color: #000000;
-  color: #fff;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-  box-sizing: border-box;
+.holo-about-page {
+    font-family: 'Outfit', sans-serif;
+    background-color: #05050a;
+    color: #ffffff;
+    min-height: 100vh;
+    padding: 40px 20px;
+    position: relative;
+    overflow-x: hidden;
 }
 
-/* Typography Utilities */
-.text-center { text-align: center; }
-.mx-auto { margin-left: auto; margin-right: auto; }
-.mt-2 { margin-top: 1rem; }
-.mt-4 { margin-top: 2rem; }
-.mb-2 { margin-bottom: 1rem; }
-.mb-4 { margin-bottom: 2rem; }
-.p-2 { padding: 1rem; }
-.block { display: block; }
-
-.pixel-title { font-size: 20px; text-shadow: 2px 2px 0 #333; margin: 0; }
-.pixel-title-small { font-size: 14px; text-shadow: 2px 2px 0 #000; margin: 0; line-height: 1.4; }
-.pixel-subtitle { font-size: 10px; margin: 0; }
-
-/* Theme Colors */
-.gold-text { color: #ffd700; }
-.blue-text { color: #00f0ff; }
-.green-text { color: #39ff14; }
-.purple-text { color: #b000ff; }
-.red-text { color: #ff003c; }
-.cyan-text { color: #00ffff; }
-
-.text-blue { color: #00f0ff; }
-.text-green { color: #39ff14; }
-.text-purple { color: #b000ff; }
-.text-gold { color: #ffd700; }
-.text-red { color: #ff003c; }
-.text-cyan { color: #00ffff; }
-
-.bg-blue { background-color: #00f0ff; color: #000; }
-.bg-green { background-color: #39ff14; color: #000; }
-.bg-purple { background-color: #b000ff; color: #fff; }
-.bg-gold { background-color: #ffd700; color: #000; }
-.bg-red { background-color: #ff003c; color: #fff; }
-.bg-cyan { background-color: #00ffff; color: #000; }
-
-.bg-hp { background-color: #ff003c; }
-.bg-mp { background-color: #1e90ff; }
-
-/* =========================================
-   RETRO PC MONITOR HARDWARE
-   ========================================= */
-.retro-pc-setup {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 1100px;
+/* Sci-fi grid background */
+.holo-background-grid {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-image: 
+        linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+    pointer-events: none;
+    z-index: 0;
 }
 
-.pc-monitor-bezel {
-  background-color: #d8d8d8;
-  border: 4px solid #b0b0b0;
-  border-radius: 10px;
-  padding: 30px 30px 10px 30px;
-  width: 100%;
-  box-shadow: 
-    inset -5px -5px 15px rgba(0,0,0,0.2),
-    inset 5px 5px 15px #ffffff,
-    10px 10px 0px 0px rgba(255,255,255,0.05);
+/* --- HEADER --- */
+.holo-header {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 50px;
 }
 
-.pc-monitor-screen {
-  background-color: #050505;
-  border: 6px solid #222;
-  border-radius: 15px;
-  height: 65vh;
-  min-height: 500px;
-  position: relative;
-  box-shadow: inset 0 0 30px #000;
-  overflow: hidden; 
+.holo-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    margin: 0;
+    color: #ffffff;
+    text-shadow: 0 0 15px rgba(0, 240, 255, 0.5), 0 0 30px rgba(0, 240, 255, 0.3);
 }
 
-/* Scrollable Inner Content */
-.screen-content-wrapper {
-  padding: 30px;
-  height: 100%;
-  overflow-y: auto;
-  box-sizing: border-box;
-  scrollbar-width: thin;
-  scrollbar-color: #00f0ff #111;
-  transition: opacity 0.25s ease, filter 0.25s ease, background-color 0.25s ease;
+.holo-subtitle {
+    color: #00f0ff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    margin-top: 10px;
 }
 
-.screen-content-wrapper.screen-off {
-  opacity: 0;
-  pointer-events: none;
-  overflow: hidden;
-  background-color: #000;
+.holo-mission-box {
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    font-weight: 300;
+    line-height: 1.6;
+    color: #cbd5e1;
 }
 
-.screen-content-wrapper::-webkit-scrollbar { width: 8px; }
-.screen-content-wrapper::-webkit-scrollbar-track { background: #111; }
-.screen-content-wrapper::-webkit-scrollbar-thumb { background-color: #00f0ff; border-radius: 4px; }
-
-/* Hardware Details */
-.monitor-hardware-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 10px 5px 10px;
+/* --- TCG GRID --- */
+.tcg-grid {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-bottom: 50px;
 }
 
-.monitor-logo {
-  font-size: 12px;
-  color: #555;
-  font-style: italic;
-  text-shadow: 1px 1px 0px #fff;
+/* --- 3D CARD MECHANICS --- */
+.tcg-card-scene {
+    aspect-ratio: 3 / 4; /* Classic trading card ratio */
+    perspective: 1000px; /* Gives the 3D depth */
+    cursor: pointer;
 }
 
-.monitor-buttons { display: flex; gap: 15px; align-items: center; }
-
-.pwr-btn {
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background-color: #39ff14;
-  box-shadow: inset 2px 2px 2px rgba(0,0,0,0.5), 0 0 10px #39ff14;
-}
-.on-off{
-  width: 30px;
-  height: 10px;
-  background-color: #b22222;
-  border-radius: 5px;
-  box-shadow: inset 1px 1px 2px #fff, inset -1px -1px 2px rgba(0,0,0,0.5);
-  cursor: pointer;
+.tcg-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d; /* CRITICAL for the flip */
 }
 
-.on-off.is-on {
-  background-color: #39ff14;
-  box-shadow: inset 1px 1px 2px #fff, inset -1px -1px 2px rgba(0,0,0,0.5), 0 0 8px rgba(57,255,20,0.8);
+.tcg-card-inner.is-flipped {
+    transform: rotateY(180deg);
 }
 
-.on-off.is-off {
-  background-color: #b22222;
-  box-shadow: inset 1px 1px 2px #fff, inset -1px -1px 2px rgba(0,0,0,0.5), 0 0 6px rgba(178,34,34,0.6);
+.tcg-card-front, .tcg-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 16px;
+    background-color: rgba(15, 15, 25, 0.8);
+    border: 2px solid var(--theme-color);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.5);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
-.on-off:focus-visible {
-  outline: 2px solid #00f0ff;
-  outline-offset: 2px;
+.tcg-card-scene:hover .tcg-card-front,
+.tcg-card-scene:hover .tcg-card-back {
+    box-shadow: 0 0 25px var(--theme-color), inset 0 0 15px rgba(255,255,255,0.1);
 }
 
-.menu-btn {
-  width: 25px;
-  height: 8px;
-  background-color: #aaa;
-  box-shadow: inset 1px 1px 2px #fff, inset -1px -1px 2px rgba(0,0,0,0.5);
-  cursor: pointer;
-}
-.menu-btn:active { box-shadow: inset 2px 2px 4px #555; }
-
-/* PC Stand */
-.pc-stand-neck {
-  width: 150px;
-  height: 40px;
-  background-color: #b0b0b0;
-  border-left: 4px solid #fff;
-  border-right: 4px solid #888;
-}
-.pc-stand-base {
-  width: 300px;
-  height: 20px;
-  background-color: #d8d8d8;
-  border-radius: 10px 10px 0 0;
-  border-top: 4px solid #fff;
-  box-shadow: 10px 10px 0px 0px rgba(255,255,255,0.05);
+/* Glass glare effect */
+.tcg-card-glare {
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: linear-gradient(
+        to bottom right, 
+        rgba(255,255,255,0.1) 0%, 
+        rgba(255,255,255,0) 40%, 
+        rgba(255,255,255,0) 100%
+    );
+    transform: rotate(30deg);
+    pointer-events: none;
+    z-index: 5;
 }
 
-/* =========================================
-   SCREEN INTERIOR CONTENT
-   ========================================= */
-.rpg-dialogue-box {
-  background-color: #0000aa;
-  border: 3px solid #ffffff;
-  padding: 20px 30px;
-  box-shadow: inset 0 0 0 3px #aaaaff, 6px 6px 0px rgba(255,255,255,0.1);
-  max-width: 850px;
+/* --- CARD FRONT DESIGN --- */
+.tcg-video-wrapper {
+    position: relative;
+    width: 100%;
+    height: 70%;
+    background: #000;
 }
 
-.rpg-dialogue-box p { color: #ffffff; font-size: 11px; line-height: 1.8; margin: 0; }
-
-/* Roster Grid */
-.roster-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-  padding-bottom: 20px;
+.tcg-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.6) contrast(1.2);
+    transition: filter 0.3s ease;
 }
 
-.roster-card {
-  background-color: #111122;
-  border: 3px solid #555;
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 4px 4px 0 0 rgba(255,255,255,0.1);
+.tcg-card-scene:hover .tcg-video {
+    filter: brightness(1) contrast(1.1);
 }
 
-.roster-card:hover { transform: translateY(-5px); z-index: 2; }
-
-/* Dynamic Borders */
-.border-blue:hover, .border-blue.in-screen-modal-content { border-color: #00f0ff; box-shadow: 6px 6px 0 0 #00f0ff; }
-.border-green:hover, .border-green.in-screen-modal-content { border-color: #39ff14; box-shadow: 6px 6px 0 0 #39ff14; }
-.border-purple:hover, .border-purple.in-screen-modal-content { border-color: #b000ff; box-shadow: 6px 6px 0 0 #b000ff; }
-.border-gold:hover, .border-gold.in-screen-modal-content { border-color: #ffd700; box-shadow: 6px 6px 0 0 #ffd700; }
-.border-red:hover, .border-red.in-screen-modal-content { border-color: #ff003c; box-shadow: 6px 6px 0 0 #ff003c; }
-.border-cyan:hover, .border-cyan.in-screen-modal-content { border-color: #00ffff; box-shadow: 6px 6px 0 0 #00ffff; }
-
-.video-container {
-  width: 100%;
-  aspect-ratio: 4/3;
-  position: relative;
-  overflow: hidden;
-  border-bottom: 2px solid #333;
-  background: #000;
+.tcg-hover-hint {
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    text-align: center;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.5);
+    pointer-events: none;
+    transition: opacity 0.3s;
 }
 
-.roster-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: grayscale(100%) brightness(0.3);
-  transition: filter 0.3s;
+.tcg-card-scene:hover .tcg-hover-hint {
+    opacity: 0;
 }
 
-.video-container:hover .roster-video { filter: grayscale(0%) brightness(1); }
-
-.video-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #39ff14;
-  font-size: 8px;
-  text-align: center;
-  pointer-events: none;
-  background: rgba(0,0,0,0.8);
-  padding: 5px 10px;
-  border: 1px dashed #39ff14;
-  transition: opacity 0.2s;
+.tcg-card-footer {
+    height: 30%;
+    background: linear-gradient(to top, rgba(10,10,20,1) 0%, rgba(10,10,20,0.8) 100%);
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    z-index: 10;
 }
 
-.video-container:hover .video-overlay { opacity: 0; }
-
-.card-info { padding: 15px; background: #0a0a0a; flex-grow: 1; }
-.member-icon { font-size: 20px; }
-.member-name { font-size: 11px; }
-
-/* =========================================
-   IN-SCREEN MODAL (FIGHTER STATS)
-   ========================================= */
-.in-screen-modal-overlay {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.9);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 50;
-  padding: 20px;
-  box-sizing: border-box;
+.tcg-icon-ring {
+    font-size: 1.8rem;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--theme-color);
+    box-shadow: 0 0 10px var(--theme-color);
 }
 
-.in-screen-modal-content {
-  background-color: #111122;
-  border: 4px solid #fff;
-  padding: 30px;
-  width: 100%;
-  max-width: 800px;
-  max-height: 90%;
-  overflow-y: auto;
-  position: relative;
-  animation: pop-in 0.2s ease-out forwards;
+.tcg-name-plate h3 {
+    margin: 0 0 4px 0;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
 }
 
-@keyframes pop-in {
-  0% { transform: scale(0.9); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+.tcg-name-plate span {
+    font-size: 0.8rem;
+    color: var(--theme-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.close-modal-btn {
-  position: absolute;
-  top: 15px; right: 15px;
-  background: #000;
-  border: 2px solid #ff003c;
-  color: #ff003c;
-  font-family: inherit;
-  font-size: 12px;
-  padding: 5px 10px;
-  cursor: pointer;
-}
-.close-modal-btn:hover { background: #ff003c; color: #fff; }
-
-.modal-split {
-  display: flex;
-  gap: 30px;
+/* --- CARD BACK DESIGN (THE STATS) --- */
+.tcg-card-back {
+    transform: rotateY(180deg);
+    padding: 25px 20px;
+    background: linear-gradient(135deg, rgba(20,20,30,0.95) 0%, rgba(5,5,10,0.95) 100%);
+    display: flex;
+    flex-direction: column;
 }
 
-.modal-video-side {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+.tcg-back-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 10px;
 }
 
-.modal-video {
-  width: 100%;
-  aspect-ratio: 4/3;
-  object-fit: cover;
-  border: 4px solid #333;
-  background: #000;
+.tcg-back-icon {
+    font-size: 1.5rem;
 }
 
-/* FIGHTING STATS UI */
-.fighter-stats {
-  background-color: #0a0a0a;
-  border: 2px dashed #444;
-  margin-top: 15px;
+.tcg-back-header h4 {
+    margin: 0;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.2rem;
+    color: var(--theme-color);
+    letter-spacing: 2px;
 }
 
-.stat-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.tcg-stats-container {
+    margin-bottom: 20px;
 }
 
-.stat-label { font-size: 10px; width: 25px; }
-
-.stat-bar-bg {
-  flex-grow: 1;
-  height: 12px;
-  background-color: #222;
-  border: 2px solid #555;
-  padding: 1px;
+.tcg-stat-bar {
+    margin-bottom: 12px;
 }
 
-.stat-bar-fill { height: 100%; }
-
-.stat-num { font-size: 8px; width: 30px; text-align: right; }
-
-/* COMMAND LIST UI */
-.modal-info-side { flex: 1.5; }
-.modal-icon { font-size: 36px; }
-
-.role-badge {
-  display: inline-block;
-  padding: 8px 12px;
-  font-size: 10px;
-  box-shadow: 2px 2px 0 0 #000;
+.stat-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #cbd5e1;
 }
 
-.command-list {
-  background-color: #0000aa;
-  border: 3px solid #fff;
-  padding: 20px;
-  box-shadow: inset 0 0 0 3px #aaaaff, 4px 4px 0px rgba(0,0,0,0.5);
+.stat-val {
+    color: #fff;
+    font-family: 'Rajdhani', monospace;
 }
 
-.command-list h4 { font-size: 10px; border-bottom: 1px dashed #aaaaff; padding-bottom: 10px; }
+.stat-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
 
-.power-item { margin-bottom: 15px; }
-.power-item:last-child { margin-bottom: 0; }
+.stat-fill {
+    height: 100%;
+    border-radius: 4px;
+}
 
-.power-name { font-size: 11px; display: block; margin-bottom: 5px; text-shadow: 1px 1px 0 #000;}
-.power-desc { font-size: 9px; color: #ccc; line-height: 1.5; margin: 0; padding-left: 15px;}
+.hp-fill { background: linear-gradient(90deg, #ff0055, #ff4d4d); }
+.mp-fill { background: linear-gradient(90deg, #0055ff, #4d94ff); }
 
-.blink-slow { animation: blink 2s step-end infinite; }
-@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.tcg-powers-container {
+    flex-grow: 1;
+}
 
-/* Mobile Adjustments for Modal */
+.powers-title {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+.tcg-power {
+    margin-bottom: 15px;
+}
+
+.power-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--theme-color);
+    margin-bottom: 4px;
+}
+
+.power-desc {
+    font-size: 0.8rem;
+    color: #cbd5e1;
+    line-height: 1.4;
+    font-weight: 300;
+}
+
+.tcg-flip-back-hint {
+    text-align: center;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 2px;
+    margin-top: auto;
+}
+
 @media (max-width: 768px) {
-  .modal-split { flex-direction: column; }
-  .modal-video-side { width: 100%; }
+    .holo-title {
+        font-size: 2.2rem;
+    }
+    
+    .tcg-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
 }

@@ -5,46 +5,28 @@ import {
   FaStickyNote,
   FaRocket,
   FaBookOpen,
-  FaSearch
+  FaSearch,
+  FaBolt,
+  FaTrophy
 } from "react-icons/fa";
 import data from "../Videos/data.js";
 import { getSubjectProgress } from "../../../api/progressTracker.js";
 import "./Courses.css";
 
 const subjectMeta = {
-  maths: { label: "Maths Magic", tone: "mint" },
-  generalKnowledge: { label: "General Knowledge", tone: "sun" },
-  socialScience: { label: "Social Science", tone: "sky" },
-  science: { label: "Science Lab", tone: "coral" },
-  english: { label: "English Corner", tone: "berry" },
-  funActivities: { label: "Fun Activities", tone: "lime" }
+  maths: { label: "Maths Magic", tone: "blue" },
+  generalKnowledge: { label: "General Knowledge", tone: "yellow" },
+  socialScience: { label: "Social Science", tone: "purple" },
+  science: { label: "Science Lab", tone: "green" },
+  english: { label: "English Corner", tone: "red" },
+  funActivities: { label: "Fun Activities", tone: "orange" }
 };
 
 const notesPacks = [
-  {
-    id: "starter",
-    title: "Starter Pack Notes",
-    tags: ["warm-up", "quick tips", "basics"],
-    items: ["Daily study rhythm", "Quick recall tricks", "Mini practice plan"]
-  },
-  {
-    id: "maths",
-    title: "Maths Mini Notes",
-    tags: ["numbers", "patterns", "shortcuts"],
-    items: ["Addition ladder", "Times table map", "Fraction bites"]
-  },
-  {
-    id: "science",
-    title: "Science Snap Notes",
-    tags: ["experiments", "facts", "why"],
-    items: ["Water cycle sketch", "Plant power", "Motion basics"]
-  },
-  {
-    id: "english",
-    title: "English Spark Notes",
-    tags: ["grammar", "stories", "words"],
-    items: ["Parts of speech", "Story arc map", "Opposites list"]
-  }
+  { id: "starter", title: "Starter Pack", tags: ["warm-up", "basics"], icon: "🚀" },
+  { id: "maths", title: "Maths Mini", tags: ["numbers", "shortcuts"], icon: "📐" },
+  { id: "science", title: "Science Snap", tags: ["facts", "why"], icon: "🔬" },
+  { id: "english", title: "English Spark", tags: ["grammar", "words"], icon: "📚" }
 ];
 
 function getYouTubeId(embed) {
@@ -77,180 +59,143 @@ function Courses() {
   }, [query, subjects]);
 
   return (
-    <div className="courses-root">
-      <div className="courses-orbit orbit-1" />
-      <div className="courses-orbit orbit-2" />
-      <div className="courses-orbit orbit-3" />
-
-      <header className="courses-hero">
-        <div className="hero-badge">
-          <FaRocket /> Study Arcade
-        </div>
-        <h1 className="hero-title">Courses Playground</h1>
-        <p className="hero-sub">
-          Pick a subject, press play, and collect notes along the way. Everything you
-          need for video lessons and bite-sized study packs lives here.
-        </p>
-        <div className="hero-actions">
-          <a className="hero-btn primary" href="#videos">
-            <FaPlay /> Browse Video Lessons
-          </a>
-          <a className="hero-btn secondary" href="#notes">
-            <FaStickyNote /> Open Notes Packs
-          </a>
-        </div>
-        <div className="hero-stats">
-          <div className="stat-card">
-            <div className="stat-value1">{subjects.length}</div>
-            <div className="course-stat-label">Subjects</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value1">
-              {subjects.reduce((total, subject) => total + (data[subject]?.length || 0), 0)}
-            </div>
-            <div className="course-stat-label">Video Lessons</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value1">{notesPacks.length}</div>
-            <div className="course-stat-label">Notes Packs</div>
+    <div className="courses-wrapper">
+      {/* Hero Section */}
+      <header className="arcade-hero">
+        <div className="hero-content">
+          <div className="badge pulse"><FaRocket /> Welcome to the Arcade</div>
+          <h1 className="hero-title">Your Learning <span>Playground</span></h1>
+          <p className="hero-subtitle">
+            Pick a subject, press play, and level up your brain. Everything you need for epic video lessons and bite-sized notes is right here.
+          </p>
+          
+          <div className="hero-stats-row">
+            <div className="stat-pill"><FaBookOpen /> {subjects.length} Subjects</div>
+            <div className="stat-pill"><FaPlay /> {subjects.reduce((t, s) => t + (data[s]?.length || 0), 0)} Videos</div>
+            <div className="stat-pill"><FaStickyNote /> {notesPacks.length} Note Packs</div>
           </div>
         </div>
       </header>
 
-      <section id="videos" className="courses-section">
-        <div className="section-head">
-          <div>
-            <h2 className="section-title">
-              <FaBookOpen /> Video Arcade
-            </h2>
-            <p className="section-sub">
-              Select a subject to see all the video lectures inside.
-            </p>
+      {/* Main Content Area */}
+      <main className="courses-main">
+        {/* Video Arcade Section */}
+        <section id="videos" className="content-section">
+          <div className="section-header">
+            <div className="header-titles">
+              <h2><FaBolt /> Video Arcade</h2>
+              <p>Select a subject to dive into the video lectures.</p>
+            </div>
+            <div className="search-wrapper">
+              <FaSearch className="search-icon" />
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Find a subject..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
           </div>
-          <label className="search-box">
-            <FaSearch />
-            <input
-              type="text"
-              placeholder="Search subjects"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </label>
-        </div>
 
-        <div className="courses-grid">
-          {filteredSubjects.map((subject) => {
-            const meta = subjectMeta[subject] || { label: subject, tone: "mint" };
-            const lessons = data[subject] || [];
-            const thumbId = getYouTubeId(lessons[0]?.embed);
-            const progressInfo = progress[subject];
+          <div className="bento-grid">
+            {filteredSubjects.map((subject) => {
+              const meta = subjectMeta[subject] || { label: subject, tone: "blue" };
+              const lessons = data[subject] || [];
+              const thumbId = getYouTubeId(lessons[0]?.embed);
+              const progressInfo = progress[subject];
+              const pct = progressInfo?.percentage || 0;
 
-            return (
-              <div key={subject} className={`course-card tone-${meta.tone}`}>
-                <div className="course-top">
-                  <div>
-                    <div className="course-title">{meta.label}</div>
-                    <div className="course-meta">{lessons.length} lessons</div>
-                  </div>
-                  <div className="course-progress">
-                    <div className="progress-track">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${progressInfo?.percentage || 0}%` }}
+              return (
+                <div key={subject} className={`bento-card theme-${meta.tone}`}>
+                  <div className="card-image-wrapper">
+                    {thumbId ? (
+                      <img
+                        className="card-thumb"
+                        src={`https://img.youtube.com/vi/${thumbId}/hqdefault.jpg`}
+                        alt={meta.label}
                       />
+                    ) : (
+                      <div className="card-thumb-placeholder">Coming Soon</div>
+                    )}
+                    <div className="lesson-badge">{lessons.length} Lessons</div>
+                  </div>
+
+                  <div className="card-body">
+                    <h3 className="card-title">{meta.label}</h3>
+                    
+                    <div className="progress-container">
+                      <div className="progress-header">
+                        <span>Progress</span>
+                        <span>{pct}%</span>
+                      </div>
+                      <div className="progress-bar-bg">
+                        <div className="progress-bar-fill" style={{ width: `${pct}%` }}></div>
+                      </div>
                     </div>
-                    <span className="progress-text">
-                      {progressInfo?.percentage || 0}% complete
-                    </span>
+
+                    <div className="card-actions">
+                      <Link className="btn btn-primary" to={`/videos/subject/${subject}`}>
+                        <FaPlay /> Watch
+                      </Link>
+                      <Link className="btn btn-icon" to="/notes" aria-label="Notes">
+                        <FaStickyNote />
+                      </Link>
+                    </div>
                   </div>
                 </div>
-
-                <div className="course-preview">
-                  {thumbId ? (
-                    <img
-                      src={`https://img.youtube.com/vi/${thumbId}/hqdefault.jpg`}
-                      alt={`${meta.label} preview`}
-                    />
-                  ) : (
-                    <div className="course-fallback">Preview coming soon</div>
-                  )}
-                </div>
-
-                <div className="course-actions">
-                  <Link className="course-btn primary" to={`/videos/subject/${subject}`}>
-                    <FaPlay /> Videos
-                  </Link>
-                  <Link className="course-btn secondary" to="/notes">
-                    <FaStickyNote /> Notes
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {filteredSubjects.length === 0 && (
-          <div className="empty-state">
-            No subjects found. Try another keyword.
+              );
+            })}
           </div>
-        )}
-      </section>
 
-      <section id="notes" className="courses-section notes-section">
-        <div className="section-head">
-          <div>
-            <h2 className="section-title">
-              <FaStickyNote /> Notes Studio
-            </h2>
-            <p className="section-sub">
-              Short, colorful notes you can review after every lesson.
-            </p>
+          {filteredSubjects.length === 0 && (
+            <div className="empty-state-box">
+              <FaSearch className="empty-icon" />
+              <h3>No subjects found</h3>
+              <p>We couldn't find anything matching "{query}". Try another search!</p>
+            </div>
+          )}
+        </section>
+
+        {/* Notes Studio Section */}
+        <section id="notes" className="content-section">
+          <div className="section-header">
+            <div className="header-titles">
+              <h2><FaStickyNote /> Notes Studio</h2>
+              <p>Quick review cards to boost your memory.</p>
+            </div>
+            <Link className="btn btn-outline" to="/notes">View All Notes</Link>
           </div>
-          <Link className="hero-btn tertiary" to="/notes">
-            Open full notes
-          </Link>
-        </div>
 
-        <div className="notes-grid">
-          {notesPacks.map((pack) => (
-            <div key={pack.id} className="notes-card">
-              <div className="notes-card-header">
-                <div className="notes-title">{pack.title}</div>
-                <div className="notes-tags">
+          <div className="notes-bento-grid">
+            {notesPacks.map((pack) => (
+              <div key={pack.id} className="note-pack-card">
+                <div className="note-icon">{pack.icon}</div>
+                <h4 className="note-title">{pack.title}</h4>
+                <div className="note-tags">
                   {pack.tags.map((tag) => (
-                    <span key={tag} className="tag-chip">{tag}</span>
+                    <span key={tag} className="chip">{tag}</span>
                   ))}
                 </div>
               </div>
-              <ul className="notes-list">
-                {pack.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-              <Link className="notes-btn" to="/notes">
-                Open notes
-              </Link>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
 
-      <section className="courses-section bonus-section">
-        <div className="bonus-card">
-          <div>
-            <h3>Study Combo</h3>
-            <p>Mix video time + notes time for the fastest progress.</p>
+        {/* Bonus Combo Banner */}
+        <section className="combo-banner">
+          <div className="combo-content">
+            <FaTrophy className="combo-icon" />
+            <div>
+              <h3>Mastery Combo Strategy</h3>
+              <p>Watch a video lesson, then immediately read the matching notes for maximum retention!</p>
+            </div>
           </div>
-          <div className="bonus-actions">
-            <Link className="hero-btn primary" to="/videos">
-              Watch videos
-            </Link>
-            <Link className="hero-btn secondary" to="/notes">
-              Read notes
-            </Link>
+          <div className="combo-actions">
+            <Link className="btn btn-light" to="/videos">Go to Videos</Link>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
     </div>
   );
 }

@@ -5,7 +5,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { JWT_SECRET, verifyToken, requireAdmin } = require('../middleware/auth');
-const { isValidString, isValidEmail, sanitizeString } = require('../middleware/validate');
+const { isValidString, isValidEmail, isValidPositiveInt, sanitizeString } = require('../middleware/validate');
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
@@ -177,17 +177,51 @@ router.put('/:id', verifyToken, async (req, res) => {
       });
     }
 
-    // Prevent role escalation: non-admins cannot change their own role
-    const updateData = { ...req.body };
-    if (req.userId.toString() === req.params.id) {
-      delete updateData.role; // users cannot change their own role
-    }
-    // Never allow updating these through generic update
-    delete updateData._id;
-
-    const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true }).select('-password');
+    const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, error: 'User not found' });
-    res.json({ success: true, user });
+
+    if (typeof req.body.name === 'string') {
+      if (!isValidString(req.body.name, 100)) {
+        return res.status(400).json({ success: false, error: 'Invalid name' });
+      }
+      user.name = sanitizeString(req.body.name, 100);
+    }
+
+    if (typeof req.body.email === 'string') {
+      if (!isValidEmail(req.body.email)) {
+        return res.status(400).json({ success: false, error: 'Invalid email format' });
+      }
+      user.email = sanitizeString(req.body.email, 254).toLowerCase();
+    }
+
+    if (req.body.avatarId !== undefined) {
+      const avatarId = Number(req.body.avatarId);
+      if (!isValidPositiveInt(avatarId, 1000) || avatarId < 1) {
+        return res.status(400).json({ success: false, error: 'Invalid avatarId' });
+      }
+      user.avatarId = avatarId;
+    }
+
+    if (req.body.password) {
+      user.password = req.body.password;
+    }
+
+    if (req.body.role !== undefined) {
+      const requestingUser = await User.findById(req.userId).select('role');
+      if (!requestingUser || requestingUser.role !== 'admin') {
+        return res.status(403).json({ success: false, error: 'Only admin can change roles' });
+      }
+
+      if (!['student', 'teacher', 'admin'].includes(req.body.role)) {
+        return res.status(400).json({ success: false, error: 'Invalid role' });
+      }
+
+      user.role = req.body.role;
+    }
+
+    await user.save();
+    const safeUser = await User.findById(user._id).select('-password');
+    res.json({ success: true, user: safeUser });
   } catch (err) {
     console.error('Update user error:', err);
     res.status(500).json({ success: false, error: 'Failed to update user' });

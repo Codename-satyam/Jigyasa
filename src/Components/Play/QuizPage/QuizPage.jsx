@@ -223,7 +223,7 @@ function QuizPage() {
                 </div>
 
                 <div className="rpg-dialogue-box question-box mb-4">
-                  <h2 className="pixel-title-small text-center" dangerouslySetInnerHTML={{ __html: questions[currentQuestion].question }}></h2>
+                  <h2 className="pixel-title-small text-center" >{questions[currentQuestion].question }</h2>
                 </div>
 
                 {userSettings.showHints && (
@@ -244,7 +244,7 @@ function QuizPage() {
                     >
                       <span className="cursor-arrow">▶</span>
                       <span className="option-letter">{String.fromCharCode(65 + index)}.</span>
-                      <span className="option-text" dangerouslySetInnerHTML={{ __html: option }} />
+                      <span className="option-text">{option}</span>
                     </button>
                   ))}
                 </div>

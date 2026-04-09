@@ -1,9 +1,9 @@
 import "./SubjectCards.css";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import data from "../data.js";
-import ThreeDBackground from "../../Games/ThreeDBackground.jsx";
-import { getSubjectProgress } from "../../../../api/progressTracker.js";
+import data from "../../data.js";
+import ThreeDBackground from "../../../Games/ThreeDBackground.jsx";
+import { getSubjectProgress } from "../../../../../api/progressTracker.js";
 
 function SubjectCards(){
 
