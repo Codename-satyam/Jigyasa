@@ -39,7 +39,7 @@ A comprehensive security scan of the Quizy project was performed to identify any
 
 **Real Credentials Found in .env:**
 - ✅ Firebase Private Key - Protected (not in git)
-- ✅ Google/Gemini API Key: `AIzaSyB9k4L1XSTL8Z-HsRF2eqV3_Y13Glw186g` - Protected (not in git)
+- ✅ Google/Gemini API Key: `` (REDACTED) - Protected (not in git)
 - ✅ Admin credentials - Protected (not in git)
 
 **Verification:**
@@ -47,7 +47,7 @@ A comprehensive security scan of the Quizy project was performed to identify any
 $ git ls-files | grep -i ".env"
 # Output: (empty - no .env files tracked)
 
-$ git log --all -S "AIzaSyB9k4L1XSTL8Z-HsRF2eqV3_Y13Glw186g" --oneline
+$ git log --all -S "redacted_api_key" --oneline
 # Output: (empty - no API key in history)
 ```
 
