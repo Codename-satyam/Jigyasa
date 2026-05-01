@@ -22,3 +22,9 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Firebase credentials and service account keys
+serviceAccountKey.json
+src/services/jigyasa-899f3-firebase-adminsdk-fbsvc-289c867b16.json
+firebase-adminsdk-*.json
+**/serviceAccountKey.json
