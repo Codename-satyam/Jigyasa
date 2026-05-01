@@ -190,7 +190,7 @@ To verify this audit:
 
 ```bash
 # Check for exposed API keys in history
-git log --all -S "AIzaSyB9k4L1XSTL8Z-HsRF2eqV3_Y13Glw186g" --oneline
+git log --all -S "" --oneline
 # Expected: (empty - no results)
 
 # Check .env files are not tracked
