@@ -1,16 +1,23 @@
-const mongoose = require('mongoose');
+const FirestoreModel = require('../storage/firestoreModel');
 
-const FlagSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    quizId: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz' },
-    gameId: { type: mongoose.Schema.Types.ObjectId, ref: 'Game' },
-    reason: String,
-    description: String,
-    severity: { type: String, enum: ['low', 'medium', 'high'], default: 'medium' },
-    status: { type: String, enum: ['open', 'reviewed', 'resolved'], default: 'open' },
-    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    resolution: String,
-    timestamp: { type: Date, default: Date.now },
-});
+class Flag extends FirestoreModel {
+  static collectionName = 'flags';
 
-module.exports = mongoose.model('Flag', FlagSchema);
+  constructor(data = {}) {
+    super({
+      severity: 'medium',
+      status: 'open',
+      timestamp: new Date().toISOString(),
+      ...data,
+    });
+  }
+
+  static populateMap = {
+    userId: './User',
+    quizId: './Quiz',
+    gameId: './Game',
+    reviewedBy: './User',
+  };
+}
+
+module.exports = Flag;

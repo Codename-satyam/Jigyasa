@@ -34,7 +34,6 @@ const Register = lazy(() => import("./Components/Login/Register.jsx"));
 const AdminLogin = lazy(() => import("./Components/Login/AdminLogin.jsx"));
 const BlockedUser = lazy(() => import("./Components/Login/BlockedUser.jsx"));
 
-const Notes = lazy(() => import("./Components/Play/Notes/Notes.jsx"));
 
 const QuizPage = lazy(() => import("./Components/Play/QuizPage/QuizPage.jsx"));
 const SelectQuiz = lazy(() => import("./Components/Play/QuizPage/SelectQuiz.jsx"));
@@ -48,12 +47,9 @@ const MathGame = lazy(() => import("./Components/Play/Games/g4/g4.jsx"));
 const Game2048 = lazy(() => import("./Components/Play/Games/g5/g5.jsx"));
 const Game6 = lazy(() => import("./Components/Play/Games/g6/g6.jsx"));
 
-const SubjectSelector = lazy(() => import("./Components/Play/Videos/Selector/SubjectCards/SubjectCards.jsx"));
-const TopicSelector = lazy(() => import("./Components/Play/Videos/Selector/TopicSelector/TopicSelector.jsx"));
-const VideoPlayer = lazy(() => import("./Components/Play/Videos/VideoPlayer.jsx"));
-const Courses = lazy(() => import("./Components/Play/Courses/Courses.jsx"));
-
 const LeaderBoard = lazy(() => import("./Components/LeaderBoard/LeaderBoard.jsx"));
+const GamesLeaderBoard = lazy(() => import("./Components/LeaderBoard/GamesLeaderBoard.jsx"));
+const Achievements = lazy(() => import("./Components/Achievements/Achievements.jsx"));
 const NotFound = lazy(() => import("./Components/Error/Error404.jsx"));
 
 function AnimatedRoutes() {
@@ -96,13 +92,9 @@ function AnimatedRoutes() {
             <Route path="/play/quiz" element={<PageTransition><QuizPage /></PageTransition>} />
             <Route path="/play/teacher-quiz/:quizId" element={<PageTransition><TeacherQuizAttempt /></PageTransition>} />
 
-            <Route path="/courses" element={<PageTransition><Courses /></PageTransition>} />
             <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
             <Route path="/about" element={<PageTransition><About /></PageTransition>} />
 
-            <Route path="/videos" element={<PageTransition><SubjectSelector /></PageTransition>} />
-            <Route path="/videos/subject/:subject" element={<PageTransition><TopicSelector /></PageTransition>} />
-            <Route path="/videos/subject/:subject/topic/:topicIndex" element={<PageTransition><VideoPlayer /></PageTransition>} />
 
             <Route path="/games" element={<PageTransition><Games /></PageTransition>} />
             <Route path="/play/games/g1" element={<PageTransition><MemoryGame /></PageTransition>} />
@@ -112,8 +104,10 @@ function AnimatedRoutes() {
             <Route path="/play/games/g5" element={<PageTransition><Game2048 /></PageTransition>} />
             <Route path="/play/games/g6" element={<PageTransition><Game6 /></PageTransition>} />
 
-            <Route path="/notes" element={<PageTransition><Notes /></PageTransition>} />
             <Route path="/leaderboard" element={<PageTransition><LeaderBoard /></PageTransition>} />
+            <Route path="/leaderboard/games" element={<PageTransition><GamesLeaderBoard /></PageTransition>} />
+
+            <Route path="/achievements" element={<PageTransition><Achievements /></PageTransition>} />
 
             <Route path="/dashboard" element={
               <ProtectedRoute>

@@ -1,8 +1,12 @@
 // g3.jsx — Neon Path Game
-// ML integration: skillScore silently sets the starting level.
-// Maze generation: Recursive Backtracker (DFS) guarantees a fully connected,
-// winding maze. Targets are placed on the critical path. Minimum path length
-// is enforced per difficulty level so the maze is never trivially short.
+// Maze logic:
+//   • Pure recursive-backtracker DFS → perfect maze (spanning tree).
+//     This guarantees EXACTLY ONE path from S to E — no loops, no shortcuts.
+//   • Dead-end diversions are carved off the true path after generation.
+//     They go nowhere; entering one burns a move the player cannot afford.
+//   • maxMoves = exact BFS path length through all frags to the exit.
+//     No margin is added — every move must be on the correct route.
+// ML integration: useDifficulty() silently sets the starting level.
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import "./g3.css";
@@ -10,12 +14,12 @@ import gamesTracker from "../../../../api/gamesTracker";
 import auth from "../../../../api/auth";
 import { useDifficulty } from "../../../../api/useDifficulty";
 
-// ── Constants ──────────────────────────────────────────────────────────────────
-const DIRECTIONS = [[1,0],[-1,0],[0,1],[0,-1]];
+// ── Constants ─────────────────────────────────────────────────────────────────
+const DIRECTIONS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 const keyOf = (r, c) => `${r},${c}`;
 
-// ── Grid helpers ───────────────────────────────────────────────────────────────
-const cloneGrid = (grid) => grid.map(row => [...row]);
+// ── Utility ───────────────────────────────────────────────────────────────────
+const cloneGrid = (grid) => grid.map((row) => [...row]);
 
 function shuffle(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
@@ -25,7 +29,9 @@ function shuffle(arr) {
     return arr;
 }
 
-// ── BFS shortest path ──────────────────────────────────────────────────────────
+// ── BFS helpers ───────────────────────────────────────────────────────────────
+
+/** Returns the length (number of steps) of the shortest path, or Infinity if unreachable. */
 function shortestPathLength(grid, start, end) {
     const size = grid.length;
     const queue = [[start.r, start.c, 0]];
@@ -50,7 +56,7 @@ function shortestPathLength(grid, start, end) {
     return Infinity;
 }
 
-// BFS to reconstruct the actual shortest path (list of {r,c})
+/** Returns the actual shortest path as an array of {r,c} objects, or [] if unreachable. */
 function shortestPath(grid, start, end) {
     const size = grid.length;
     const queue = [[start.r, start.c]];
@@ -60,7 +66,6 @@ function shortestPath(grid, start, end) {
     while (queue.length > 0) {
         const [row, col] = queue.shift();
         if (row === end.r && col === end.c) {
-            // Reconstruct
             const path = [];
             let cur = keyOf(row, col);
             while (cur !== null) {
@@ -71,7 +76,8 @@ function shortestPath(grid, start, end) {
             return path;
         }
         for (const [dr, dc] of DIRECTIONS) {
-            const nr = row + dr, nc = col + dc;
+            const nr = row + dr;
+            const nc = col + dc;
             const key = keyOf(nr, nc);
             if (
                 nr < 0 || nc < 0 || nr >= size || nc >= size ||
@@ -84,104 +90,111 @@ function shortestPath(grid, start, end) {
     return [];
 }
 
-// ── Recursive Backtracker Maze Generator ────────────────────────────────────────
-// Works on a "cell grid" of size×size where walls between cells are represented
-// by blocking the grid cells in-between in a (2*size-1)×(2*size-1) expanded grid,
-// then we collapse it back to a size×size logical grid by carving passages.
+// ── Perfect Maze Generator (Recursive Backtracker / DFS) ─────────────────────
 //
-// Strategy:
-//   1. Start with all walls (every cell is "X").
-//   2. DFS from (0,0), carving passages — ensures every cell is reachable.
-//   3. Optionally add extra connections (loops) to give the player route choices.
-//   4. Place T (target) fragments along or near the critical path.
-//   5. Verify the critical path length meets minSteps before accepting.
+// We work in a (2*logicalSize - 1) × (2*logicalSize - 1) expanded grid where:
+//   • even-row, even-col positions → logical cells  (open by default)
+//   • positions where exactly one index is odd     → passage walls (carved by DFS)
+//   • positions where both indices are odd         → corner walls  (always solid)
+//
+// The DFS visits every logical cell exactly once, carving the passage wall
+// between the current cell and its chosen unvisited neighbour.  Because every
+// cell is visited exactly once, the result is a spanning tree — a PERFECT MAZE
+// with exactly one path between any two cells.
+//
+// After generation we carve dead-end diversions: short branches off the true
+// path that terminate in a dead cell.  They look like valid corridors but lead
+// nowhere, punishing the player for exploring them.
 
-function generateMaze(logicalSize, numTargets, minSteps, extraLoopFraction = 0.15) {
-    // We work in a (2*logicalSize - 1) × (2*logicalSize - 1) grid where
-    // even-indexed rows/cols are cells, odd-indexed are potential walls.
+function generatePerfectMaze(logicalSize) {
     const G = 2 * logicalSize - 1;
 
-    // Initialise everything as wall
+    // Start with everything walled
     const raw = Array.from({ length: G }, () => Array(G).fill("X"));
 
-    // Mark all logical cell positions as open (cells at even,even coords)
+    // Open all logical cell positions
     for (let r = 0; r < logicalSize; r++) {
         for (let c = 0; c < logicalSize; c++) {
             raw[r * 2][c * 2] = "";
         }
     }
 
-    // DFS recursive backtracker
-    const visited = Array.from({ length: logicalSize }, () => Array(logicalSize).fill(false));
+    // DFS spanning tree — guarantees ONE path between any two cells
+    const vis = Array.from({ length: logicalSize }, () => Array(logicalSize).fill(false));
     const stack = [{ r: 0, c: 0 }];
-    visited[0][0] = true;
+    vis[0][0] = true;
 
     while (stack.length > 0) {
         const { r, c } = stack[stack.length - 1];
-        const neighbors = shuffle(
+        const neighbours = shuffle(
             DIRECTIONS
                 .map(([dr, dc]) => ({ nr: r + dr, nc: c + dc, dr, dc }))
                 .filter(({ nr, nc }) =>
-                    nr >= 0 && nc >= 0 && nr < logicalSize && nc < logicalSize && !visited[nr][nc]
+                    nr >= 0 && nc >= 0 && nr < logicalSize && nc < logicalSize && !vis[nr][nc]
                 )
         );
 
-        if (neighbors.length === 0) {
+        if (neighbours.length === 0) {
             stack.pop();
         } else {
-            const { nr, nc, dr, dc } = neighbors[0];
-            // Carve the wall between (r,c) and (nr,nc)
+            const { nr, nc, dr, dc } = neighbours[0];
+            // Carve the wall separating (r,c) from (nr,nc)
             raw[r * 2 + dr][c * 2 + dc] = "";
-            visited[nr][nc] = true;
+            vis[nr][nc] = true;
             stack.push({ r: nr, c: nc });
         }
     }
 
-    // Add extra loops: randomly open some remaining walls to create shortcuts
-    const wallCells = [];
-    for (let r = 0; r < G; r++) {
-        for (let c = 0; c < G; c++) {
-            // Walls between cells are at positions where exactly one of r,c is odd
-            if ((r % 2 === 1) !== (c % 2 === 1) && raw[r][c] === "X") {
-                wallCells.push([r, c]);
-            }
-        }
-    }
-    shuffle(wallCells);
-    const loopsToAdd = Math.floor(wallCells.length * extraLoopFraction);
-    for (let i = 0; i < loopsToAdd; i++) {
-        const [r, c] = wallCells[i];
-        raw[r][c] = "";
-    }
-
-    // Collapse the raw (2*size-1)² grid into a logical size×size grid
-    // Logical cell (r,c) maps to raw[r*2][c*2]
-    // The passage between logical (r,c)→(r+1,c) is raw[r*2+1][c*2]
-    // We represent walls in the logical grid differently:
-    //   In our game grid (size×size), an "X" cell is just a blocked cell.
-    //   We simulate walls by treating the raw grid as our actual game grid
-    //   (so the game runs on a (2*logicalSize-1)² board, not logicalSize²).
-    //   This gives natural corridors and walls that look like a real maze.
-
-    // Actually: let's use the raw grid directly as the game grid.
-    // Start = raw[0][0], End = raw[G-1][G-1]
-    raw[0][0] = "S";
-    raw[G - 1][G - 1] = "E";
-
-    return { grid: raw, gameSize: G };
+    return { raw, G };
 }
 
-// ── Place targets along critical path ─────────────────────────────────────────
-function placeTargetsOnPath(grid, numTargets) {
-    const size = grid.length;
-    const start = { r: 0, c: 0 };
-    const end   = { r: size - 1, c: size - 1 };
+// ── Dead-end Diversion Carver ─────────────────────────────────────────────────
+//
+// Takes the finalised raw grid (with S/E/T already placed) and the set of cells
+// on the true path.  For each source on the path it tries to break one wall
+// into an adjacent wall cell that is NOT on the path, creating a short corridor
+// that dead-ends.  The player cannot tell from a glance whether a corridor leads
+// somewhere or not — they must plan their route carefully.
 
-    const path = shortestPath(grid, start, end);
-    if (path.length < 3) return; // Not enough room
+function carveDiversions(raw, G, truePath, logicalSize, count) {
+    const pathSet = new Set(truePath.map((p) => keyOf(p.r, p.c)));
+    // Shuffle so diversions are spread across the maze, not just at the start
+    const sources = shuffle([...truePath.slice(1, -2)]);
+    let added = 0;
 
-    // Distribute targets evenly along path (skip start and end)
-    const inner = path.slice(1, -1);
+    for (const { r, c } of sources) {
+        if (added >= count) break;
+        for (const [dr, dc] of shuffle([...DIRECTIONS])) {
+            // The wall cell between (r,c) and the candidate logical cell
+            const wr = r + dr;
+            const wc = c + dc;
+            // The candidate logical cell (two steps in the same direction)
+            const cr = r + 2 * dr;
+            const cc = c + 2 * dc;
+
+            if (wr < 0 || wc < 0 || wr >= G || wc >= G) continue;
+            if (cr < 0 || cc < 0 || cr >= G || cc >= G) continue;
+            if (raw[wr][wc] !== "X") continue; // Wall must be intact
+            if (raw[cr][cc] !== "X") continue; // Destination must be walled (dead cell)
+            if (pathSet.has(keyOf(cr, cc))) continue; // Don't expose path cells
+
+            // Carve: open the wall and the dead-end cell
+            raw[wr][wc] = "";
+            raw[cr][cc] = "";
+            added++;
+            break;
+        }
+    }
+}
+
+// ── Place Targets on the True Path ───────────────────────────────────────────
+//
+// Distributes T (data frag) cells evenly along the true path, skipping start
+// and end.  All frags are guaranteed to lie on the correct route, so the player
+// must traverse the entire path length to collect them.
+
+function placeTargetsOnPath(grid, truePath, numTargets) {
+    const inner = truePath.slice(1, -1);
     const step = Math.max(1, Math.floor(inner.length / (numTargets + 1)));
     let placed = 0;
 
@@ -193,32 +206,39 @@ function placeTargetsOnPath(grid, numTargets) {
         }
     }
 
-    // If we still need more, place them anywhere reachable
+    // Fallback: fill remaining slots from anywhere reachable on the path
     if (placed < numTargets) {
-        for (let r = 0; r < size && placed < numTargets; r++) {
-            for (let c = 0; c < size && placed < numTargets; c++) {
-                if (grid[r][c] === "") {
-                    grid[r][c] = "T";
-                    placed++;
-                }
+        for (const { r, c } of inner) {
+            if (placed >= numTargets) break;
+            if (grid[r][c] === "") {
+                grid[r][c] = "T";
+                placed++;
             }
         }
     }
+
+    return placed;
 }
 
-// ── Minimum moves calculation (TSP over targets via BFS) ──────────────────────
+// ── Minimum Moves Calculator (TSP via bitmask DP) ────────────────────────────
+//
+// Solves the Held–Karp style problem: starting from S, visit all T cells in
+// the optimal order, then reach E.  Because frags lie on the true path and the
+// maze is a spanning tree, the optimal order is simply left-to-right along the
+// path — but we run the full DP to be safe for any future configuration.
+
 function getTargetPositions(grid) {
-    const points = [];
+    const pts = [];
     for (let r = 0; r < grid.length; r++)
         for (let c = 0; c < grid[0].length; c++)
-            if (grid[r][c] === "T") points.push({ r, c });
-    return points;
+            if (grid[r][c] === "T") pts.push({ r, c });
+    return pts;
 }
 
 function getMinimumMovesToWin(grid) {
     const size = grid.length;
     const start = { r: 0, c: 0 };
-    const exit  = { r: size - 1, c: size - 1 };
+    const exit = { r: size - 1, c: size - 1 };
     const targets = getTargetPositions(grid);
 
     if (targets.length === 0) {
@@ -227,13 +247,14 @@ function getMinimumMovesToWin(grid) {
     }
 
     const n = targets.length;
-    const s2t = targets.map(t => shortestPathLength(grid, start, t));
-    const t2e = targets.map(t => shortestPathLength(grid, t, exit));
-    const t2t = targets.map((a, i) => targets.map((b, j) =>
-        i === j ? 0 : shortestPathLength(grid, a, b)
-    ));
+    const s2t = targets.map((t) => shortestPathLength(grid, start, t));
+    const t2e = targets.map((t) => shortestPathLength(grid, t, exit));
+    const t2t = targets.map((a, i) =>
+        targets.map((b, j) => (i === j ? 0 : shortestPathLength(grid, a, b)))
+    );
 
-    if (s2t.some(d => !Number.isFinite(d)) || t2e.some(d => !Number.isFinite(d))) return null;
+    if (s2t.some((d) => !Number.isFinite(d)) || t2e.some((d) => !Number.isFinite(d)))
+        return null;
     for (let i = 0; i < n; i++)
         for (let j = 0; j < n; j++)
             if (i !== j && !Number.isFinite(t2t[i][j])) return null;
@@ -263,74 +284,101 @@ function getMinimumMovesToWin(grid) {
     return Number.isFinite(best) ? best : null;
 }
 
-// ── Difficulty → maze params ───────────────────────────────────────────────────
-// Returns { logicalSize, numTargets, minSteps, extraLoops }
-// logicalSize: the logical NxN cell grid (game grid will be (2N-1)×(2N-1))
-// minSteps:    the guaranteed minimum BFS path steps before accepting the maze
+// ── Difficulty Parameters ─────────────────────────────────────────────────────
 function getDifficultyParams(level) {
-    // Level 1–3: small, easy maze
-    // Level 4–6: medium maze, more winding
-    // Level 7+:  large, complex maze
-    const logicalSize = Math.min(4 + Math.floor((level - 1) / 2), 9); // 4→9
-    const numTargets  = Math.min(1 + Math.floor((level - 1) / 2), 5); // 1→5
-    const minSteps    = 6 + level * 4;   // L1=10, L5=26, L9=42, etc.
-    // Lower extra loops → fewer shortcuts → harder navigation
-    const extraLoops  = Math.max(0.05, 0.25 - level * 0.02);
-    return { logicalSize, numTargets, minSteps, extraLoops };
+    const logicalSize = Math.min(4 + Math.floor((level - 1) / 2), 9); // 4 → 9
+    const numTargets  = Math.min(1 + Math.floor((level - 1) / 2), 5); // 1 → 5
+    // Number of dead-end diversions: ramp up with level so navigation gets harder
+    const numDiversions = Math.min(4 + level * 2, 18);
+    return { logicalSize, numTargets, numDiversions };
 }
 
-// ── Main grid factory ─────────────────────────────────────────────────────────
-// Attempts to build a maze that satisfies minSteps. Retries up to maxAttempts.
+// ── Main Maze Factory ─────────────────────────────────────────────────────────
+//
+// Builds a maze and returns it together with the EXACT minimum move count.
+// maxMoves is set to this exact value — no margin.  The player must follow the
+// correct path without a single wasted step.
+//
+// We retry up to maxAttempts times to ensure the true path is long enough to
+// be interesting (minSteps heuristic scales with level).
+
 function buildMaze(level, maxAttempts = 40) {
-    const { logicalSize, numTargets, minSteps, extraLoops } = getDifficultyParams(level);
+    const { logicalSize, numTargets, numDiversions } = getDifficultyParams(level);
+    const minSteps = 6 + level * 4; // Minimum acceptable path length
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        const { grid, gameSize } = generateMaze(logicalSize, numTargets, minSteps, extraLoops);
-        placeTargetsOnPath(grid, numTargets);
+        // 1. Generate a perfect (loop-free) maze
+        const { raw, G } = generatePerfectMaze(logicalSize);
 
-        const minMoves = getMinimumMovesToWin(grid);
-        if (minMoves !== null && minMoves >= minSteps) {
-            return { grid, gameSize, minMoves, numTargets };
-        }
+        // 2. Mark start and exit before path analysis
+        raw[0][0] = "S";
+        raw[G - 1][G - 1] = "E";
+
+        // 3. Find the one and only true path
+        const truePath = shortestPath(raw, { r: 0, c: 0 }, { r: G - 1, c: G - 1 });
+        if (truePath.length < minSteps + 1) continue; // Path too short — retry
+
+        // 4. Place frags along the true path
+        placeTargetsOnPath(raw, truePath, numTargets);
+
+        // 5. Carve dead-end diversions off path nodes
+        carveDiversions(raw, G, truePath, logicalSize, numDiversions);
+
+        // 6. Compute the exact minimum moves needed (S → all T → E)
+        const minMoves = getMinimumMovesToWin(raw);
+        if (minMoves === null || minMoves < minSteps) continue;
+
+        const placedTargets = getTargetPositions(raw).length;
+        return {
+            grid: raw,
+            gameSize: G,
+            minMoves,           // Exact move budget — no margin
+            numTargets: placedTargets,
+        };
     }
 
-    // Fallback: accept the last generated maze even if shorter than ideal
-    const { grid, gameSize } = generateMaze(logicalSize, numTargets, minSteps, extraLoops);
-    placeTargetsOnPath(grid, numTargets);
-    const minMoves = getMinimumMovesToWin(grid) ?? minSteps;
-    return { grid, gameSize, minMoves, numTargets };
+    // Fallback: accept whatever was last generated, even if shorter than ideal
+    const { raw, G } = generatePerfectMaze(logicalSize);
+    raw[0][0] = "S";
+    raw[G - 1][G - 1] = "E";
+    const truePath = shortestPath(raw, { r: 0, c: 0 }, { r: G - 1, c: G - 1 });
+    placeTargetsOnPath(raw, truePath, numTargets);
+    carveDiversions(raw, G, truePath, logicalSize, numDiversions);
+    const minMoves = getMinimumMovesToWin(raw) ?? minSteps;
+    const placedTargets = getTargetPositions(raw).length;
+    return { grid: raw, gameSize: G, minMoves, numTargets: placedTargets };
 }
 
-// ── ML score → starting level ──────────────────────────────────────────────────
+// ── ML score → starting level ─────────────────────────────────────────────────
 function scoreToStartLevel(difficultyScore) {
     const s = Math.max(0, Math.min(1, Number(difficultyScore ?? 0)));
     return 1 + Math.floor(s * 8);
 }
 
-// ── Component ──────────────────────────────────────────────────────────────────
+// ── Component ─────────────────────────────────────────────────────────────────
 function PathGame() {
     const {
         difficulty_score: mlScore,
         loading: mlLoading,
-    } = useDifficulty('neon-path');
+    } = useDifficulty("neon-path");
 
     const [startLevelApplied, setStartLevelApplied] = useState(false);
 
-    // ── Game state ─────────────────────────────────────────────────────────────
-    const [level, setLevel]               = useState(1);
-    const [size, setSize]                 = useState(7);       // actual game grid size
-    const [targetsTotal, setTargetsTotal] = useState(1);
-    const [grid, setGrid]                 = useState([]);
-    const [player, setPlayer]             = useState({ r: 0, c: 0 });
-    const [moves, setMoves]               = useState(0);
-    const [targets, setTargets]           = useState(1);
-    const [maxMoves, setMaxMoves]         = useState(20);
+    // ── Game state ────────────────────────────────────────────────────────────
+    const [level,         setLevel]         = useState(1);
+    const [size,          setSize]          = useState(7);
+    const [grid,          setGrid]          = useState([]);
+    const [player,        setPlayer]        = useState({ r: 0, c: 0 });
+    const [moves,         setMoves]         = useState(0);
+    const [targets,       setTargets]       = useState(1);
+    const [maxMoves,      setMaxMoves]      = useState(20);
     const [statusMessage, setStatusMessage] = useState("Extract all data frags, then reach the portal.");
-    const [gameStarted, setGameStarted]   = useState(false);
-    const [gameOver, setGameOver]         = useState(false);
+    const [gameStarted,   setGameStarted]   = useState(false);
+    const [gameOver,      setGameOver]      = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
-    const [saveStatus, setSaveStatus]     = useState("");
+    const [saveStatus,    setSaveStatus]    = useState("");
 
+    // Refs keep stale-closure callbacks in sync with latest state
     const movesRef     = useRef(moves);
     const targetsRef   = useRef(targets);
     const levelRef     = useRef(level);
@@ -347,7 +395,7 @@ function PathGame() {
     useEffect(() => { gridRef.current     = grid;     }, [grid]);
     useEffect(() => { sizeRef.current     = size;     }, [size]);
 
-    // Apply ML starting level once (before first game)
+    // ── Apply ML starting level once, before the first game begins ────────────
     useEffect(() => {
         if (!mlLoading && !startLevelApplied && !gameStarted) {
             const startLevel = scoreToStartLevel(mlScore);
@@ -356,18 +404,15 @@ function PathGame() {
         }
     }, [mlLoading, mlScore, startLevelApplied, gameStarted]);
 
-    // ── Difficulty scaler ──────────────────────────────────────────────────────
+    // ── Build a new maze for the current level ────────────────────────────────
     const scaleDifficulty = useCallback((lvl) => {
         const { grid: newGrid, gameSize, minMoves, numTargets } = buildMaze(lvl);
 
-        // Give the player minMoves + a generous margin that shrinks with level
-        const margin  = Math.max(3, 12 - Math.floor(lvl / 2));
-        const allowed = minMoves + margin;
-
+        // maxMoves = exact minimum — zero margin.
+        // Every move off the true path will cause failure.
         setSize(gameSize);
-        setTargetsTotal(numTargets);
         setTargets(numTargets);
-        setMaxMoves(allowed);
+        setMaxMoves(minMoves);
         setGrid(newGrid);
         setPlayer({ r: 0, c: 0 });
         setMoves(0);
@@ -377,7 +422,46 @@ function PathGame() {
 
     useEffect(() => { scaleDifficulty(level); }, [level, scaleDifficulty]);
 
-    // ── Restart ────────────────────────────────────────────────────────────────
+    // ── Start timer when game begins ──────────────────────────────────────────
+    useEffect(() => {
+        if (!gameStarted || startTimeRef.current) return;
+        startTimeRef.current = Date.now();
+    }, [gameStarted]);
+
+    // ── Save run to backend when game ends ────────────────────────────────────
+    useEffect(() => {
+        if (!gameOver || savedRef.current) return;
+        const user = auth.getCurrentUser();
+        if (!user) {
+            setSaveStatus("Log in to sync this run.");
+            savedRef.current = true;
+            return;
+        }
+        savedRef.current = true;
+        setSaveStatus("Syncing...");
+
+        const levelReached  = Math.max(1, levelRef.current);
+        const remaining     = Math.max(0, maxMovesRef.current - movesRef.current);
+        const computedScore = Math.max(0, (levelReached - 1) * 100 + remaining);
+        const elapsed       = startTimeRef.current
+            ? Math.max(0, Math.floor((Date.now() - startTimeRef.current) / 1000))
+            : 0;
+
+        gamesTracker
+            .recordGamePlay({
+                email:     user.email,
+                gameType:  "neon-path",
+                gameName:  "Neon Path",
+                score:     computedScore,
+                level:     levelReached,
+                timePlayed: elapsed,
+                date:      new Date().toISOString(),
+            })
+            .then(() => setSaveStatus("Run synced."))
+            .catch(() => setSaveStatus("Sync failed."));
+    }, [gameOver]);
+
+    // ── Restart ───────────────────────────────────────────────────────────────
     const handleRestart = () => {
         setGameOver(false);
         setSaveStatus("");
@@ -389,75 +473,65 @@ function PathGame() {
         scaleDifficulty(1);
     };
 
-    useEffect(() => {
-        if (!gameStarted || startTimeRef.current) return;
-        startTimeRef.current = Date.now();
-    }, [gameStarted]);
+    // ── Movement handler ──────────────────────────────────────────────────────
+    const move = useCallback(
+        (dr, dc) => {
+            if (!gameStarted || gameOver || isTransitioning) return;
 
-    // ── Save on game over ──────────────────────────────────────────────────────
-    useEffect(() => {
-        if (!gameOver || savedRef.current) return;
-        const user = auth.getCurrentUser();
-        if (!user) { setSaveStatus("Log in to sync this run."); savedRef.current = true; return; }
-        savedRef.current = true;
-        setSaveStatus("Syncing...");
-        const levelReached  = Math.max(1, levelRef.current);
-        const remaining     = Math.max(0, maxMovesRef.current - movesRef.current);
-        const computedScore = Math.max(0, (levelReached - 1) * 100 + remaining);
-        const elapsed       = startTimeRef.current
-            ? Math.max(0, Math.floor((Date.now() - startTimeRef.current) / 1000)) : 0;
-        gamesTracker.recordGamePlay({
-            email: user.email, gameType: "neon-path", gameName: "Neon Path",
-            score: computedScore, level: levelReached, timePlayed: elapsed,
-            date: new Date().toISOString(),
-        })
-        .then(()  => setSaveStatus("Run synced."))
-        .catch(() => setSaveStatus("Sync failed."));
-    }, [gameOver]);
+            const ag  = gridRef.current;
+            const as_ = sizeRef.current;
+            const nr  = player.r + dr;
+            const nc  = player.c + dc;
 
-    // ── Movement ───────────────────────────────────────────────────────────────
-    const move = useCallback((dr, dc) => {
-        if (!gameStarted || gameOver || isTransitioning) return;
-        const ag  = gridRef.current;
-        const as_ = sizeRef.current;
-        const nr  = player.r + dr;
-        const nc  = player.c + dc;
-        if (nr < 0 || nc < 0 || nr >= as_ || nc >= as_ || ag[nr][nc] === "X") return;
+            // Block out-of-bounds and wall cells
+            if (nr < 0 || nc < 0 || nr >= as_ || nc >= as_ || ag[nr][nc] === "X") return;
 
-        const dest   = ag[nr][nc];
-        const picked = dest === "T";
-        const nm     = movesRef.current + 1;
-        const nt     = picked ? targetsRef.current - 1 : targetsRef.current;
+            const dest   = ag[nr][nc];
+            const picked = dest === "T";
+            const nm     = movesRef.current + 1;
+            const nt     = picked ? targetsRef.current - 1 : targetsRef.current;
 
-        setMoves(nm);
-        setTargets(nt);
-        setPlayer({ r: nr, c: nc });
+            setMoves(nm);
+            setTargets(nt);
+            setPlayer({ r: nr, c: nc });
 
-        if (picked) {
-            setGrid(p => { const g = cloneGrid(p); g[nr][nc] = ""; return g; });
-            setStatusMessage("Data frag extracted!");
-        }
+            // Collect a data frag
+            if (picked) {
+                setGrid((prev) => {
+                    const g = cloneGrid(prev);
+                    g[nr][nc] = "";
+                    return g;
+                });
+                setStatusMessage("Data frag extracted!");
+            }
 
-        if (dest === "E" && nt === 0) {
-            setStatusMessage("Portal unlocked! Sequence complete.");
-            setIsTransitioning(true);
-            setTimeout(() => setLevel(l => l + 1), 300);
-            return;
-        }
+            // Reach the exit with all frags → advance level
+            if (dest === "E" && nt === 0) {
+                setStatusMessage("Portal unlocked! Sequence complete.");
+                setIsTransitioning(true);
+                setTimeout(() => setLevel((l) => l + 1), 300);
+                return;
+            }
 
-        if (dest === "E" && nt > 0) {
-            setStatusMessage(`Collect ${nt} more frag${nt > 1 ? "s" : ""} before extraction.`);
-        }
+            // Reach exit without all frags
+            if (dest === "E" && nt > 0) {
+                setStatusMessage(`Collect ${nt} more frag${nt > 1 ? "s" : ""} before extraction.`);
+            }
 
-        if (nm >= maxMovesRef.current && !(dest === "E" && nt === 0)) {
-            setStatusMessage("System cycles depleted! Trace detected.");
-            setGameOver(true);
-        }
-    }, [player, isTransitioning, gameStarted, gameOver]);
+            // Move budget exhausted without winning → game over
+            if (nm >= maxMovesRef.current && !(dest === "E" && nt === 0)) {
+                setStatusMessage("System cycles depleted! Trace detected.");
+                setGameOver(true);
+            }
+        },
+        [player, isTransitioning, gameStarted, gameOver]
+    );
 
+    // ── Keyboard controls ─────────────────────────────────────────────────────
     useEffect(() => {
         const h = (e) => {
-            if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) e.preventDefault();
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key))
+                e.preventDefault();
             if (e.key === "ArrowUp")    move(-1,  0);
             if (e.key === "ArrowDown")  move( 1,  0);
             if (e.key === "ArrowLeft")  move( 0, -1);
@@ -467,13 +541,17 @@ function PathGame() {
         return () => window.removeEventListener("keydown", h);
     }, [move]);
 
-    if (grid.length === 0) return <div className="loading-screen text-center gold-text blink">LOADING GRID...</div>;
+    if (grid.length === 0)
+        return <div className="loading-screen text-center gold-text blink">LOADING GRID...</div>;
 
     return (
         <div className="cyber-path-page">
             <div className="arcade-cabinet retro-panel border-cyan">
+
+                {/* ── HUD ── */}
                 <div className="cabinet-header">
                     <h1 className="pixel-title cyan-text glitch-effect text-center mb-4">NEON PATH</h1>
+
                     <div className="header-stats">
                         <div className="stat-block border-blue">
                             <span className="stat-label">SYS_LEVEL</span>
@@ -490,11 +568,13 @@ function PathGame() {
                             <span className="stat-value gold-text">{targets}</span>
                         </div>
                     </div>
+
                     <div className="rpg-dialogue-box mt-4">
-                        <p className="status-line typing-text">&gt; {statusMessage}</p>
+                        <p className="status-line">&gt; {statusMessage}</p>
                     </div>
                 </div>
 
+                {/* ── Maze Grid ── */}
                 <div className="cyber-grid-container mt-4">
                     <div
                         className="cyber-grid"
@@ -526,6 +606,22 @@ function PathGame() {
                     </div>
                 </div>
 
+                {/* ── Mobile D-Pad ── */}
+                <div className="dpad-container mt-4">
+                    <div className="dpad-row">
+                        <button className="dpad-btn" onClick={() => move(-1, 0)}>▲</button>
+                    </div>
+                    <div className="dpad-row">
+                        <button className="dpad-btn" onClick={() => move(0, -1)}>◄</button>
+                        <div className="dpad-center" />
+                        <button className="dpad-btn" onClick={() => move(0, 1)}>►</button>
+                    </div>
+                    <div className="dpad-row">
+                        <button className="dpad-btn" onClick={() => move(1, 0)}>▼</button>
+                    </div>
+                </div>
+
+                {/* ── Start Modal ── */}
                 {!gameStarted && (
                     <div className="modal-overlay">
                         <div className="in-screen-modal-content border-cyan text-center">
@@ -533,7 +629,8 @@ function PathGame() {
                             <div className="rpg-dialogue-box bg-dark mb-4">
                                 <p className="green-text mb-2">INFILTRATE THE MAINFRAME.</p>
                                 <p className="gold-text mb-2">EXTRACT THE DATA FRAGS.</p>
-                                <p className="red-text">ESCAPE BEFORE CYCLES DEPLETE.</p>
+                                <p className="red-text mb-2">ONE TRUE PATH EXISTS.</p>
+                                <p className="red-text">WRONG MOVE = SYSTEM FAIL.</p>
                             </div>
                             <button
                                 className="pixel-btn btn-green pulse-btn mx-auto mt-2"
@@ -545,6 +642,7 @@ function PathGame() {
                     </div>
                 )}
 
+                {/* ── Game Over Modal ── */}
                 {gameOver && (
                     <div className="modal-overlay">
                         <div className="in-screen-modal-content border-red text-center">
@@ -556,7 +654,7 @@ function PathGame() {
                                     <span className="cyan-text huge-text">{level}</span>
                                 </div>
                                 {saveStatus && (
-                                    <div className="stat-row">
+                                    <div className="stat-row mt-2">
                                         <span className="gold-text">{saveStatus}</span>
                                     </div>
                                 )}
@@ -567,6 +665,7 @@ function PathGame() {
                         </div>
                     </div>
                 )}
+
             </div>
         </div>
     );

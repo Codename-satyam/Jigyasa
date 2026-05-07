@@ -1,15 +1,17 @@
-const mongoose = require('mongoose');
+const FirestoreModel = require('../storage/firestoreModel');
 
-const ProgressSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    subject: { type: String, required: true },
-    topicIndex: { type: Number, min: 0 },
-    completedVideos: [Number],
-    lastViewed: Number,
-    lastViewedTime: Date,
-    timestamp: { type: Date, default: Date.now },
-});
+class Progress extends FirestoreModel {
+  static collectionName = 'progress';
 
-ProgressSchema.index({ userId: 1, subject: 1 }, { unique: true });
+  constructor(data = {}) {
+    super({
+      topicIndex: 0,
+      completedVideos: [],
+      lastViewed: 0,
+      timestamp: new Date().toISOString(),
+      ...data,
+    });
+  }
+}
 
-module.exports = mongoose.model('Progress', ProgressSchema);
+module.exports = Progress;

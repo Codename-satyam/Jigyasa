@@ -3,8 +3,6 @@ import './Dashboard.css';
 import scoresApi from '../../../api/scores.js';
 import gamesTracker from '../../../api/gamesTracker.js';
 import auth from '../../../api/auth.js';
-import data from '../../Play/Videos/data.js';
-import { getSubjectProgress } from '../../../api/progressTracker.js';
 import { Link } from 'react-router-dom';
 import { getDailyMinutesProgress, getUserSettings } from '../../../api/settings.js';
 
@@ -51,22 +49,11 @@ function Dashboard() {
       });
   }, [scores, user]);
 
-  const subjects = useMemo(() => Object.keys(data), []);
-  const subjectSummaries = useMemo(() => {
-    if (!subjects.length) return [];
-    return subjects.map((subject) => {
-      const topics = data[subject] || [];
-      const progress = getSubjectProgress(subject, topics.length, topics);
-      return { subject, ...progress };
-    });
-  }, [subjects]);
+
 
   const totals = useMemo(() => {
-    const totalLessons = subjectSummaries.reduce((sum, item) => sum + item.total, 0);
-    const completedLessons = subjectSummaries.reduce((sum, item) => sum + item.completed, 0);
-    const completionRate = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-    return { totalLessons, completedLessons, completionRate };
-  }, [subjectSummaries]);
+    return { totalLessons: 0, completedLessons: 0, completionRate: 0 };
+  }, []);
 
   const achievements = useMemo(() => {
     const bestScore = myScores.reduce((best, s) => {
@@ -93,28 +80,6 @@ function Dashboard() {
     }, 0);
 
     return [
-      // Learning Achievements
-      {
-        id: 'first-lesson',
-        title: 'First Lesson',
-        detail: 'Watch one video lesson.',
-        unlocked: totals.completedLessons >= 1,
-        icon: '📺'
-      },
-      {
-        id: 'five-lessons',
-        title: 'Mini Streak',
-        detail: 'Finish 5 lessons.',
-        unlocked: totals.completedLessons >= 5,
-        icon: '🔥'
-      },
-      {
-        id: 'ten-lessons',
-        title: 'Lesson Explorer',
-        detail: 'Finish 10 lessons.',
-        unlocked: totals.completedLessons >= 10,
-        icon: '🎓'
-      },
       // Quiz Achievements
       {
         id: 'quiz-starter',
@@ -202,7 +167,7 @@ function Dashboard() {
         icon: '🏆'
       }
     ];
-  }, [totals.completedLessons, myScores, games, user]);
+  }, [myScores, games, user]);
   
   return (
     <div className="dashboard-root">
@@ -211,9 +176,17 @@ function Dashboard() {
           <div className="hero-content">
             <p className="hero-kicker">Your learning space</p>
             <h1>{user ? `Welcome back, ${user.name}` : 'Welcome back'}</h1>
-            <Link to={link}>
-              <button className='ViewLeaderBoard'>View Leaderboard</button>
-            </Link>
+            <div className="hero-buttons">
+              <Link to={link}>
+                <button className='ViewLeaderBoard'>View Leaderboard</button>
+              </Link>
+              <Link to="/leaderboard/games">
+                <button className='ViewGamesLeaderboard'>🎮 Games</button>
+              </Link>
+              <Link to="/achievements">
+                <button className='ViewAchievements'>View Achievements</button>
+              </Link>
+            </div>
             {user?.role === 'teacher' && (
               <Link to={teacher}>
                 <button className='ViewTeacherDashboard'>View Teacher Dashboard</button>
@@ -240,29 +213,74 @@ function Dashboard() {
           </div>
         )}
 
+        {myScores.length > 0 && (
+          <section className="last-attempt-section">
+            <div className="last-attempt-card">
+              <h2>⏱️ Last Attempt</h2>
+              {(() => {
+                const lastScore = myScores[0];
+                const quizName = lastScore.quizTitle || lastScore.quiz || 'Quiz';
+                const scoreValue = lastScore.correctAnswers || lastScore.score || 0;
+                const totalValue = lastScore.totalQuestions || lastScore.total || 1;
+                const percentage = Math.round((scoreValue / totalValue) * 100);
+                const dateValue = lastScore.timestamp || lastScore.date;
+                const displayDate = dateValue ? new Date(dateValue).toLocaleDateString() : 'N/A';
+                const displayTime = dateValue ? new Date(dateValue).toLocaleTimeString() : '';
+
+                return (
+                  <div className="last-attempt-content">
+                    <div className="attempt-header">
+                      <h3>{quizName}</h3>
+                      <span className="attempt-date">{displayDate} {displayTime}</span>
+                    </div>
+
+                    <div className="attempt-score-display">
+                      <div className={`score-percentage ${percentage >= 70 ? 'passed' : percentage >= 50 ? 'partial' : 'failed'}`}>
+                        <span className="percentage-number">{percentage}%</span>
+                      </div>
+                      <div className="score-breakdown">
+                        <div className="breakdown-item">
+                          <span className="breakdown-label">Correct Answers:</span>
+                          <span className="breakdown-value">{scoreValue}/{totalValue}</span>
+                        </div>
+                        <div className="breakdown-item">
+                          <span className="breakdown-label">Status:</span>
+                          <span className={`breakdown-status ${percentage >= 70 ? 'passed' : percentage >= 50 ? 'partial' : 'failed'}`}>
+                            {percentage >= 70 ? '✅ Passed' : percentage >= 50 ? '⚠️ Partial' : '❌ Need Review'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Link to="/play/quiz-select" className="attempt-action-link">
+                      <button className="attempt-retry-btn">📝 Try Another Quiz</button>
+                    </Link>
+                  </div>
+                );
+              })()}
+            </div>
+          </section>
+        )}
+
         <section className="dashboard-grid">
           <div className="dash-card dash-stats">
             <h2>Learning stats</h2>
             <div className="stat-grid">
               <div>
-                <span className="dash-stat-label">Lessons completed</span>
-                <span className="stat-value">{totals.completedLessons}</span>
-              </div>
-              <div>
-                <span className="dash-stat-label">Total lessons</span>
-                <span className="stat-value">{totals.totalLessons}</span>
-              </div>
-              <div>
-                <span className="dash-stat-label">Completion rate</span>
-                <span className="stat-value">{totals.completionRate}%</span>
-              </div>
-              <div>
                 <span className="dash-stat-label">Quizzes taken</span>
                 <span className="stat-value">{myScores.length}</span>
               </div>
               <div>
+                <span className="dash-stat-label">Games played</span>
+                <span className="stat-value">{games.filter(g => g.email === user?.email).length}</span>
+              </div>
+              <div>
                 <span className="dash-stat-label">Daily goal</span>
                 <span className="stat-value">{dailyProgress.minutes}/{settings.dailyGoal} min</span>
+              </div>
+              <div>
+                <span className="dash-stat-label">Best score</span>
+                <span className="stat-value">{myScores.length > 0 ? Math.max(...myScores.map(s => Math.round((Number(s.correctAnswers || s.score || 0) / (Number(s.totalQuestions || s.total || 1))) * 100))) : 0}%</span>
               </div>
             </div>
             
@@ -306,22 +324,7 @@ function Dashboard() {
             </div>
           </div>
 
-          <div className="dash-card progress">
-            <h2>Subject progress</h2>
-            <div className="subject-list">
-              {subjectSummaries.map((item) => (
-                <div key={item.subject} className="subject-row">
-                  <div>
-                    <span className="subject-name">{item.subject}</span>
-                    <span className="subject-count">{item.completed}/{item.total} lessons</span>
-                  </div>
-                  <div className="subject-bar">
-                    <div className="subject-fill" style={{ width: `${item.percentage}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+
 
           <div className="dash-card scores">
             <h2>Recent quizzes</h2>

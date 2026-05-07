@@ -1,7 +1,7 @@
 // server/routes/difficulty.js
 // GET /api/difficulty/recommend
 //
-// Fetches the authenticated user's game history from MongoDB, sends it to
+// Fetches the authenticated user's game history from local JSON storage, sends it to
 // the Python ML microservice, and returns the predicted difficulty.
 // Falls back gracefully if the microservice is unreachable.
 

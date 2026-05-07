@@ -1,32 +1,29 @@
-const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const FirestoreModel = require('../storage/firestoreModel');
 
+class User extends FirestoreModel {
+  static collectionName = 'users';
 
+  constructor(data = {}) {
+    super({
+      role: 'student',
+      avatarId: 1,
+      blocked: false,
+      approved: false,
+      createdAt: new Date().toISOString(),
+      ...data,
+    });
+  }
 
-
-// User Schema [defines the structure of user data in MongoDB]
-const UserSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password:{ type: String, required: true },
-    role:{ type: String, enum: ['student', 'teacher', 'admin'], default: 'student' },
-    avatarId:{type: Number, default: 1},
-    blocked: { type: Boolean, default: false },
-    approved: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now }
-});
-
-//Hashing password befor saving
-//Hashing -> password ki maa behen kr dena
-UserSchema.pre('save', async function() {
-    if(!this.isModified('password')) return;
+  async beforeSave() {
+    if (!this.password) return;
+    if (String(this.password).startsWith('$2a$') || String(this.password).startsWith('$2b$')) return;
     this.password = await bcrypt.hash(this.password, 10);
-});
+  }
 
-//Method to compare password during login
-UserSchema.methods.comparePassword = async function(password){
-    return await bcrypt.compare(password,this.password);
+  async comparePassword(password) {
+    return bcrypt.compare(password, this.password);
+  }
 }
 
-module.exports = mongoose.model('User',UserSchema);
-
+module.exports = User;

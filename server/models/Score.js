@@ -1,19 +1,19 @@
-const mongoose = require('mongoose');
+const FirestoreModel = require('../storage/firestoreModel');
 
-const ScoreSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    quizId: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz', required: false, index: true },
-    quizTitle: { type: String },
-    name: { type: String },
-    email: { type: String },
-    score: { type: Number, min: 0 },
-    percentage: { type: Number, min: 0, max: 100 },
-    totalQuestions: { type: Number, min: 0 },
-    correctAnswers: { type: Number, min: 0 },
-    timeSpent: { type: Number, min: 0 },
-    timestamp: { type: Date, default: Date.now },
-});
+class Score extends FirestoreModel {
+  static collectionName = 'scores';
 
-ScoreSchema.index({ percentage: -1, score: -1, timeSpent: 1 });
+  constructor(data = {}) {
+    super({
+      timestamp: new Date().toISOString(),
+      ...data,
+    });
+  }
 
-module.exports = mongoose.model('Score', ScoreSchema);
+  static populateMap = {
+    userId: './User',
+    quizId: './Quiz',
+  };
+}
+
+module.exports = Score;

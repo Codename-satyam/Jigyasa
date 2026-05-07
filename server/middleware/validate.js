@@ -1,5 +1,3 @@
-const mongoose = require('mongoose');
-
 // Validate that a value is a non-empty string within max length
 function isValidString(val, maxLength = 500) {
   return typeof val === 'string' && val.trim().length > 0 && val.length <= maxLength;
@@ -11,9 +9,9 @@ function isValidPositiveInt(val, max = 100000) {
   return Number.isInteger(n) && n >= 0 && n <= max;
 }
 
-// Validate MongoDB ObjectId
+// Validate local record IDs
 function isValidObjectId(val) {
-  return mongoose.Types.ObjectId.isValid(val);
+  return typeof val === 'string' && /^[a-f0-9]{24}$/i.test(val);
 }
 
 // Validate email format

@@ -29,8 +29,8 @@ async function mlPost(path, body) {
 /**
  * Ask the ML service for a difficulty recommendation.
  *
- * @param {string} userId   — MongoDB user id string
- * @param {Array}  games    — raw Game documents from MongoDB
+ * @param {string} userId   — local user id string
+ * @param {Array}  games    — raw Game records from local storage
  * @returns {{ recommended: string, difficulty_score: number,
  *             confidence: number, model_type: string }}
  */

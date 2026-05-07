@@ -3,7 +3,7 @@ const router = express.Router();
 const Score = require('../models/Score');
 const User = require('../models/User');
 const { verifyToken } = require('../middleware/auth');
-const { isValidPositiveInt, isValidString, sanitizeString, safeMax } = require('../middleware/validate');
+const { isValidPositiveInt, sanitizeString, safeMax, isValidObjectId } = require('../middleware/validate');
 
 // Save score (with server-side validation)
 router.post('/', verifyToken, async (req, res) => {
@@ -78,26 +78,50 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
-// Get score by ID
-router.get('/:id', verifyToken, async (req, res) => {
+// Get global leaderboard (public - all users, all quizzes, sorted by score)
+router.get('/leaderboard/public/all', async (req, res) => {
   try {
-    const score = await Score.findById(req.params.id).populate('quizId').populate('userId', 'name email');
-    if (!score) return res.status(404).json({ success: false, error: 'Score not found' });
+    const leaderboard = await Score.find()
+      .populate('userId', 'name email avatarId')
+      .sort({ percentage: -1, score: -1, timeSpent: 1 })
+      .limit(100);
     
-    if (score.userId._id.toString() !== req.userId.toString()) {
-      return res.status(403).json({ success: false, error: 'Can only view your own scores' });
-    }
-
-    res.json({ success: true, score });
+    // Ensure all entries have a name (fallback to email if needed)
+    const leaderboardWithNames = leaderboard.map(score => {
+      const scoreObj = score.toObject ? score.toObject() : score;
+      
+      // Extract name from populated userId or direct name field
+      let displayName = scoreObj.name || 'Anonymous';
+      
+      if (scoreObj.userId) {
+        if (typeof scoreObj.userId === 'object' && scoreObj.userId.name) {
+          displayName = scoreObj.userId.name;
+        } else if (typeof scoreObj.userId === 'string') {
+          displayName = scoreObj.userId;
+        }
+      }
+      
+      // Add displayName to ensure frontend always has a proper name
+      return {
+        ...scoreObj,
+        displayName
+      };
+    });
+    
+    res.json({ success: true, leaderboard: leaderboardWithNames });
   } catch (err) {
-    console.error('Get score error:', err);
-    res.status(500).json({ success: false, error: 'Failed to get score' });
+    console.error('Get global leaderboard error:', err);
+    res.status(500).json({ success: false, error: 'Failed to get leaderboard' });
   }
 });
 
 // Get scores for a specific quiz
 router.get('/quiz/:quizId', verifyToken, async (req, res) => {
   try {
+    if (!isValidObjectId(req.params.quizId)) {
+      return res.status(400).json({ success: false, error: 'Invalid quiz ID' });
+    }
+
     const scores = await Score.find({ quizId: req.params.quizId, userId: req.userId });
     res.json({ success: true, scores });
   } catch (err) {
@@ -106,23 +130,13 @@ router.get('/quiz/:quizId', verifyToken, async (req, res) => {
   }
 });
 
-// Get global leaderboard (public - all users, all quizzes, sorted by score)
-router.get('/leaderboard/public/all', async (req, res) => {
-  try {
-    const leaderboard = await Score.find()
-      .populate('userId', 'name avatarId')
-      .sort({ percentage: -1, score: -1, timeSpent: 1 })
-      .limit(100);
-    res.json({ success: true, leaderboard });
-  } catch (err) {
-    console.error('Get global leaderboard error:', err);
-    res.status(500).json({ success: false, error: 'Failed to get leaderboard' });
-  }
-});
-
 // Get leaderboard for a specific quiz (public)
 router.get('/leaderboard/:quizId', async (req, res) => {
   try {
+    if (!isValidObjectId(req.params.quizId)) {
+      return res.status(400).json({ success: false, error: 'Invalid quiz ID' });
+    }
+
     const leaderboard = await Score.find({ quizId: req.params.quizId })
       .populate('userId', 'name avatarId')
       .sort({ score: -1, timeSpent: 1 })
@@ -155,9 +169,36 @@ router.get('/stats/personal', verifyToken, async (req, res) => {
   }
 });
 
+// Get score by ID
+router.get('/:id', verifyToken, async (req, res) => {
+  try {
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, error: 'Invalid score ID' });
+    }
+
+    const score = await Score.findById(req.params.id).populate('quizId').populate('userId', 'name email');
+    if (!score) return res.status(404).json({ success: false, error: 'Score not found' });
+
+    const user = await User.findById(req.userId).select('role');
+    const canViewAnyScore = user && (user.role === 'admin' || user.role === 'teacher');
+    if (!canViewAnyScore && score.userId._id.toString() !== req.userId.toString()) {
+      return res.status(403).json({ success: false, error: 'Can only view your own scores' });
+    }
+
+    res.json({ success: true, score });
+  } catch (err) {
+    console.error('Get score error:', err);
+    res.status(500).json({ success: false, error: 'Failed to get score' });
+  }
+});
+
 // Delete score
 router.delete('/:id', verifyToken, async (req, res) => {
   try {
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, error: 'Invalid score ID' });
+    }
+
     const score = await Score.findById(req.params.id);
     if (!score) return res.status(404).json({ success: false, error: 'Score not found' });
     

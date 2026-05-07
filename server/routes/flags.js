@@ -75,9 +75,45 @@ router.get('/user', verifyToken, async (req, res) => {
   }
 });
 
+// Get flags by status (admin only)
+router.get('/status/:status', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    const flags = await Flag.find({ status: req.params.status })
+      .populate('userId', 'name email')
+      .populate('quizId', 'title')
+      .populate('gameId', 'gameName')
+      .sort({ timestamp: -1 });
+
+    res.json({ success: true, flags });
+  } catch (err) {
+    console.error('Get flags by status error:', err);
+    res.status(500).json({ success: false, error: 'Failed to get flags' });
+  }
+});
+
+// Get flags by severity (admin only)
+router.get('/severity/:severity', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    const flags = await Flag.find({ severity: req.params.severity })
+      .populate('userId', 'name email')
+      .populate('quizId', 'title')
+      .populate('gameId', 'gameName')
+      .sort({ timestamp: -1 });
+
+    res.json({ success: true, flags });
+  } catch (err) {
+    console.error('Get flags by severity error:', err);
+    res.status(500).json({ success: false, error: 'Failed to get flags' });
+  }
+});
+
 // Get flag by ID
 router.get('/:id', verifyToken, async (req, res) => {
   try {
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, error: 'Invalid flag ID' });
+    }
+
     const flag = await Flag.findById(req.params.id)
       .populate('userId', 'name email')
       .populate('quizId', 'title')
@@ -101,6 +137,10 @@ router.get('/:id', verifyToken, async (req, res) => {
 // Review flag (admin only)
 router.post('/:id/review', verifyToken, requireAdmin, async (req, res) => {
   try {
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, error: 'Invalid flag ID' });
+    }
+
     const { status, resolution } = req.body;
 
     if (!['open', 'reviewed', 'resolved'].includes(status)) {
@@ -126,41 +166,13 @@ router.post('/:id/review', verifyToken, requireAdmin, async (req, res) => {
   }
 });
 
-// Get flags by status (admin only)
-router.get('/status/:status', verifyToken, requireAdmin, async (req, res) => {
-  try {
-    const flags = await Flag.find({ status: req.params.status })
-      .populate('userId', 'name email')
-      .populate('quizId', 'title')
-      .populate('gameId', 'gameName')
-      .sort({ timestamp: -1 });
-    
-    res.json({ success: true, flags });
-  } catch (err) {
-    console.error('Get flags by status error:', err);
-    res.status(500).json({ success: false, error: 'Failed to get flags' });
-  }
-});
-
-// Get flags by severity (admin only)
-router.get('/severity/:severity', verifyToken, requireAdmin, async (req, res) => {
-  try {
-    const flags = await Flag.find({ severity: req.params.severity })
-      .populate('userId', 'name email')
-      .populate('quizId', 'title')
-      .populate('gameId', 'gameName')
-      .sort({ timestamp: -1 });
-    
-    res.json({ success: true, flags });
-  } catch (err) {
-    console.error('Get flags by severity error:', err);
-    res.status(500).json({ success: false, error: 'Failed to get flags' });
-  }
-});
-
 // Delete flag
 router.delete('/:id', verifyToken, async (req, res) => {
   try {
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, error: 'Invalid flag ID' });
+    }
+
     const flag = await Flag.findById(req.params.id);
     if (!flag) return res.status(404).json({ success: false, error: 'Flag not found' });
     

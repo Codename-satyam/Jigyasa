@@ -160,7 +160,7 @@ router.get('/:id', verifyToken, async (req, res) => {
   }
 });
 
-// Update user (fix: use .toString() for ObjectId comparison)
+// Update user
 router.put('/:id', verifyToken, async (req, res) => {
   try {
     if (req.userId.toString() !== req.params.id) {
@@ -305,11 +305,19 @@ router.post('/admin/validate', adminLoginLimiter, async (req, res) => {
       return res.status(401).json({ success: false, error: 'Invalid admin credentials' });
     }
     
-    // Try to ensure admin user exists in MongoDB
+    // Try to ensure admin user exists in local storage
     try {
       let adminUser = await User.findOne({ email: ADMIN_EMAIL });
       
       if (!adminUser) {
+        const allowAutoCreate = process.env.NODE_ENV !== 'production' || process.env.ADMIN_AUTO_CREATE === 'true';
+        if (!allowAutoCreate) {
+          return res.status(403).json({
+            success: false,
+            error: 'Admin user is not initialized. Set ADMIN_AUTO_CREATE=true once, create the admin, then disable it.',
+          });
+        }
+
         const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
         adminUser = new User({
           name: 'Admin',

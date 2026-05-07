@@ -99,6 +99,16 @@ export function getGamePlaysByEmail(email) {
   return games.filter(g => g.email === email);
 }
 
+export async function getPublicGamesLeaderboard() {
+  try {
+    const response = await apiCall('/api/games/leaderboard/public/all', 'GET');
+    return response.success ? response.leaderboard : [];
+  } catch (error) {
+    console.error('Error fetching games leaderboard:', error);
+    return [];
+  }
+}
+
 export function clearGamesData() {
   saveGames([]);
 }

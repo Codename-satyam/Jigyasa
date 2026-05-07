@@ -1,10 +1,10 @@
-// server.js - Complete Backend with MongoDB & Routes
+// server.js - Backend with local JSON storage & routes
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
-const mongoose = require('mongoose');
+const { getFirestore } = require('./server/storage/firebase');
 
 const fetchJson = global.fetch
   ? (...args) => global.fetch(...args)
@@ -43,7 +43,7 @@ const allowedOrigins = new Set(
 );
 
 if (corsAllowAll) {
-  console.warn('⚠️ CORS_ALLOW_ALL=true: all origins are allowed');
+  console.warn('WARNING: CORS_ALLOW_ALL=true: all origins are allowed');
 } else {
   console.log('CORS allowed origins:', Array.from(allowedOrigins));
 }
@@ -60,7 +60,7 @@ app.use(cors({
     if (allowedOrigins.has(normalizedOrigin)) {
       callback(null, true);
     } else {
-      console.log('❌ CORS blocked origin:', origin, '(allowed:', Array.from(allowedOrigins), ')');
+      console.log('CORS blocked origin:', origin, '(allowed:', Array.from(allowedOrigins), ')');
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -69,7 +69,6 @@ app.use(cors({
 
 const GEMINI_KEY = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || '';
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-const MONGO_URI = process.env.MONGO_URI || '';
 
 // Validate required environment variables
 if (!process.env.JWT_SECRET) {
@@ -79,16 +78,6 @@ if (!process.env.JWT_SECRET) {
 
 console.log('GEMINI_API_KEY present:', !!GEMINI_KEY);
 console.log('Using model:', GEMINI_MODEL);
-console.log('MongoDB URI present:', !!MONGO_URI);
-
-// ==================== MONGODB CONNECTION ====================
-if (MONGO_URI) {
-  mongoose.connect(MONGO_URI)
-    .then(() => console.log('✅ MongoDB connected'))
-    .catch(err => console.error('❌ MongoDB connection failed:', err.message));
-} else {
-  console.warn('⚠️ MONGO_URI not set - MongoDB features disabled');
-}
 
 // ==================== IMPORT ROUTES ====================
 const userRoutes = require('./server/routes/user');
@@ -124,14 +113,14 @@ function tryParseJsonMaybe(text) {
   // Try 1: Parse cleaned version directly
   try { 
     const result = JSON.parse(cleaned);
-    console.log('✅ Parsed JSON from cleaned text');
+    console.log('Parsed JSON from cleaned text');
     return result;
   } catch (e) {}
   
   // Try 2: Parse original text
   try { 
     const result = JSON.parse(text);
-    console.log('✅ Parsed JSON from original text');
+    console.log('Parsed JSON from original text');
     return result;
   } catch (e) {}
   
@@ -142,7 +131,7 @@ function tryParseJsonMaybe(text) {
     const candidate = text.slice(first, last + 1);
     try { 
       const result = JSON.parse(candidate);
-      console.log('✅ Parsed JSON from extracted substring');
+      console.log('Parsed JSON from extracted substring');
       return result;
     } catch (e) {
       console.log('Failed to parse extracted substring:', e.message);
@@ -154,13 +143,13 @@ function tryParseJsonMaybe(text) {
     let fixed = text.replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":');
     fixed = fixed.replace(/'/g, '"');
     const result = JSON.parse(fixed);
-    console.log('✅ Parsed JSON after fixing common issues');
+    console.log('Parsed JSON after fixing common issues');
     return result;
   } catch (e) {
     console.log('Failed to parse fixed JSON:', e.message);
   }
 
-  console.log('❌ All parsing attempts failed for text length:', text.length);
+  console.log('All parsing attempts failed for text length:', text.length);
   return null;
 }
 
@@ -174,13 +163,13 @@ function stripCodeFences(text) {
 }
 
 app.post('/api/generate-quiz', async (req, res) => {
-  console.log('\n🔵 /api/generate-quiz called');
+  console.log('\n/api/generate-quiz called');
   
   if (!GEMINI_KEY) {
-    console.log('❌ GEMINI_KEY is empty');
+    console.log('GEMINI_KEY is empty');
     return res.status(500).json({ success: false, error: 'GOOGLE_API_KEY not configured on server' });
   }
-  console.log('✅ GEMINI_KEY is present');
+  console.log('GEMINI_KEY is present');
 
   const { topic = 'General knowledge', count = 5, difficulty = 'easy', type = 'mcq' } = req.body || {};
   const maxOutputTokens = Math.min(4096, 400 + Number(count || 5) * 300);
@@ -213,20 +202,20 @@ app.post('/api/generate-quiz', async (req, res) => {
 
     const status = response.status;
     const raw = await response.text();
-    console.log('✅ Gemini API responded with status:', status);
+    console.log('Gemini API responded with status:', status);
     console.log('Response size:', raw.length, 'bytes');
 
     if (!response.ok) {
-      console.log('❌ Gemini API error response:', raw.slice(0, 500));
+      console.log('Gemini API error response:', raw.slice(0, 500));
       return res.status(500).json({ success: false, error: 'Gemini API returned error', status, raw });
     }
 
     let apiPayload = null;
     try {
       apiPayload = JSON.parse(raw);
-      console.log('✅ Valid JSON from Gemini');
+      console.log('Valid JSON from Gemini');
     } catch (e) {
-      console.log('❌ Failed to parse Gemini JSON:', e.message);
+      console.log('Failed to parse Gemini JSON:', e.message);
       return res.json({ success: false, error: 'invalid-gemini-json', raw });
     }
 
@@ -238,7 +227,7 @@ app.post('/api/generate-quiz', async (req, res) => {
     if (!content && typeof apiPayload === 'object') {
       // Check if the entire response is the quiz data
       if (apiPayload.quiz && Array.isArray(apiPayload.quiz)) {
-        console.log('✅ Found quiz directly in response');
+        console.log('Found quiz directly in response');
         return res.json({ success: true, quiz: apiPayload.quiz });
       }
       
@@ -251,7 +240,7 @@ app.post('/api/generate-quiz', async (req, res) => {
     console.log('Extracted content (first 300 chars):', content.slice(0, 300));
     
     if (!content) {
-      console.log('❌ No content extracted from response');
+      console.log('No content extracted from response');
       console.log('Response structure:', JSON.stringify(apiPayload).slice(0, 500));
       return res.json({ success: false, error: 'no-content-extracted', apiPayloadKeys: Object.keys(apiPayload) });
     }
@@ -261,16 +250,47 @@ app.post('/api/generate-quiz', async (req, res) => {
     console.log('Parsed quiz:', parsed ? `${parsed.quiz ? parsed.quiz.length + ' questions' : 'no quiz property'}` : 'null');
     
     if (!parsed || !Array.isArray(parsed.quiz)) {
-      console.log('❌ Invalid quiz format, parsed:', JSON.stringify(parsed).slice(0, 200));
+      console.log('Invalid quiz format, parsed:', JSON.stringify(parsed).slice(0, 200));
       return res.json({ success: false, error: 'invalid-quiz-json', raw, content, finishReason, parsedAttempt: parsed });
     }
 
-    console.log('✅ Returning', parsed.quiz.length, 'questions');
+    console.log('Returning', parsed.quiz.length, 'questions');
     return res.json({ success: true, quiz: parsed.quiz });
   } catch (err) {
     console.error('Server -> Gemini call failed:', err);
     return res.status(500).json({ success: false, error: 'server-exception', message: err.message });
   }
+});
+
+app.get('/api/health', async (req, res) => {
+  const startedAt = Date.now();
+  const db = getFirestore();
+  const health = {
+    success: true,
+    service: 'quizy-api',
+    timestamp: new Date().toISOString(),
+    geminiConfigured: Boolean(GEMINI_KEY),
+    firebase: {
+      configured: Boolean(db),
+      connected: false,
+    },
+  };
+
+  try {
+    if (db) {
+      await db.collection('_health').doc('server').set({
+        service: 'quizy-api',
+        checkedAt: new Date().toISOString(),
+      }, { merge: true });
+      health.firebase.connected = true;
+    }
+  } catch (err) {
+    health.success = false;
+    health.firebase.error = err.message;
+  }
+
+  health.responseTimeMs = Date.now() - startedAt;
+  res.status(health.success ? 200 : 503).json(health);
 });
 
 const buildPath = path.join(__dirname, 'build');
@@ -282,7 +302,34 @@ app.get(/.*/, (req, res) => {
   res.sendFile(path.join(buildPath, 'index.html'));
 });
 
-app.listen(PORT, HOST, () => {
-  const hostForLog = HOST === '0.0.0.0' ? 'localhost' : HOST;
-  console.log(`✅ Server listening on http://${hostForLog}:${PORT}`);
-});
+async function verifyFirebaseConnection() {
+  const db = getFirestore();
+
+  if (!db) {
+    throw new Error('Firebase credentials are missing. Check FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY in .env');
+  }
+
+  await db.collection('_health').doc('server').set({
+    service: 'quizy-api',
+    checkedAt: new Date().toISOString(),
+  }, { merge: true });
+
+  console.log('Database: Firebase Firestore');
+  console.log('Firebase connection verified');
+}
+
+async function startServer() {
+  try {
+    await verifyFirebaseConnection();
+
+    app.listen(PORT, HOST, () => {
+      const hostForLog = HOST === '0.0.0.0' ? 'localhost' : HOST;
+      console.log(`Server listening on http://${hostForLog}:${PORT}`);
+    });
+  } catch (err) {
+    console.error('Firebase connection failed:', err.message);
+    process.exit(1);
+  }
+}
+
+startServer();

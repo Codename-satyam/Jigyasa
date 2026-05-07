@@ -57,6 +57,7 @@ const Navbar = () => {
         <li><Link to="/about" onClick={closeMenu}>About</Link></li>
         <li><Link to="/play" onClick={closeMenu}>Play</Link></li>
         <li><Link to="/dashboard" onClick={closeMenu}>Dashboard</Link></li>
+        <li><Link to="/achievements" onClick={closeMenu}>Achievements</Link></li>
         
         {!user ? (
           <>

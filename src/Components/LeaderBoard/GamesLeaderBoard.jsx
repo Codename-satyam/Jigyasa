@@ -1,20 +1,20 @@
 import './LeaderBoard.css';
 import { useState, useEffect } from 'react';
-import scoresApi from '../../api/scores';
+import gamesTracker from '../../api/gamesTracker';
 
-function LeaderBoard() {
+function GamesLeaderBoard() {
     const [leaderboardData, setLeaderboardData] = useState([]);
     const [loading, setLoading] = useState(true);
     
     useEffect(() => {
         const loadLeaderboard = async () => {
             try {
-                console.log('📊 [LeaderBoard] Fetching public leaderboard...');
-                const leaderboard = await scoresApi.getPublicLeaderboard();
-                console.log('✅ [LeaderBoard] Leaderboard data:', leaderboard.length, 'entries');
+                console.log('🎮 [GamesLeaderBoard] Fetching global games leaderboard...');
+                const leaderboard = await gamesTracker.getPublicGamesLeaderboard();
+                console.log('✅ [GamesLeaderBoard] Games leaderboard data:', leaderboard.length, 'entries');
                 setLeaderboardData(leaderboard || []);
             } catch (error) {
-                console.error('❌ [LeaderBoard] Error loading leaderboard:', error);
+                console.error('❌ [GamesLeaderBoard] Error loading leaderboard:', error);
                 setLeaderboardData([]);
             } finally {
                 setLoading(false);
@@ -32,13 +32,13 @@ function LeaderBoard() {
                 <div className="scanline"></div>
 
                 <div className="leaderboard-header text-center mb-4">
-                    <h2 className="pixel-title gold-text glitch-effect">🏆 GLOBAL TOP 10</h2>
-                    <p className="pixel-subtitle blue-text mt-2">ELITE OPERATIVES ACROSS ALL ZONES</p>
+                    <h2 className="pixel-title gold-text glitch-effect">🎮 GAMES CHAMPIONS</h2>
+                    <p className="pixel-subtitle cyan-text mt-2">TOP GAMERS ACROSS ALL ARENAS</p>
                 </div>
 
                 {loading ? (
                     <div className="loading-screen text-center green-text blink-slow">
-                        CONNECTING TO MAINFRAME...
+                        LOADING GAME STATS...
                     </div>
                 ) : (
                     <div className="table-wrapper">
@@ -46,30 +46,29 @@ function LeaderBoard() {
                             <thead>
                                 <tr className="cyber-table-header">
                                     <th className="text-center">RANK</th>
-                                    <th className="text-left">OPERATIVE</th>
-                                    <th className="text-center">EXP %</th>
-                                    <th className="text-right">ZONE DETAILS</th>
+                                    <th className="text-left">GAMER</th>
+                                    <th className="text-center">TOP SCORE</th>
+                                    <th className="text-center">LEVEL</th>
+                                    <th className="text-right">GAMES</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {leaderboardData.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} className="empty-row text-center red-text blink">
-                                            NO DATA FRAGS FOUND
+                                        <td colSpan={5} className="empty-row text-center red-text blink">
+                                            NO CHAMPIONS YET
                                         </td>
                                     </tr>
                                 ) : (
                                     leaderboardData.slice(0, 10).map((entry, index) => {
-                                        // Get user name from multiple sources (in order of priority)
+                                        // Get user name from multiple sources
                                         let userName = entry.displayName ||  // displayName from backend
-                                                       (typeof entry.userId === 'object' && entry.userId?.name) ||  // Populated userId object
-                                                       entry.name ||  // Direct name field
-                                                       'User';  // Fallback - never show "ANONYMOUS"
+                                                       (typeof entry.name === 'object' ? entry.name?.name : entry.name) ||  // Direct name field
+                                                       'Gamer';  // Fallback
                                         
-                                        const displayScore = entry.percentage !== undefined 
-                                            ? `${Math.round(entry.percentage)}%` 
-                                            : (entry.score !== undefined ? `${entry.score}` : '0%');
-                                        const quizTitle = entry.quizTitle || 'UNKNOWN QUEST';
+                                        const displayScore = entry.highestScore || 0;
+                                        const displayLevel = entry.highestLevel || 1;
+                                        const gamesCount = entry.gamesPlayed || 0;
                                         
                                         let rankClass = "standard-rank";
                                         if (index === 0) rankClass = "rank-1 gold-text";
@@ -78,9 +77,8 @@ function LeaderBoard() {
 
                                         return (
                                             <tr 
-                                                key={entry._id || index} 
+                                                key={entry.userId || index} 
                                                 className={`cyber-table-row ${rankClass}`}
-                                                /* STAGGERED ENTRANCE ANIMATION DELAY */
                                                 style={{ animationDelay: `${index * 0.15}s` }}
                                             >
                                                 <td className="rank-cell text-center">
@@ -90,7 +88,8 @@ function LeaderBoard() {
                                                     <span className="user-name">{userName}</span>
                                                 </td>
                                                 <td className="score-cell text-center glitch-hover">{displayScore}</td>
-                                                <td className="quiz-cell text-right">{quizTitle}</td>
+                                                <td className="score-cell text-center">⭐ {displayLevel}</td>
+                                                <td className="quiz-cell text-right">{gamesCount} 🎯</td>
                                             </tr>
                                         );
                                     })
@@ -104,4 +103,4 @@ function LeaderBoard() {
     );
 }
 
-export default LeaderBoard;
+export default GamesLeaderBoard;
