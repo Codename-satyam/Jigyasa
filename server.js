@@ -194,6 +194,30 @@ app.post('/api/generate-quiz', async (req, res) => {
       { id: 1, question: 'What is the capital of Japan?', options: ['Osaka', 'Tokyo', 'Kyoto', 'Yokohama'], correct: 'Tokyo', explanation: 'Tokyo is the capital and largest city of Japan.', difficulty: 'easy' },
       { id: 2, question: 'Which is the longest river in the world?', options: ['Amazon', 'Yangtze', 'Mississippi', 'Nile'], correct: 'Nile', explanation: 'The Nile River in Africa is the longest river in the world.', difficulty: 'easy' },
     ],
+    'Video Games': [
+      { id: 1, question: 'In The Legend of Zelda series, what is the name of the magical artifact sought by Ganondorf?', options: ['Master Sword', 'Hylian Shield', 'Triforce', 'Ocarina of Time'], correct: 'Triforce', explanation: 'The Triforce is the central magical artifact in The Legend of Zelda series.', difficulty: 'medium' },
+      { id: 2, question: 'Which game franchise features a character named Mario?', options: ['Sonic the Hedgehog', 'Super Mario', 'Mega Man', 'Donkey Kong'], correct: 'Super Mario', explanation: 'Mario is the protagonist of the Super Mario video game franchise by Nintendo.', difficulty: 'easy' },
+      { id: 3, question: 'What is the name of the protagonist in The Witcher 3?', options: ['Geralt of Rivia', 'Ciri', 'Yennefer', 'Triss'], correct: 'Geralt of Rivia', explanation: 'Geralt of Rivia is the main protagonist and playable character in The Witcher 3.', difficulty: 'medium' },
+      { id: 4, question: 'In Minecraft, what is the most basic building block?', options: ['Wood', 'Stone', 'Dirt', 'Grass'], correct: 'Dirt', explanation: 'Dirt is one of the most basic and abundant building materials in Minecraft.', difficulty: 'easy' },
+      { id: 5, question: 'Which game is NOT part of the Halo franchise?', options: ['Halo: Combat Evolved', 'Halo 2', 'Call of Duty', 'Halo 3'], correct: 'Call of Duty', explanation: 'Call of Duty is a separate first-person shooter franchise, not part of Halo.', difficulty: 'medium' },
+    ],
+    'Sports': [
+      { id: 1, question: 'How many players are on a basketball team on the court?', options: ['4', '5', '6', '7'], correct: '5', explanation: 'Each basketball team has 5 players on the court at a time.', difficulty: 'easy' },
+      { id: 2, question: 'In cricket, how many runs make a century?', options: ['50', '75', '100', '150'], correct: '100', explanation: 'A century in cricket is 100 runs scored by a batsman.', difficulty: 'easy' },
+      { id: 3, question: 'How many sets must a tennis player win to win a standard match?', options: ['1', '2', '3', '4'], correct: '2', explanation: 'In most tennis matches, a player must win 2 out of 3 sets to win.', difficulty: 'medium' },
+    ],
+    'Books': [
+      { id: 1, question: 'Who wrote "Pride and Prejudice"?', options: ['Charlotte Brontë', 'Jane Austen', 'Emily Dickinson', 'George Eliot'], correct: 'Jane Austen', explanation: 'Jane Austen wrote Pride and Prejudice, published in 1813.', difficulty: 'easy' },
+      { id: 2, question: 'How many books are in the Harry Potter series?', options: ['5', '6', '7', '8'], correct: '7', explanation: 'J.K. Rowling wrote 7 books in the Harry Potter series.', difficulty: 'easy' },
+    ],
+    'Film': [
+      { id: 1, question: 'In which year was the first Star Wars film released?', options: ['1975', '1977', '1979', '1981'], correct: '1977', explanation: 'A New Hope, the first Star Wars film, was released in 1977.', difficulty: 'easy' },
+      { id: 2, question: 'Who directed "Inception"?', options: ['Steven Spielberg', 'Christopher Nolan', 'James Cameron', 'Martin Scorsese'], correct: 'Christopher Nolan', explanation: 'Christopher Nolan directed the science fiction film Inception in 2010.', difficulty: 'medium' },
+    ],
+    'Computers': [
+      { id: 1, question: 'What does CPU stand for?', options: ['Central Processing Unit', 'Computer Personal Unit', 'Central Personal Utility', 'Computing Processing Unit'], correct: 'Central Processing Unit', explanation: 'CPU stands for Central Processing Unit, the main processor in a computer.', difficulty: 'easy' },
+      { id: 2, question: 'How many bits are in a byte?', options: ['4', '8', '16', '32'], correct: '8', explanation: 'One byte consists of 8 bits of data.', difficulty: 'easy' },
+    ],
   };
 
   try {
