@@ -1,541 +1,769 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import "./g6.css";
-import knight from "../../../../Assets/g6/knight.png";
-import knightdamage from "../../../../Assets/g6/knight-damage.png";
-import knightattack from "../../../../Assets/g6/knight-attack.png";
-import slash from "../../../../Assets/g6/attack.mp3";
-import damage from "../../../../Assets/g6/damage.mp3";
-import victory from "../../../../Assets/g6/victory.mp3";
-import gameend from "../../../../Assets/g6/game-end.png";
-import { riddles } from "./riddles";
-import { enemyPool } from "./enemyPool";
+import {riddles} from "./riddles";
+import {enemyPool} from "./enemyPool";
 
-// ─── Shuffle riddles so each game feels fresh ─────────────────────────────────
-function shuffleArray(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-}
+// ═══════════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════════
+const BOSS_LEVEL      = 7;
+const BASE_XP_NEEDED  = 100;
+const XP_SCALE        = 1.45;
+const PLAYER_BASE_HP  = 100;
+const PLAYER_BASE_DMG = 22;
+const HP_PER_LEVEL    = 22;
+const DMG_PER_LEVEL   = 5;
+const RUNE_CHARS      = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟᚫᚣᛡᛠ◆◇⬡⬢✦✧';
+const BOSS_LETTERS    = ['A','D','M','I','N'];
 
-// ─── Fuzzy answer checker: strips punctuation + articles, trims whitespace ────
-function normalize(str) {
-    return str
-        .toLowerCase()
-        .replace(/^(a|an|the)\s+/i, "")
-        .replace(/[^a-z0-9\s]/g, "")
-        .trim();
-}
-function isCorrectAnswer(input, answer) {
-    const ni = normalize(input);
-    const na = normalize(answer);
-    if (ni === na) return true;
-    // allow partial match if input contains the core answer
-    if (na.split(" ").every(word => ni.includes(word))) return true;
-    return false;
-}
-
-// ─── Hint: reveal answer progressively, hiding middle chars ──────────────────
-function buildHint(answer, reveal) {
-    const words = answer.split(" ");
-    return words.map(word => {
-        const chars = word.split("");
-        return chars
-            .map((ch, i) => (i < reveal || i === chars.length - 1 ? ch : "_"))
-            .join("");
-    }).join(" ");
-}
-
-// ─── Enemy factory ────────────────────────────────────────────────────────────
-const getEnemy = (level, playerMaxHp = 100) => {
-    if (level === 4 || level === 8) {
-        const adminData = enemyPool.find(e => e.name === "ADMIN");
-        if (adminData) {
-            const maxHp = adminData.baseHp + adminData.hpPerLevel * (level - 1);
-            return { ...adminData, level, maxHp, hp: maxHp, damage: adminData.baseDamage + 5 * (level - 1) };
-        }
-    }
-    const pool = enemyPool.filter(e => e.name !== "ADMIN" && e.baseHp + e.hpPerLevel * (level - 1) <= playerMaxHp * 1.5);
-    const enemyData = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : enemyPool[0];
-    const maxHp = enemyData.baseHp + enemyData.hpPerLevel * (level - 1);
-    return { ...enemyData, level, maxHp, hp: maxHp, damage: enemyData.baseDamage + 3 * (level - 1) };
+const SCREENS = {
+  TITLE:      'TITLE',
+  BATTLE:     'BATTLE',
+  BOSS_INTRO: 'BOSS_INTRO',
+  LEVEL_UP:   'LEVEL_UP',
+  GAME_OVER:  'GAME_OVER',
+  VICTORY:    'VICTORY',
 };
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-const BASE_ATTACK_DAMAGE  = 22;
-const POWER_DAMAGE        = 45;
-const POWER_MANA_COST     = 20;
-const MANA_REGEN_PER_TURN = 5;      // mana restored on correct answer
-const XP_PER_KILL         = 40;
-const COMBO_CAP           = 5;      // max combo multiplier tier
-const HINT_COST_MANA      = 15;
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+function xpNeededForLevel(lvl) {
+  return Math.floor(BASE_XP_NEEDED * Math.pow(XP_SCALE, lvl - 1));
+}
 
-function RiddleRPG() {
-    /* ── Audio ──────────────────────────────────────────────────────────── */
-    const attackSoundRef  = useRef(new Audio(slash));
-    const damageSoundRef  = useRef(new Audio(damage));
-    const victorySoundRef = useRef(new Audio(victory));
+function buildEnemy(template, playerLevel) {
+  const maxHp = template.baseHp + template.hpPerLevel * (playerLevel - 1);
+  return {
+    ...template,
+    currentHp: maxHp,
+    maxHp,
+    playerDamage: PLAYER_BASE_DMG + DMG_PER_LEVEL * (playerLevel - 1),
+  };
+}
 
-    /* ── Riddle deck (shuffled once per game) ───────────────────────────── */
-    const [deck, setDeck]         = useState(() => shuffleArray(riddles));
-    const [deckIdx, setDeckIdx]   = useState(0);
+function pickEnemyTemplate(playerLevel, bossTriggered) {
+  if (playerLevel >= BOSS_LEVEL && !bossTriggered) return null;
+  let pool;
+  if      (playerLevel <= 2) pool = enemyPool.filter(e => e.tier === 1);
+  else if (playerLevel <= 4) pool = enemyPool.filter(e => e.tier <= 2);
+  else                       pool = enemyPool.filter(e => e.tier === 3 && !e.isBoss);
+  if (!pool || pool.length === 0) pool = enemyPool.filter(e => !e.isBoss);
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
-    const currentRiddle = deck[deckIdx % deck.length];
+function pickRiddle(usedSet, totalCount) {
+  if (usedSet.size >= totalCount) usedSet.clear();
+  let idx;
+  do { idx = Math.floor(Math.random() * totalCount); } while (usedSet.has(idx));
+  usedSet.add(idx);
+  return riddles[idx];
+}
 
-    const advanceRiddle = useCallback(() => {
-        setDeckIdx(i => i + 1);
-        setHintLevel(0);
-        setInput("");
-    }, []);
+function freshPlayerState() {
+  return {
+    hp:       PLAYER_BASE_HP,
+    maxHp:    PLAYER_BASE_HP,
+    level:    1,
+    xp:       0,
+    xpNeeded: xpNeededForLevel(1),
+    damage:   PLAYER_BASE_DMG,
+  };
+}
 
-    /* ── Player state ───────────────────────────────────────────────────── */
-    const [player, setPlayer] = useState({
-        level: 1, xp: 0, xpToLevel: 50,
-        maxHp: 120, hp: 120, maxMana: 60, mana: 60,
-    });
+function normalise(s) {
+  return s.toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\b(a|an|the)\b/g,'').trim();
+}
 
-    /* ── Enemy state ────────────────────────────────────────────────────── */
-    const [enemy, setEnemy] = useState(() => getEnemy(1, 120));
+function checkAnswer(input, correct) {
+  const u = normalise(input);
+  const c = normalise(correct);
+  if (!u) return false;
+  return u === c || c.includes(u) || u.includes(c);
+}
 
-    /* ── Combat UI state ────────────────────────────────────────────────── */
-    const [input,           setInput]           = useState("");
-    const [message,         setMessage]         = useState({ text: "", type: "info" });
-    const [shake,           setShake]           = useState(false);
-    const [damagePopup,     setDamagePopup]     = useState(null);
-    const [victoryScreen,   setVictoryScreen]   = useState(false);
-    const [playerDamaged,   setPlayerDamaged]   = useState(false);
-    const [playerAttacking, setPlayerAttacking] = useState(false);
-    const [adminPopup,      setAdminPopup]      = useState(false);
-    const [gameCompleted,   setGameCompleted]   = useState(false);
-    const [combo,           setCombo]           = useState(0);       // correct streak
-    const [hintLevel,       setHintLevel]       = useState(0);       // chars revealed
-    const [floatingTexts,   setFloatingTexts]   = useState([]);      // floating combat labels
-    const [screenFlash,     setScreenFlash]     = useState("");      // "" | "hit" | "crit" | "defeat"
-    const [wrongAnim,       setWrongAnim]       = useState(false);   // input shake on wrong
+// ═══════════════════════════════════════════════════════════════
+// TITLE SCREEN COMPONENT
+// ═══════════════════════════════════════════════════════════════
+function TitleScreen({ onStart }) {
+  const runeRef = useRef(null);
 
-    const playerDamageTimerRef = useRef(null);
-    const playerAttackTimerRef = useRef(null);
-    const xpAwardedRef         = useRef(false);
-    const floatIdRef           = useRef(0);
+  useEffect(() => {
+    const container = runeRef.current;
+    if (!container) return;
+    const runes = [];
+    for (let i = 0; i < 22; i++) {
+      const el = document.createElement('span');
+      el.className = 'rune-particle';
+      el.textContent = RUNE_CHARS[Math.floor(Math.random() * RUNE_CHARS.length)];
+      el.style.left = Math.random() * 100 + '%';
+      el.style.fontSize = (14 + Math.random() * 22) + 'px';
+      el.style.animationDuration = (8 + Math.random() * 14) + 's';
+      el.style.animationDelay = (-Math.random() * 14) + 's';
+      el.style.opacity = (0.06 + Math.random() * 0.12);
+      container.appendChild(el);
+      runes.push(el);
+    }
+    return () => runes.forEach(r => r.remove());
+  }, []);
 
-    const isVictory = enemy.hp <= 0;
-    const isDefeat  = player.hp <= 0;
-    const isLocked  = isDefeat || victoryScreen || gameCompleted;
+  return (
+    <div className="title-screen">
+      <div className="rune-field" ref={runeRef} />
+      <div className="torch-left" />
+      <div className="torch-right" />
+      <div className="title-content">
+        <p className="title-eyebrow">A dungeon of riddles awaits</p>
+        <h1 className="title-logo">
+          <span className="title-logo-line1">ENIGMA</span>
+          <span className="title-logo-line2">DUNGEON</span>
+        </h1>
+        <div className="title-ornament">
+          <span className="orn-line" />
+          <span className="orn-diamond">◆</span>
+          <span className="orn-line" />
+        </div>
+        <p className="title-flavor">
+          Words are your only weapon.<br />
+          Wit is your only armor.<br />
+          Answer wrong — and darkness wins.
+        </p>
+        <button className="btn title-btn" onClick={onStart}>
+          ⚔&nbsp;&nbsp;Begin Quest
+        </button>
+        <p className="title-hint">Answer riddles · Defeat monsters · Face the ADMIN</p>
+      </div>
+      <div className="title-footer">
+        <span>◆</span>
+        <span className="footer-text">Riddle RPG</span>
+        <span>◆</span>
+      </div>
+    </div>
+  );
+}
 
-    /* ── Floating text helper ────────────────────────────────────────────── */
-    const spawnFloat = (text, color) => {
-        const id = floatIdRef.current++;
-        setFloatingTexts(prev => [...prev, { id, text, color }]);
-        setTimeout(() => setFloatingTexts(prev => prev.filter(f => f.id !== id)), 1000);
+// ═══════════════════════════════════════════════════════════════
+// HUD COMPONENT
+// ═══════════════════════════════════════════════════════════════
+function HUD({ player, enemy }) {
+  const hpPct  = Math.max(0, (player.hp / player.maxHp) * 100);
+  const xpPct  = Math.max(0, (player.xp / player.xpNeeded) * 100);
+  const ehpPct = enemy ? Math.max(0, (enemy.currentHp / enemy.maxHp) * 100) : 0;
+
+  return (
+    <div className="hud">
+      <div className="hud-player-block">
+        <div className="hud-name">⚔ Hero</div>
+        <div className="hud-bars">
+          <div className="hud-bar-row">
+            <span className="hud-bar-label">HP</span>
+            <div className="hud-bar-track">
+              <div className="hud-bar-fill hud-hp-fill" style={{ width: hpPct + '%' }} />
+            </div>
+            <span className="hud-bar-val">{Math.max(0, player.hp)}/{player.maxHp}</span>
+          </div>
+          <div className="hud-bar-row">
+            <span className="hud-bar-label">XP</span>
+            <div className="hud-bar-track">
+              <div className="hud-bar-fill hud-xp-fill" style={{ width: xpPct + '%' }} />
+            </div>
+            <span className="hud-bar-val">{player.xp}/{player.xpNeeded}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="hud-level-badge">
+        <span className="hud-level-num">{player.level}</span>
+        <span className="hud-level-label">LVL</span>
+      </div>
+
+      {enemy && (
+        <div className="hud-enemy-block">
+          <div className={`hud-enemy-name ${enemy.isBoss ? 'hud-enemy-boss' : ''}`}>
+            {enemy.name}
+          </div>
+          <div className="hud-bar-row hud-enemy-row">
+            <span className="hud-bar-label">HP</span>
+            <div className="hud-bar-track">
+              <div
+                className={`hud-bar-fill hud-enemy-fill ${enemy.isBoss ? 'hud-enemy-fill-boss' : ''}`}
+                style={{ width: ehpPct + '%' }}
+              />
+            </div>
+            <span className="hud-bar-val">{Math.max(0, enemy.currentHp)}/{enemy.maxHp}</span>
+          </div>
+          <div className="hud-enemy-dmg">⚔ {enemy.baseDamage} dmg/miss</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BATTLE SCREEN COMPONENT
+// ═══════════════════════════════════════════════════════════════
+function BattleScreen({ enemy, riddle, onCorrect, onWrong, onHintUsed, screenShake }) {
+  const [inputVal, setInputVal]     = useState('');
+  const [inputState, setInputState] = useState('idle');
+  const [hintShown, setHintShown]   = useState(false);
+  const [feedback, setFeedback]     = useState(null);
+  const [damages, setDamages]       = useState([]);
+  const [logs, setLogs]             = useState([
+    { text: 'The dungeon stirs. A challenger emerges…', cls: 'log-gold' }
+  ]);
+  const inputRef = useRef(null);
+  const dmgIdRef = useRef(0);
+
+  useEffect(() => {
+    setInputVal('');
+    setInputState('idle');
+    setHintShown(false);
+    setFeedback(null);
+    if (inputRef.current) inputRef.current.focus();
+  }, [riddle]);
+
+  const addLog = useCallback((text, cls = '') => {
+    setLogs(prev => [{ text, cls }, ...prev].slice(0, 5));
+  }, []);
+
+  const spawnDamage = useCallback((text, color) => {
+    const id = ++dmgIdRef.current;
+    const x = 15 + Math.random() * 50;
+    const y = 20 + Math.random() * 30;
+    setDamages(prev => [...prev, { id, text, color, x, y }]);
+    setTimeout(() => setDamages(prev => prev.filter(d => d.id !== id)), 1100);
+  }, []);
+
+  const handleSubmit = useCallback(() => {
+    if (!inputVal.trim() || !riddle) return;
+    if (checkAnswer(inputVal, riddle.answer)) {
+      setInputState('correct');
+      const dmg = enemy.playerDamage + Math.floor(Math.random() * 12);
+      spawnDamage(`-${dmg}`, '#e74c3c');
+      setFeedback({ text: `✓ Correct! The answer was "${riddle.answer}"`, type: 'correct' });
+      addLog(`Correct! You strike the ${enemy.name} for ${dmg} damage!`, 'log-green');
+      setTimeout(() => { setInputState('idle'); setFeedback(null); }, 1200);
+      onCorrect(dmg, hintShown);
+    } else {
+      setInputState('wrong');
+      const dmg = enemy.baseDamage + Math.floor(Math.random() * 10);
+      setFeedback({ text: `✗ Wrong! You take ${dmg} damage!`, type: 'wrong' });
+      addLog(`Wrong! The ${enemy.name} strikes you for ${dmg} damage.`, 'log-red');
+      setTimeout(() => { setInputState('idle'); setFeedback(null); }, 1000);
+      onWrong(dmg);
+    }
+  }, [inputVal, riddle, enemy, hintShown, onCorrect, onWrong, addLog, spawnDamage]);
+
+  const handleKey = useCallback((e) => {
+    if (e.key === 'Enter') handleSubmit();
+  }, [handleSubmit]);
+
+  const handleHint = () => {
+    if (hintShown) return;
+    setHintShown(true);
+    onHintUsed();
+  };
+
+  const hintText = hintShown && riddle
+    ? riddle.answer[0].toUpperCase() + '_ '.repeat(riddle.answer.length - 1).trim() + `  (${riddle.answer.length} letters)`
+    : null;
+
+  const bgStyle = enemy?.Image ? { backgroundImage: `url(${enemy.Image})` } : {};
+  const glowColor = enemy?.glowColor || 'rgba(139,26,26,0.4)';
+
+  return (
+    <div className={`battle-screen ${screenShake ? 'screen-shake' : ''}`}>
+      <div className="enemy-bg" style={bgStyle} data-hasbg={!!enemy?.Image}>
+        {!enemy?.Image && (
+          <div
+            className={`enemy-emoji-display ${enemy?.isBoss ? 'enemy-emoji-boss' : ''}`}
+            style={{ filter: `drop-shadow(0 0 40px ${glowColor})` }}
+          >
+            {enemy?.emoji || '👾'}
+          </div>
+        )}
+        <div
+          className="enemy-glow"
+          style={{ background: `radial-gradient(ellipse at 50% 60%, ${glowColor} 0%, transparent 65%)` }}
+        />
+        <div className="battle-vignette" />
+        {damages.map(d => (
+          <div
+            key={d.id}
+            className="dmg-float"
+            style={{ left: d.x + '%', top: d.y + '%', color: d.color }}
+          >
+            {d.text}
+          </div>
+        ))}
+      </div>
+
+      <div className="riddle-panel">
+        <div className="riddle-panel-inner">
+          <div className="panel-ornament">
+            <span className="panel-orn-line" />
+            <span className="panel-orn-text">◆ The Riddle ◆</span>
+            <span className="panel-orn-line" />
+          </div>
+
+          <p className="riddle-text">{riddle?.question || '…'}</p>
+
+          <div className="hint-row">
+            {!hintShown ? (
+              <button className="hint-btn" onClick={handleHint}>🔮 Reveal Hint</button>
+            ) : (
+              <span className="hint-revealed">{hintText}</span>
+            )}
+          </div>
+
+          <div className="answer-row">
+            <input
+              ref={inputRef}
+              className={`answer-input answer-${inputState}`}
+              type="text"
+              value={inputVal}
+              onChange={e => setInputVal(e.target.value)}
+              onKeyDown={handleKey}
+              placeholder="Speak your answer…"
+              autoComplete="off"
+              spellCheck="false"
+            />
+            <button className="btn btn-sm strike-btn" onClick={handleSubmit}>
+              Strike
+            </button>
+          </div>
+
+          {feedback && (
+            <div className={`feedback feedback-${feedback.type}`}>
+              {feedback.text}
+            </div>
+          )}
+
+          <div className="combat-log">
+            {logs.map((l, i) => (
+              <p key={i} className={`log-line ${l.cls}`} style={{ opacity: 1 - i * 0.18 }}>
+                {l.text}
+              </p>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BOSS INTRO COMPONENT
+// ═══════════════════════════════════════════════════════════════
+function BossIntro({ onDismiss }) {
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase(1), 400);
+    const t2 = setTimeout(() => setPhase(2), 1200);
+    const t3 = setTimeout(() => setPhase(3), 2400);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, []);
+
+  return (
+    <div className="boss-intro">
+      <div className={`boss-fog ${phase >= 1 ? 'boss-fog-show' : ''}`} />
+
+      {phase >= 1 && (
+        <div className="boss-particles">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div key={i} className="boss-particle" style={{
+              left: Math.random() * 100 + '%',
+              animationDuration: (1.5 + Math.random() * 2) + 's',
+              animationDelay: (Math.random() * 1.5) + 's',
+              width: (2 + Math.random() * 4) + 'px',
+              height: (2 + Math.random() * 4) + 'px',
+            }} />
+          ))}
+        </div>
+      )}
+
+      <div className="boss-title-row">
+        {BOSS_LETTERS.map((letter, i) => (
+          <span
+            key={i}
+            className={`boss-letter ${phase >= 2 ? 'boss-letter-show' : ''}`}
+            style={{ animationDelay: (i * 0.12) + 's' }}
+          >
+            {letter}
+          </span>
+        ))}
+      </div>
+
+      <div className={`boss-subtitle-block ${phase >= 3 ? 'boss-sub-show' : ''}`}>
+        <p className="boss-subtitle">The Final Enigma Awakens</p>
+        <p className="boss-warning">
+          Answer wrong and face catastrophic punishment.<br/>
+          Every riddle may be your last.
+        </p>
+        <button className="btn btn-blood boss-face-btn" onClick={onDismiss}>
+          ☠ Face Your Doom
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LEVEL UP COMPONENT
+// ═══════════════════════════════════════════════════════════════
+function LevelUp({ level, hpGain, dmgGain, maxHp, damage, onContinue }) {
+  return (
+    <div className="levelup-overlay">
+      <div className="levelup-box">
+        <div className="levelup-sparks">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="spark" style={{
+              '--angle': (i * 30) + 'deg',
+              animationDelay: (i * 0.05) + 's',
+            }} />
+          ))}
+        </div>
+        <div className="levelup-eyebrow">✦ Level Up ✦</div>
+        <div className="levelup-num">{level}</div>
+        <div className="levelup-divider">
+          <span className="ld-line" />
+          <span className="ld-diamond">◆</span>
+          <span className="ld-line" />
+        </div>
+        <p className="levelup-flavor">
+          The dungeon recognises your growing power.<br />
+          You grow stronger in the dark.
+        </p>
+        <div className="levelup-stats">
+          <div className="lvl-stat">
+            <span className="lvl-stat-icon">❤</span>
+            <span className="lvl-stat-label">Max HP</span>
+            <span className="lvl-stat-gain">+{hpGain}</span>
+            <span className="lvl-stat-total">→ {maxHp}</span>
+          </div>
+          <div className="lvl-stat">
+            <span className="lvl-stat-icon">⚔</span>
+            <span className="lvl-stat-label">Attack</span>
+            <span className="lvl-stat-gain">+{dmgGain}</span>
+            <span className="lvl-stat-total">→ {damage}</span>
+          </div>
+        </div>
+        <button className="btn levelup-btn" onClick={onContinue}>
+          Descend Deeper
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// END SCREEN COMPONENT
+// ═══════════════════════════════════════════════════════════════
+function EndScreen({ won, stats, onRestart }) {
+  return (
+    <div className={`end-screen ${won ? 'end-victory' : 'end-defeat'}`}>
+      <div className="end-bg" />
+      <div className="end-vignette" />
+      <div className="end-content">
+        <div className="end-icon">{won ? '👑' : '⚰'}</div>
+        <h1 className={`end-title ${won ? 'end-title-win' : 'end-title-lose'}`}>
+          {won ? 'Triumphant' : 'Fallen'}
+        </h1>
+        <div className="end-ornament">
+          <span className="end-orn-line" />
+          <span className="end-orn-diamond">◆</span>
+          <span className="end-orn-line" />
+        </div>
+        <p className="end-flavor">
+          {won
+            ? 'The ADMIN has been vanquished.\nThe dungeon\'s deepest riddle lies solved at your feet.\nYour legend echoes through these stone halls.'
+            : 'The dungeon claimed another soul.\nYour riddles went unanswered, your torch extinguished.\nThe darkness remembers your name.'}
+        </p>
+        <div className="epitaph">
+          <div className="epitaph-header">— Here Lies the Record —</div>
+          <div className="score-grid">
+            <div className="score-card">
+              <div className="score-label">Level Reached</div>
+              <div className="score-val">{stats.level}</div>
+            </div>
+            <div className="score-card">
+              <div className="score-label">Enemies Slain</div>
+              <div className="score-val">{stats.kills}</div>
+            </div>
+            <div className="score-card">
+              <div className="score-label">Riddles Solved</div>
+              <div className="score-val">{stats.correct}</div>
+            </div>
+            <div className="score-card">
+              <div className="score-label">Wrong Answers</div>
+              <div className="score-val">{stats.wrong}</div>
+            </div>
+          </div>
+          <div className="score-accuracy">
+            Accuracy: {stats.correct + stats.wrong > 0
+              ? Math.round((stats.correct / (stats.correct + stats.wrong)) * 100)
+              : 0}%
+          </div>
+        </div>
+        <button className="btn end-btn" onClick={onRestart}>
+          {won ? '⚔ Descend Again' : '⚔ Rise Again'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GAME — ROOT COMPONENT
+// ═══════════════════════════════════════════════════════════════
+export default function Game() {
+  const [screen, setScreen]           = useState(SCREENS.TITLE);
+  const [player, setPlayer]           = useState(freshPlayerState());
+  const [enemy, setEnemy]             = useState(null);
+  const [riddle, setRiddle]           = useState(null);
+  const [levelUpData, setLevelUpData] = useState(null);
+  const [shakeScreen, setShakeScreen] = useState(false);
+  const [stats, setStats]             = useState({ level:1, kills:0, correct:0, wrong:0 });
+
+  const usedRiddlesRef   = useRef(new Set());
+  const bossTriggeredRef = useRef(false);
+  const lockedRef        = useRef(false);
+
+  // ── Start game ──
+  const startGame = useCallback(() => {
+    const p = freshPlayerState();
+    usedRiddlesRef.current   = new Set();
+    bossTriggeredRef.current = false;
+    lockedRef.current        = false;
+
+    const template = pickEnemyTemplate(p.level, false);
+    const e = buildEnemy(template, p.level);
+    const r = pickRiddle(usedRiddlesRef.current, riddles.length);
+
+    setPlayer(p);
+    setEnemy(e);
+    setRiddle(r);
+    setStats({ level:1, kills:0, correct:0, wrong:0 });
+    setScreen(SCREENS.BATTLE);
+  }, []);
+
+  // ── Spawn next enemy ──
+  const spawnNextEnemy = useCallback((currentPlayer) => {
+    if (currentPlayer.level >= BOSS_LEVEL && !bossTriggeredRef.current) {
+      bossTriggeredRef.current = true;
+      setScreen(SCREENS.BOSS_INTRO);
+      return;
+    }
+    const template = pickEnemyTemplate(currentPlayer.level, bossTriggeredRef.current);
+    if (!template) {
+      const fallback = enemyPool.find(e => e.tier === 1) || enemyPool[0];
+      setEnemy(buildEnemy(fallback, currentPlayer.level));
+    } else {
+      setEnemy(buildEnemy(template, currentPlayer.level));
+    }
+    setRiddle(pickRiddle(usedRiddlesRef.current, riddles.length));
+  }, []);
+
+  // ── Spawn boss (ADMIN detected from enemyPool) ──
+  const spawnBoss = useCallback((currentPlayer) => {
+    const bossTemplate = enemyPool.find(e => e.isBoss || e.name === 'ADMIN');
+    if (!bossTemplate) return;
+    // Boss is dramatically amplified
+    const amplifiedBoss = {
+      ...bossTemplate,
+      baseHp:      bossTemplate.baseHp      * 2,
+      hpPerLevel:  bossTemplate.hpPerLevel  * 2,
+      baseDamage:  bossTemplate.baseDamage  * 2,
+      xpReward:    bossTemplate.xpReward    * 3,
     };
+    const boss = buildEnemy(amplifiedBoss, currentPlayer.level);
+    setEnemy(boss);
+    setRiddle(pickRiddle(usedRiddlesRef.current, riddles.length));
+    setScreen(SCREENS.BATTLE);
+  }, []);
 
-    /* ── Screen flash helper ─────────────────────────────────────────────── */
-    const flash = (type, ms = 300) => {
-        setScreenFlash(type);
-        setTimeout(() => setScreenFlash(""), ms);
-    };
+  // ── Handle correct answer ──
+  const handleCorrect = useCallback((damage, hintUsed) => {
+    if (lockedRef.current) return;
+    lockedRef.current = true;
 
-    /* ── Enemy attack ────────────────────────────────────────────────────── */
-    const enemyAttack = useCallback((dmg) => {
-        setShake(true);
-        damageSoundRef.current.currentTime = 0;
-        damageSoundRef.current.play().catch(() => {});
-        setDamagePopup({ value: `-${dmg}`, type: "player" });
-        setPlayerDamaged(true);
-        flash("hit", 400);
-        clearTimeout(playerDamageTimerRef.current);
-        playerDamageTimerRef.current = setTimeout(() => setPlayerDamaged(false), 500);
-        setPlayer(prev => ({ ...prev, hp: Math.max(0, prev.hp - dmg) }));
-        setTimeout(() => setShake(false), 350);
-        setTimeout(() => setDamagePopup(null), 900);
-    }, []);
+    setStats(s => ({ ...s, correct: s.correct + 1 }));
 
-    /* ── XP / level up ───────────────────────────────────────────────────── */
-    const gainXP = useCallback((amount) => {
-        setPlayer(prev => {
-            let { xp, level, xpToLevel, maxHp, maxMana } = prev;
-            xp += amount;
-            let didLevel = false;
-            while (xp >= xpToLevel) {
-                xp -= xpToLevel;
-                level++;
-                xpToLevel += 50;
-                maxHp   += 25;
-                maxMana += 15;
-                didLevel = true;
+    setEnemy(prev => {
+      const newHp  = prev.currentHp - damage;
+      const isBoss = !!prev.isBoss;
+
+      if (newHp <= 0) {
+        setTimeout(() => {
+          if (isBoss) {
+            setStats(s => ({ ...s, kills: s.kills + 1 }));
+            setTimeout(() => setScreen(SCREENS.VICTORY), 400);
+            lockedRef.current = false;
+            return;
+          }
+
+          const xpGain = prev.xpReward;
+          setPlayer(p => {
+            let newXp    = p.xp + xpGain;
+            let newLevel = p.level;
+            let newMaxHp = p.maxHp;
+            let newDmg   = p.damage;
+            let hpGain   = 0;
+            let dmgGain  = 0;
+            let levelled = false;
+            let xpNeeded = p.xpNeeded;
+
+            while (newXp >= xpNeeded) {
+              newXp -= xpNeeded;
+              newLevel++;
+              hpGain   += HP_PER_LEVEL;
+              dmgGain  += DMG_PER_LEVEL;
+              newMaxHp += HP_PER_LEVEL;
+              newDmg   += DMG_PER_LEVEL;
+              xpNeeded  = xpNeededForLevel(newLevel);
+              levelled  = true;
             }
-            spawnFloat(didLevel ? `LEVEL UP! LV ${level}` : `+${amount} XP`, didLevel ? "#ffd700" : "#a0ffa0");
-            return { ...prev, level, xp, xpToLevel, maxHp, maxMana, hp: didLevel ? maxHp : prev.hp, mana: didLevel ? maxMana : prev.mana };
-        });
-    }, []);
 
-    /* ── Hint system ─────────────────────────────────────────────────────── */
-    const requestHint = () => {
-        if (player.mana < HINT_COST_MANA) {
-            setMessage({ text: "Not enough mana for a hint!", type: "warn" });
-            return;
-        }
-        setPlayer(prev => ({ ...prev, mana: Math.max(0, prev.mana - HINT_COST_MANA) }));
-        setHintLevel(prev => prev + 1);
-        spawnFloat(`HINT (-${HINT_COST_MANA} MP)`, "#00f0ff");
-    };
+            const newPlayerHp = Math.min(p.hp + Math.floor(hpGain * 0.4), newMaxHp);
+            const updated = {
+              ...p,
+              xp: newXp, xpNeeded,
+              level: newLevel,
+              maxHp: newMaxHp,
+              hp: levelled ? newPlayerHp : p.hp,
+              damage: newDmg,
+            };
 
-    /* ── Main attack handler ─────────────────────────────────────────────── */
-    const attack = useCallback((usePower = false) => {
-        if (isLocked) return;
-        if (usePower && player.mana < POWER_MANA_COST) {
-            setMessage({ text: "Insufficient mana for Power Strike!", type: "warn" });
-            return;
-        }
+            if (levelled) {
+              setLevelUpData({ level: newLevel, hpGain, dmgGain, maxHp: newMaxHp, damage: newDmg });
+              setScreen(SCREENS.LEVEL_UP);
+              setStats(s => ({ ...s, level: newLevel, kills: s.kills + 1 }));
+            } else {
+              setStats(s => ({ ...s, kills: s.kills + 1 }));
+              setTimeout(() => {
+                spawnNextEnemy(updated);
+                lockedRef.current = false;
+              }, 300);
+            }
 
-        const correct = isCorrectAnswer(input, currentRiddle.answer);
+            return updated;
+          });
+        }, 600);
 
-        if (!correct) {
-            // Wrong answer → enemy strikes, combo resets
-            setWrongAnim(true);
-            setTimeout(() => setWrongAnim(false), 400);
-            setCombo(0);
-            const dmg = enemy.damage;
-            setMessage({ text: `WRONG! The answer was: "${currentRiddle.answer}"`, type: "error" });
-            enemyAttack(dmg);
-            advanceRiddle();
-            return;
-        }
+        return { ...prev, currentHp: 0 };
+      }
 
-        /* ── Correct answer ── */
-        attackSoundRef.current.currentTime = 0;
-        attackSoundRef.current.play().catch(() => {});
-        setPlayerAttacking(true);
-        clearTimeout(playerAttackTimerRef.current);
-        playerAttackTimerRef.current = setTimeout(() => setPlayerAttacking(false), 250);
+      // Enemy still alive – next riddle
+      setTimeout(() => {
+        setRiddle(pickRiddle(usedRiddlesRef.current, riddles.length));
+        lockedRef.current = false;
+      }, 700);
 
-        // Combo tier bonus (1x, 1.1x … up to 1.5x at combo 5+)
-        const newCombo = Math.min(combo + 1, COMBO_CAP);
-        setCombo(newCombo);
-        const comboMult  = 1 + (newCombo - 1) * 0.1;
-        const base       = usePower ? POWER_DAMAGE : BASE_ATTACK_DAMAGE;
-        const isCrit     = Math.random() < 0.15 + newCombo * 0.02;
-        const finalDmg   = Math.round(base * comboMult * (isCrit ? 2 : 1));
+      return { ...prev, currentHp: newHp };
+    });
+  }, [spawnNextEnemy]);
 
-        if (isCrit) {
-            setMessage({ text: `CRITICAL HIT! ×${comboMult.toFixed(1)} COMBO`, type: "crit" });
-            flash("crit", 400);
-            spawnFloat("CRITICAL!", "#ff6600");
-        } else if (newCombo >= 3) {
-            setMessage({ text: `COMBO ×${newCombo}! +${Math.round((comboMult - 1) * 100)}% DMG`, type: "combo" });
-        } else {
-            setMessage({ text: "TARGET STRUCK!", type: "success" });
-        }
+  // ── Handle wrong answer ──
+  const handleWrong = useCallback((damage) => {
+    if (lockedRef.current) return;
+    lockedRef.current = true;
 
-        setShake(true);
-        setDamagePopup({ value: `-${finalDmg}`, type: "enemy" });
-        setEnemy(prev => ({ ...prev, hp: Math.max(0, prev.hp - finalDmg) }));
+    setStats(s => ({ ...s, wrong: s.wrong + 1 }));
+    setShakeScreen(true);
+    setTimeout(() => setShakeScreen(false), 500);
 
-        // Mana regen on correct answer
-        setPlayer(prev => ({
-            ...prev,
-            mana: Math.min(prev.maxMana, prev.mana + MANA_REGEN_PER_TURN - (usePower ? POWER_MANA_COST : 0)),
-        }));
+    setPlayer(prev => {
+      const newHp = prev.hp - damage;
+      if (newHp <= 0) {
+        setTimeout(() => setScreen(SCREENS.GAME_OVER), 600);
+        return { ...prev, hp: 0 };
+      }
+      setTimeout(() => {
+        setRiddle(pickRiddle(usedRiddlesRef.current, riddles.length));
+        lockedRef.current = false;
+      }, 700);
+      return { ...prev, hp: newHp };
+    });
+  }, []);
 
-        setTimeout(() => setShake(false), 350);
-        setTimeout(() => setDamagePopup(null), 900);
-        advanceRiddle();
-    }, [input, currentRiddle, enemy, player, combo, isLocked, enemyAttack, advanceRiddle]);
+  // ── Level up continue ──
+  const handleLevelUpContinue = useCallback(() => {
+    setScreen(SCREENS.BATTLE);
+    setLevelUpData(null);
+    lockedRef.current = false;
 
-    /* ── Enter key ───────────────────────────────────────────────────────── */
-    useEffect(() => {
-        const h = (e) => { if (e.key === "Enter" && !isLocked) attack(false); };
-        window.addEventListener("keydown", h);
-        return () => window.removeEventListener("keydown", h);
-    }, [attack, isLocked]);
+    setPlayer(p => {
+      if (p.level >= BOSS_LEVEL && !bossTriggeredRef.current) {
+        bossTriggeredRef.current = true;
+        setTimeout(() => setScreen(SCREENS.BOSS_INTRO), 50);
+        return p;
+      }
+      setTimeout(() => spawnNextEnemy(p), 100);
+      return p;
+    });
+  }, [spawnNextEnemy]);
 
-    /* ── Victory detection ───────────────────────────────────────────────── */
-    useEffect(() => {
-        if (isVictory && !xpAwardedRef.current) {
-            gainXP(XP_PER_KILL + combo * 5);
-            victorySoundRef.current.currentTime = 0;
-            victorySoundRef.current.play().catch(() => {});
-            if (enemy.name === "ADMIN") setGameCompleted(true);
-            else setVictoryScreen(true);
-            xpAwardedRef.current = true;
-        }
-    }, [isVictory, enemy.name, combo, gainXP]);
+  // ── Boss dismissed ──
+  const handleBossDismiss = useCallback(() => {
+    setPlayer(p => {
+      spawnBoss(p);
+      return p;
+    });
+  }, [spawnBoss]);
 
-    /* ── Message auto-clear ──────────────────────────────────────────────── */
-    useEffect(() => {
-        if (!message.text) return;
-        const t = setTimeout(() => setMessage({ text: "", type: "info" }), 2500);
-        return () => clearTimeout(t);
-    }, [message]);
+  const handleHintUsed = useCallback(() => {}, []);
 
-    /* ── Admin popup auto-dismiss ────────────────────────────────────────── */
-    useEffect(() => {
-        if (!adminPopup) return;
-        const t = setTimeout(() => setAdminPopup(false), 3000);
-        return () => clearTimeout(t);
-    }, [adminPopup]);
+  const handleRestart = useCallback(() => {
+    setScreen(SCREENS.TITLE);
+  }, []);
 
-    /* ── Cleanup ─────────────────────────────────────────────────────────── */
-    useEffect(() => () => {
-        clearTimeout(playerDamageTimerRef.current);
-        clearTimeout(playerAttackTimerRef.current);
-    }, []);
+  useEffect(() => {
+    setStats(s => ({ ...s, level: player.level }));
+  }, [player.level]);
 
-    /* ── Continue / Restart ──────────────────────────────────────────────── */
-    const continueGame = () => {
-        setVictoryScreen(false);
-        setCombo(0);
-        const newEnemy = getEnemy(player.level, player.maxHp);
-        setEnemy(newEnemy);
-        if (newEnemy.name === "ADMIN") setAdminPopup(true);
-        xpAwardedRef.current = false;
-    };
+  return (
+    <div style={{ width:'100%', height:'100vh', position:'relative', overflow:'hidden', background:'#080604' }}>
+      {screen === SCREENS.TITLE && (
+        <TitleScreen onStart={startGame} />
+      )}
 
-    const restartGame = () => {
-        setPlayer({ level: 1, xp: 0, xpToLevel: 50, maxHp: 120, hp: 120, maxMana: 60, mana: 60 });
-        setEnemy(getEnemy(1, 120));
-        setVictoryScreen(false);
-        setGameCompleted(false);
-        setCombo(0);
-        setDeck(shuffleArray(riddles));
-        setDeckIdx(0);
-        xpAwardedRef.current = false;
-    };
-
-    /* ── Bar percentages ─────────────────────────────────────────────────── */
-    const hpPct    = (player.hp   / player.maxHp)    * 100;
-    const mpPct    = (player.mana / player.maxMana)  * 100;
-    const xpPct    = (player.xp   / player.xpToLevel) * 100;
-    const enmyPct  = (enemy.hp    / enemy.maxHp)     * 100;
-
-    const hintText = hintLevel > 0
-        ? buildHint(currentRiddle.answer, hintLevel)
-        : null;
-
-    const msgClass = { info:"msg-info", success:"msg-success", error:"msg-error", warn:"msg-warn", crit:"msg-crit", combo:"msg-combo" }[message.type] ?? "";
-
-    /* ── Render ──────────────────────────────────────────────────────────── */
-    return (
-        <div className={`g6-body ${screenFlash ? `flash-${screenFlash}` : ""}`}>
-            <div className={`rpg-container ${shake ? "shake" : ""}`}>
-
-                {/* Scanline overlay */}
-                <div className="scanlines" aria-hidden="true" />
-
-                {/* Floating combat text */}
-                <div className="float-layer" aria-hidden="true">
-                    {floatingTexts.map(f => (
-                        <span key={f.id} className="float-text" style={{ color: f.color }}>{f.text}</span>
-                    ))}
-                </div>
-
-                {/* ── BATTLE STAGE ─────────────────────────────────────────── */}
-                <div className="rpg-battle-stage">
-                    <div className="stage-bg" aria-hidden="true">
-                        <div className="stage-ground" />
-                        <div className="stage-torches">
-                            <span className="torch left-torch">🔥</span>
-                            <span className="torch right-torch">🔥</span>
-                        </div>
-                    </div>
-
-                    {/* PLAYER */}
-                    <div className="battle-character player-side">
-                        <div className="character-stats-panel player-panel">
-                            <div className="char-head">
-                                <span className="char-name hero-name">◈ HERO</span>
-                                <span className="char-level">LV <em>{player.level}</em></span>
-                            </div>
-                            <StatBar label="HP" pct={hpPct} val={player.hp} max={player.maxHp}
-                                fillClass={hpPct < 30 ? "bar-hp-low" : "bar-hp"} />
-                            <StatBar label="MP" pct={mpPct} val={player.mana} max={player.maxMana} fillClass="bar-mp" />
-                            <StatBar label="XP" pct={xpPct} val={player.xp} max={player.xpToLevel} fillClass="bar-xp" />
-                            {combo > 0 && (
-                                <div className="combo-badge">
-                                    <span>COMBO</span><strong>×{combo}</strong>
-                                </div>
-                            )}
-                        </div>
-                        <div className="character-sprite-box">
-                            <img
-                                src={playerAttacking ? knightattack : playerDamaged ? knightdamage : knight}
-                                alt="Hero"
-                                className={`sprite-img ${playerAttacking ? "sprite-attack" : ""} ${playerDamaged ? "sprite-hurt" : ""}`}
-                            />
-                            {damagePopup?.type === "player" && (
-                                <div className="damage-text player-damage">{damagePopup.value}</div>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="vs-badge" aria-hidden="true">
-                        <span>VS</span>
-                    </div>
-
-                    {/* ENEMY */}
-                    <div className="battle-character enemy-side">
-                        <div className="character-stats-panel enemy-panel">
-                            <div className="char-head">
-                                <span className="char-name enemy-name">{enemy.name}</span>
-                                <span className="char-level">LV <em>{enemy.level}</em></span>
-                            </div>
-                            <StatBar label="HP" pct={enmyPct} val={enemy.hp} max={enemy.maxHp}
-                                fillClass={enmyPct < 30 ? "bar-hp-low" : "bar-enemy"} />
-                        </div>
-                        <div className="character-sprite-box">
-                            <img
-                                src={enemy.Image || knight}
-                                alt={enemy.name}
-                                className={`sprite-img enemy-img ${shake ? "sprite-hurt" : ""}`}
-                            />
-                            {damagePopup?.type === "enemy" && (
-                                <div className="damage-text enemy-damage">{damagePopup.value}</div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── BOTTOM HUD ────────────────────────────────────────────── */}
-                <div className="rpg-bottom-hud">
-
-                    {/* DIALOGUE / RIDDLE BOX */}
-                    <div className="rpg-dialogue-box">
-                        <div className="dialogue-header">
-                            <span className="dialogue-speaker">▶ THE ENIGMA</span>
-                            {message.text && (
-                                <span className={`dialogue-message ${msgClass}`}>{message.text}</span>
-                            )}
-                        </div>
-                        <p className="dialogue-text">
-                            {!isDefeat && !victoryScreen && !gameCompleted
-                                ? currentRiddle.question
-                                : "…"}
-                        </p>
-                        {hintText && (
-                            <div className="hint-row">
-                                <span className="hint-label">HINT:</span>
-                                <span className="hint-text">{hintText}</span>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* COMMAND MENU */}
-                    <div className="rpg-command-menu">
-                        <div className="command-header">
-                            <span>⚔ COMMANDS</span>
-                        </div>
-                        <div className="command-body">
-                            <div className={`input-wrapper ${wrongAnim ? "input-shake" : ""}`}>
-                                <span className="input-cursor">›</span>
-                                <input
-                                    className="pixel-input"
-                                    value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    placeholder="Type your answer…"
-                                    disabled={isLocked}
-                                    autoComplete="off"
-                                    spellCheck={false}
-                                />
-                            </div>
-                            <button
-                                className="pixel-btn btn-attack"
-                                onClick={() => attack(false)}
-                                disabled={isLocked || !input.trim()}
-                            >
-                                <span className="btn-icon">⚔</span>
-                                <span>ATTACK</span>
-                            </button>
-                            <button
-                                className="pixel-btn btn-power"
-                                onClick={() => attack(true)}
-                                disabled={isLocked || player.mana < POWER_MANA_COST || !input.trim()}
-                            >
-                                <span className="btn-icon">✦</span>
-                                <span>POWER STRIKE</span>
-                                <span className="btn-cost">{POWER_MANA_COST} MP</span>
-                            </button>
-                            <button
-                                className="pixel-btn btn-hint"
-                                onClick={requestHint}
-                                disabled={isLocked || player.mana < HINT_COST_MANA}
-                            >
-                                <span className="btn-icon">💡</span>
-                                <span>REVEAL HINT</span>
-                                <span className="btn-cost">{HINT_COST_MANA} MP</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── OVERLAYS ─────────────────────────────────────────────── */}
-                {isDefeat && (
-                    <div className="modal-overlay">
-                        <div className="modal-content modal-defeat">
-                            <img src={gameend} alt="Game over" className="defeat-img" />
-                            <h2 className="modal-title defeat-title">YOU HAVE FALLEN</h2>
-                            <p className="modal-sub">Your journey ends here, brave soul.</p>
-                            <button className="pixel-btn btn-attack pulse-btn" onClick={restartGame}>
-                                ↺ RISE AGAIN
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {victoryScreen && (
-                    <div className="modal-overlay">
-                        <div className="modal-content modal-victory">
-                            <div className="victory-stars">★ ★ ★</div>
-                            <h1 className="modal-title victory-title">VICTORY!</h1>
-                            <p className="modal-sub">+{XP_PER_KILL + combo * 5} EXP EARNED</p>
-                            {combo > 0 && <p className="modal-combo">COMBO BONUS: ×{combo}</p>}
-                            <button className="pixel-btn btn-power pulse-btn" onClick={continueGame}>
-                                ▶ NEXT FLOOR
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {gameCompleted && (
-                    <div className="modal-overlay">
-                        <div className="modal-content modal-complete">
-                            <div className="complete-crown">👑</div>
-                            <h1 className="modal-title complete-title">SYSTEM CONQUERED</h1>
-                            <p className="modal-sub">The ADMIN has been defeated.</p>
-                            <p className="modal-sub">Final Level: <strong>{player.level}</strong></p>
-                            <button className="pixel-btn btn-hint pulse-btn" onClick={restartGame}>
-                                ✦ NEW GAME+
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {adminPopup && (
-                    <div className="modal-overlay admin-flash">
-                        <div className="admin-warning-box">
-                            <p className="admin-warning-label">⚠ INTRUDER DETECTED ⚠</p>
-                            <h1 className="admin-title">ADMIN</h1>
-                            <p className="admin-sub">PREPARE FOR TERMINATION</p>
-                        </div>
-                    </div>
-                )}
-            </div>
+      {(screen === SCREENS.BATTLE || screen === SCREENS.LEVEL_UP) && (
+        <div style={{ display:'flex', flexDirection:'column', height:'100%' }}>
+          <HUD player={player} enemy={enemy} />
+          <BattleScreen
+            enemy={enemy}
+            riddle={riddle}
+            onCorrect={handleCorrect}
+            onWrong={handleWrong}
+            onHintUsed={handleHintUsed}
+            screenShake={shakeScreen}
+          />
         </div>
-    );
-}
+      )}
 
-/* ── Reusable stat bar ───────────────────────────────────────────────────────── */
-function StatBar({ label, pct, val, max, fillClass }) {
-    return (
-        <div className="rpg-stat-row">
-            <span className="stat-label">{label}</span>
-            <div className="rpg-bar-bg">
-                <div className={`rpg-bar-fill ${fillClass}`} style={{ width: `${Math.max(0, pct)}%` }} />
-            </div>
-            <span className="stat-num">{val}<span className="stat-sep">/</span>{max}</span>
-        </div>
-    );
-}
+      {screen === SCREENS.LEVEL_UP && levelUpData && (
+        <LevelUp
+          level={levelUpData.level}
+          hpGain={levelUpData.hpGain}
+          dmgGain={levelUpData.dmgGain}
+          maxHp={levelUpData.maxHp}
+          damage={levelUpData.damage}
+          onContinue={handleLevelUpContinue}
+        />
+      )}
 
-export default RiddleRPG;
+      {screen === SCREENS.BOSS_INTRO && (
+        <BossIntro onDismiss={handleBossDismiss} />
+      )}
+
+      {screen === SCREENS.GAME_OVER && (
+        <EndScreen won={false} stats={stats} onRestart={handleRestart} />
+      )}
+
+      {screen === SCREENS.VICTORY && (
+        <EndScreen won={true} stats={stats} onRestart={handleRestart} />
+      )}
+    </div>
+  );
+}
