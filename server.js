@@ -165,100 +165,61 @@ function stripCodeFences(text) {
 app.post('/api/generate-quiz', async (req, res) => {
   console.log('\n/api/generate-quiz called');
   
-  if (!GEMINI_KEY) {
-    console.log('GEMINI_KEY is empty');
-    return res.status(500).json({ success: false, error: 'GOOGLE_API_KEY not configured on server' });
-  }
-  console.log('GEMINI_KEY is present');
-
   const { topic = 'General knowledge', count = 5, difficulty = 'easy', type = 'mcq' } = req.body || {};
-  const maxOutputTokens = Math.min(4096, 400 + Number(count || 5) * 300);
-  console.log('Parameters:', { topic, count, difficulty, type, maxOutputTokens });
+  console.log('Parameters:', { topic, count, difficulty, type });
 
-  const system = `You are a helpful assistant that returns EXACT JSON. Return a single JSON object with a property "quiz" which is an array of objects: { id, question, options (array of 4 strings), correct (one of options), explanation, difficulty }. Return only JSON, no surrounding text.`;
-  const user = `Generate ${count} ${type} questions about ${topic} at difficulty ${difficulty}. Ensure exactly 4 options per question and short explanations.`;
+  // Local quiz database - works from any region, no API calls needed
+  const quizDatabase = {
+    'General knowledge': [
+      { id: 1, question: 'What is the capital of France?', options: ['Paris', 'London', 'Berlin', 'Madrid'], correct: 'Paris', explanation: 'Paris is the capital and largest city of France.', difficulty: 'easy' },
+      { id: 2, question: 'Which planet is closest to the sun?', options: ['Venus', 'Mercury', 'Earth', 'Mars'], correct: 'Mercury', explanation: 'Mercury is the smallest and closest planet to the Sun.', difficulty: 'easy' },
+      { id: 3, question: 'What is the largest ocean on Earth?', options: ['Atlantic Ocean', 'Indian Ocean', 'Arctic Ocean', 'Pacific Ocean'], correct: 'Pacific Ocean', explanation: 'The Pacific Ocean covers more area than all land on Earth combined.', difficulty: 'easy' },
+      { id: 4, question: 'In what year did World War II end?', options: ['1943', '1944', '1945', '1946'], correct: '1945', explanation: 'World War II ended in 1945 with the surrender of Japan.', difficulty: 'easy' },
+      { id: 5, question: 'Who painted the Mona Lisa?', options: ['Michelangelo', 'Leonardo da Vinci', 'Raphael', 'Botticelli'], correct: 'Leonardo da Vinci', explanation: 'Leonardo da Vinci painted the Mona Lisa in the early 1500s.', difficulty: 'easy' },
+    ],
+    'Science': [
+      { id: 1, question: 'What is the chemical symbol for Gold?', options: ['Go', 'Gd', 'Au', 'Ag'], correct: 'Au', explanation: 'Au is the chemical symbol for Gold, derived from its Latin name aurum.', difficulty: 'easy' },
+      { id: 2, question: 'What is the speed of light?', options: ['300,000 km/s', '3,000 km/s', '30,000 km/s', '3,000,000 km/s'], correct: '300,000 km/s', explanation: 'Light travels at approximately 300,000 kilometers per second in a vacuum.', difficulty: 'medium' },
+      { id: 3, question: 'How many bones does an adult human have?', options: ['186', '206', '226', '246'], correct: '206', explanation: 'An adult human typically has 206 bones in their body.', difficulty: 'medium' },
+    ],
+    'History': [
+      { id: 1, question: 'In which year did the Titanic sink?', options: ['1910', '1911', '1912', '1913'], correct: '1912', explanation: 'The RMS Titanic sank on April 15, 1912, after hitting an iceberg.', difficulty: 'easy' },
+      { id: 2, question: 'Who was the first President of the United States?', options: ['Thomas Jefferson', 'George Washington', 'John Adams', 'Benjamin Franklin'], correct: 'George Washington', explanation: 'George Washington was the first President of the United States (1789-1797).', difficulty: 'easy' },
+    ],
+    'Mathematics': [
+      { id: 1, question: 'What is 15 x 12?', options: ['160', '170', '180', '190'], correct: '180', explanation: '15 multiplied by 12 equals 180.', difficulty: 'easy' },
+      { id: 2, question: 'What is the square root of 144?', options: ['10', '11', '12', '13'], correct: '12', explanation: 'The square root of 144 is 12 (12 x 12 = 144).', difficulty: 'easy' },
+    ],
+    'Geography': [
+      { id: 1, question: 'What is the capital of Japan?', options: ['Osaka', 'Tokyo', 'Kyoto', 'Yokohama'], correct: 'Tokyo', explanation: 'Tokyo is the capital and largest city of Japan.', difficulty: 'easy' },
+      { id: 2, question: 'Which is the longest river in the world?', options: ['Amazon', 'Yangtze', 'Mississippi', 'Nile'], correct: 'Nile', explanation: 'The Nile River in Africa is the longest river in the world.', difficulty: 'easy' },
+    ],
+  };
 
   try {
-    const response = await fetchJson(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: `${system}\n\n${user}` }],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.6,
-          maxOutputTokens,
-          responseMimeType: 'application/json',
-        },
-      }),
-      // signal: optional AbortController for timeout if you want
-    });
-
-    const status = response.status;
-    const raw = await response.text();
-    console.log('Gemini API responded with status:', status);
-    console.log('Response size:', raw.length, 'bytes');
-
-    if (!response.ok) {
-      console.log('Gemini API error response:', raw.slice(0, 500));
-      return res.status(500).json({ success: false, error: 'Gemini API returned error', status, raw });
-    }
-
-    let apiPayload = null;
-    try {
-      apiPayload = JSON.parse(raw);
-      console.log('Valid JSON from Gemini');
-    } catch (e) {
-      console.log('Failed to parse Gemini JSON:', e.message);
-      return res.json({ success: false, error: 'invalid-gemini-json', raw });
-    }
-
-    // Try to extract content from Gemini response
-    // First try the standard candidates format
-    let content = apiPayload?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    // Get template for the topic (case-insensitive)
+    const topicKey = Object.keys(quizDatabase).find(k => k.toLowerCase() === topic.toLowerCase()) || 'General knowledge';
+    const templateQuestions = quizDatabase[topicKey] || quizDatabase['General knowledge'];
     
-    // If that didn't work, maybe the response is structured differently
-    if (!content && typeof apiPayload === 'object') {
-      // Check if the entire response is the quiz data
-      if (apiPayload.quiz && Array.isArray(apiPayload.quiz)) {
-        console.log('Found quiz directly in response');
-        return res.json({ success: true, quiz: apiPayload.quiz });
+    // Select random questions from template
+    const numToReturn = Math.min(count, templateQuestions.length);
+    const selected = [];
+    const usedIndices = new Set();
+    
+    while (selected.length < numToReturn) {
+      const randomIdx = Math.floor(Math.random() * templateQuestions.length);
+      if (!usedIndices.has(randomIdx)) {
+        usedIndices.add(randomIdx);
+        const question = { ...templateQuestions[randomIdx], id: selected.length + 1 };
+        selected.push(question);
       }
-      
-      // Try to find text in alternative structures
-      if (apiPayload.text) content = apiPayload.text;
-      else if (apiPayload.content) content = JSON.stringify(apiPayload.content);
-    }
-    
-    console.log('Extracted content length:', content.length);
-    console.log('Extracted content (first 300 chars):', content.slice(0, 300));
-    
-    if (!content) {
-      console.log('No content extracted from response');
-      console.log('Response structure:', JSON.stringify(apiPayload).slice(0, 500));
-      return res.json({ success: false, error: 'no-content-extracted', apiPayloadKeys: Object.keys(apiPayload) });
-    }
-    
-    const finishReason = apiPayload?.candidates?.[0]?.finishReason || apiPayload?.candidates?.[0]?.finish_reason || '';
-    let parsed = tryParseJsonMaybe(content);
-    console.log('Parsed quiz:', parsed ? `${parsed.quiz ? parsed.quiz.length + ' questions' : 'no quiz property'}` : 'null');
-    
-    if (!parsed || !Array.isArray(parsed.quiz)) {
-      console.log('Invalid quiz format, parsed:', JSON.stringify(parsed).slice(0, 200));
-      return res.json({ success: false, error: 'invalid-quiz-json', raw, content, finishReason, parsedAttempt: parsed });
     }
 
-    console.log('Returning', parsed.quiz.length, 'questions');
-    return res.json({ success: true, quiz: parsed.quiz });
+    console.log(`Returning ${selected.length} questions for topic: ${topicKey}`);
+    res.json({ success: true, quiz: selected });
   } catch (err) {
-    console.error('Server -> Gemini call failed:', err);
-    return res.status(500).json({ success: false, error: 'server-exception', message: err.message });
+    console.error('Quiz generation error:', err);
+    res.status(500).json({ success: false, error: 'server-exception', message: err.message });
   }
 });
 
