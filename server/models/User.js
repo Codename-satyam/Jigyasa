@@ -22,6 +22,9 @@ class User extends FirestoreModel {
   }
 
   async comparePassword(password) {
+    if (!this.password) {
+      return false;
+    }
     return bcrypt.compare(password, this.password);
   }
 }
