@@ -221,9 +221,43 @@ app.post('/api/generate-quiz', async (req, res) => {
   };
 
   try {
-    // Get template for the topic (case-insensitive)
-    const topicKey = Object.keys(quizDatabase).find(k => k.toLowerCase() === topic.toLowerCase()) || 'General knowledge';
-    const templateQuestions = quizDatabase[topicKey] || quizDatabase['General knowledge'];
+    // Map frontend category names to database keys
+    const categoryMapping = {
+      'General Knowledge': 'General knowledge',
+      'General knowledge': 'General knowledge',
+      'Science & Nature': 'Science',
+      'Science': 'Science',
+      'Science: Computers': 'Computers',
+      'Computers': 'Computers',
+      'Science: Mathematics': 'Mathematics',
+      'Mathematics': 'Mathematics',
+      'Geography': 'Geography',
+      'History': 'History',
+      'Politics': 'General knowledge', // fallback
+      'Sports': 'Sports',
+      'Art': 'General knowledge', // fallback
+      'Books': 'Books',
+      'Film': 'Film',
+      'Music': 'General knowledge', // fallback
+      'Television': 'Film', // fallback to Film
+      'Video Games': 'Video Games',
+      'Animals': 'Science', // fallback to Science
+    };
+    
+    // Get the mapped topic or use the mapping, or fall back to the topic itself
+    let mappedTopic = categoryMapping[topic];
+    if (!mappedTopic) {
+      // Try case-insensitive matching
+      mappedTopic = Object.keys(categoryMapping).find(k => k.toLowerCase() === topic.toLowerCase());
+      if (mappedTopic) {
+        mappedTopic = categoryMapping[mappedTopic];
+      } else {
+        mappedTopic = 'General knowledge';
+      }
+    }
+    
+    const templateQuestions = quizDatabase[mappedTopic] || quizDatabase['General knowledge'];
+    console.log(`Topic: "${topic}" -> Mapped to: "${mappedTopic}", Found ${templateQuestions.length} questions`);
     
     // Select random questions from template
     const numToReturn = Math.min(count, templateQuestions.length);
@@ -239,7 +273,7 @@ app.post('/api/generate-quiz', async (req, res) => {
       }
     }
 
-    console.log(`Returning ${selected.length} questions for topic: ${topicKey}`);
+    console.log(`Returning ${selected.length} questions for topic: ${topic} (mapped to: ${mappedTopic})`);
     res.json({ success: true, quiz: selected });
   } catch (err) {
     console.error('Quiz generation error:', err);
