@@ -1,165 +1,165 @@
+// riddles.js
+// Fantasy, RPG, and dungeon-themed riddles for the Riddle RPG game.
+// Answers are 1–2 words; punctuation is stripped by the game engine.
 
-const riddles = [
-    {
-        question: "I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?",
-        answer: "An echo"
-    },
-    {
-        question: "I'm not alive, but I grow. I don't have lungs, but I need air. I don't have a mouth, but water kills me. What am I?",
-        answer: "Fire"
-    },
-    {
-        question: "The more you take away, the bigger I become. What am I?",
-        answer: "A hole"
-    },
-    {
-        question: "I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?",
-        answer: "A map"
-    },
-    {
-        question: "What has to be broken before you can use it?",
-        answer: "An egg"
-    },
-    {
-        question: "I’m tall when I’m young, and short when I’m old. What am I?",
-        answer: "A candle"
-    },
-    {
-        question: "What month of the year has 28 days?",
-        answer: "All of them"
-    },
-    {
-        question: "What is always in front of you but can’t be seen?",
-        answer: "The future"
-    },
-    {
-        question: "There’s a one-story house in which everything is yellow. What color are the stairs?",
-        answer: "There are no stairs"
-    },
-    {
-        question: "What can you catch, but not throw?",
-        answer: "A cold"
-    },
-    {
-        question: "What has hands, but can’t clap?",
-        answer: "A clock"
-    },
-    {
-        question: "What has one eye, but can’t see?",
-        answer: "A needle"
-    },
-    {
-        question: "What gets wetter the more it dries?",
-        answer: "A towel"
-    },
-    {
-        question: "What goes up but never comes down?",
-        answer: "Your age"
-    },
-    {
-        question: "I shave every day, but my beard stays the same. What am I?",
-        answer: "A barber"
-    },
-    {
-        question: "You see a boat filled with people, yet there isn’t a single person on board. How is that possible?",
-        answer: "All the people are married"
-    },
-    {
-        question: "What has many keys but can’t open a single lock?",
-        answer: "A piano"
-    },
-    {
-        question: "What runs all around a backyard, yet never moves?",
-        answer: "A fence"
-    },
-    {
-        question: "What has a head and a tail but no body?",
-        answer: "A coin"
-    },
-    {
-        question: "What begins with T, ends with T, and has T in it?",
-        answer: "A teapot"
-    },
-    {
-        question: "The more you have of me, the less you see. What am I?",
-        answer: "Darkness"
-    },
-    {
-        question: "What can travel around the world while staying in a corner?",
-        answer: "A stamp"
-    },
-    {
-        question: "What has an endless supply of letters but starts empty?",
-        answer: "A mailbox"
-    },
-    {
-        question: "If two’s company and three’s a crowd, what are four and five?",
-        answer: "Nine"
-    },
-    {
-        question: "What is so fragile that saying its name breaks it?",
-        answer: "Silence"
-    },
-     {
-        question: "What has a heart that doesn’t beat?",
-        answer: "An artichoke"
-    },
-    {
-        question: "What has a neck but no head, two arms but no hands?",
-        answer: "A shirt"
-    },
-    {
-        question: "What can fill a room but takes up no space?",
-        answer: "Light"
-    },
-    {
-        question: "What gets sharper the more you use it?",
-        answer: "Your brain"
-    },
-    {
-        question: "What has legs but doesn’t walk?",
-        answer: "A table"
-    },
-    {
-        question: "What comes once in a minute, twice in a moment, but never in a thousand years?",
-        answer: "The letter M"
-    },
-    {
-        question: "What has a ring but no finger?",
-        answer: "A phone"
-    },
-    {
-        question: "What has a face and two hands, but no arms or legs?",
-        answer: "A clock"
-    },
-    {
-        question: "What building has the most stories?",
-        answer: "A library"
-    },
-    {
-        question: "What is full of holes but still holds water?",
-        answer: "A sponge"
-    },
-    {
-        question: "What can you hold in your right hand, but never in your left hand?",
-        answer: "Your left hand"
-    },
-    {
-        question: "What begins with an E, ends with an E, but only has one letter in it?",
-        answer: "An envelope"
-    },
-    {
-        question: "What goes through cities and fields, but never moves?",
-        answer: "A road"
-    },
-    {
-        question: "What has a thumb and four fingers but is not alive?",
-        answer: "A glove"
-    },
-    {
-        question: "What kind of band never plays music?",
-        answer: "A rubber band"
-    }
+export const riddles = [
+  // ── Weapons & Armor ─────────────────────────────────────────────────────────
+  {
+    question:
+      "I am forged in fire, kissed by stone. Warriors carry me; I am never thrown. I cut through darkness, guard against fright. What am I, the knight's trusted right?",
+    answer: "sword",
+  },
+  {
+    question:
+      "I am a warrior's shell, worn on the chest. Arrows and blades are my ultimate test. Remove me in peace, don in war's art. What am I that guards a hero's heart?",
+    answer: "armor",
+  },
+  {
+    question:
+      "Strung with sinew, curved like the moon. I send my messengers singing their tune. In forests and battles alike I am found. What am I that never makes a sound?",
+    answer: "bow",
+  },
+  {
+    question:
+      "I sleep on a hero's back through the land. I wake only when called by a hand. Tipped with iron, fledged with a feather — what am I, shot in all kinds of weather?",
+    answer: "arrow",
+  },
+  {
+    question:
+      "Dwarves love me, giants fear my ring. I am swung with both hands and a war-cry's sting. Round as a wheel and cruelly spiked — what am I, by berserkers liked?",
+    answer: "axe",
+  },
+  {
+    question:
+      "I hide behind a handle of oak or of bone. I am shorter than a sword but deadlier alone in a thief's grasp. Rogues keep me near. What am I that whispers close to the ear?",
+    answer: "dagger",
+  },
+  {
+    question:
+      "I am a warrior's third hand on the field, carried on the arm as the ultimate shield. Round or tower, wooden or steel — what am I that makes enemies yield?",
+    answer: "shield",
+  },
+
+  // ── Magic & Spells ───────────────────────────────────────────────────────────
+  {
+    question:
+      "I dance without legs, eat without a mouth. I consume castles, I consume the south. Mages conjure me, dragons breathe me in strife. What am I that both destroys and gives life?",
+    answer: "fire",
+  },
+  {
+    question:
+      "A mage writes me on parchment with care. I hold a spell locked inside, sleeping there. Unroll me and speak; the magic breaks free. What am I that carries a spell's decree?",
+    answer: "scroll",
+  },
+  {
+    question:
+      "I am the mage's best companion and guide, full of secrets with knowledge inside. Open my cover and learn spells anew. What am I, bound in leather and blue?",
+    answer: "spellbook",
+  },
+  {
+    question:
+      "I am held aloft when words of power ring. Wizards wave me and summon anything. Made of wood or bone, tipped with crystal clear — what am I that all dungeon monsters fear?",
+    answer: "wand",
+  },
+  {
+    question:
+      "I am born in a cloud and fall to the ground. Split a great oak with a terrible sound. Thor wields me, storms birth me above. What am I, dreaded and feared, not loved?",
+    answer: "lightning",
+  },
+  {
+    question:
+      "I am invisible yet cover the land. I bend the tall oak with a reckless hand. No shape, no color — I whistle and moan. What am I that can never be owned?",
+    answer: "wind",
+  },
+
+  // ── Monsters & Creatures ─────────────────────────────────────────────────────
+  {
+    question:
+      "I hoard my gold in a mountain of stone. I breathe out ruin and live alone. Scales like midnight, eyes like flame — what great beast answers to this game?",
+    answer: "dragon",
+  },
+  {
+    question:
+      "Small and green, I lurk in the dark. I steal your coin and leave my mark. Cruel little teeth, a wicked grin — what low creature starts where dungeons begin?",
+    answer: "goblin",
+  },
+  {
+    question:
+      "Once it was a knight, loyal and bold. Now it rises cold from the grave of old. No heartbeat, no breath, yet it swings a blade still. What am I that kills against its will?",
+    answer: "undead",
+  },
+  {
+    question:
+      "I spin no gold but plenty of silk. My eight long legs move smooth as milk. Hang in the dungeon corners and wait — what am I, the adventurer's fate?",
+    answer: "spider",
+  },
+  {
+    question:
+      "Formed from a corpse, wrapped tight in linen and spell. I walk the dark halls where the ancient pharaohs dwell. Unravel my wrappings and find only bone. What am I that walks yet cannot atone?",
+    answer: "mummy",
+  },
+  {
+    question:
+      "I have a single eye and a singular hate. I smash through the door and arrive far too late. Giant and hungry, I roam mountain and fen. What am I that devours the bones of brave men?",
+    answer: "cyclops",
+  },
+
+  // ── Dungeon & Adventure ───────────────────────────────────────────────────────
+  {
+    question:
+      "I glow in the dark but give off no heat. I mark the path through the dungeon's defeat. Adventurers carry me, pale and round and bright. What am I that banishes night?",
+    answer: "torch",
+  },
+  {
+    question:
+      "Locked in iron, buried in stone, I guard the riches left alone. Slay the monster and claim me as prize. What am I with glittering eyes?",
+    answer: "chest",
+  },
+  {
+    question:
+      "I am a healer's greatest gift in a vial so red. One sip of me and you turn from near-dead. Warriors clutch me when arrows have flown. What am I, brewed of herbs unknown?",
+    answer: "potion",
+  },
+  {
+    question:
+      "I am made of metal and turn in a lock. Without me the dungeon door refuses to knock open. Heroes search every monster for me. What am I that will set the prisoner free?",
+    answer: "key",
+  },
+  {
+    question:
+      "I follow you always yet cost you nothing. By day I stretch long; at night I am nothing. I mimic your shape but weigh not a gram. What am I that travels wherever you am?",
+    answer: "shadow",
+  },
+  {
+    question:
+      "I am everywhere in the dungeon and nowhere at once. I separate floors and trick all the dunts. Climb me upward or fall to your doom. What am I that connects room to room?",
+    answer: "stairs",
+  },
+
+  // ── Nature & Elements ────────────────────────────────────────────────────────
+  {
+    question:
+      "I fall from the sky in winter's cold grip. I coat the great mountains, tip after tip. I am not rain, yet water I hold. What am I, beautiful, silent, and cold?",
+    answer: "snow",
+  },
+  {
+    question:
+      "I have roots as tall as my crown reaches high. I breathe out the air that keeps heroes alive. I stand in the forest and never will roam. What great living pillar do creatures call home?",
+    answer: "tree",
+  },
+  {
+    question:
+      "I am poured from a flask at the blacksmith's bright forge. I am swallowed by oceans and rivers and gorge. Without me, all creatures will wither and die. What transparent thing flows from the earth to the sky?",
+    answer: "water",
+  },
+  {
+    question:
+      "I rise in the east and fall in the west. I dry the wet cloak and warm the cold chest. Dragons worship me, vampires flee me in fright. What blazing sphere banishes the night?",
+    answer: "sun",
+  },
+  {
+    question:
+      "I am silver and full once a month in the sky. Werewolves transform when I open my eye. I light up the graveyard and cemeteries alone. What pale celestial body turns flesh into stone?",
+    answer: "moon",
+  },
 ];
-
-export { riddles };

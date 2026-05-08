@@ -34,6 +34,7 @@ from pathlib import Path
 import joblib
 import numpy as np
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
@@ -54,6 +55,13 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 app = Flask(__name__)
+
+# ── Enable CORS for backend communication ────────────────────────────────────
+CORS(app, resources={
+    r"/predict": {"origins": "*"},
+    r"/train": {"origins": "*"},
+    r"/health": {"origins": "*"},
+})
 
 # ── Per-game normalisation ceilings ──────────────────────────────────────────
 SCORE_CEIL = {"memory": 10, "neon-path": 500, "math": 10, "guess": 12, "default": 100}
@@ -301,21 +309,47 @@ def health():
 def predict():
     try:
         body    = request.get_json(force=True)
-        user_id = str(body.get("userId", "anonymous"))
-        games   = list(body.get("games", []))
+        if not body:
+            return jsonify({
+                "success": False,
+                "error": "empty_request",
+                "recommended": "medium",
+                "difficulty_score": 0.5,
+                "confidence": 0.0,
+            }), 400
+
+        user_id = str(body.get("userId", "anonymous")).strip()
+        if not user_id or user_id == "anonymous":
+            return jsonify({
+                "success": False,
+                "error": "missing_user_id",
+                "recommended": "medium",
+                "difficulty_score": 0.5,
+                "confidence": 0.0,
+            }), 400
+
+        games = body.get("games", [])
+        if not isinstance(games, list):
+            return jsonify({
+                "success": False,
+                "error": "games_must_be_array",
+                "recommended": "medium",
+                "difficulty_score": 0.5,
+                "confidence": 0.0,
+            }), 400
 
         result = predict_difficulty(user_id, games)
         return jsonify({"success": True, **result})
 
-    except Exception:
-        log.error("Error in /predict:\n%s", traceback.format_exc())
+    except Exception as e:
+        log.error("Error in /predict: %s\n%s", str(e), traceback.format_exc())
         return jsonify({
-            "success":        False,
-            "error":          "prediction_failed",
-            "recommended":    "medium",
+            "success": False,
+            "error": "prediction_failed",
+            "recommended": "medium",
             "difficulty_score": 0.5,
-            "confidence":     0.0,
-            "model_type":     "error_fallback",
+            "confidence": 0.0,
+            "model_type": "error_fallback",
         }), 500
 
 
@@ -323,26 +357,49 @@ def predict():
 def train():
     try:
         body    = request.get_json(force=True)
-        user_id = str(body.get("userId", "anonymous"))
-        games   = list(body.get("games", []))
+        if not body:
+            return jsonify({
+                "success": False,
+                "error": "empty_request",
+            }), 400
+
+        user_id = str(body.get("userId", "anonymous")).strip()
+        if not user_id or user_id == "anonymous":
+            return jsonify({
+                "success": False,
+                "error": "missing_user_id",
+            }), 400
+
+        games = body.get("games", [])
+        if not isinstance(games, list):
+            return jsonify({
+                "success": False,
+                "error": "games_must_be_array",
+            }), 400
 
         pipeline, n = train_model(user_id, games)
         model_type  = "gradient_boosting" if pipeline is not None else "heuristic_fallback"
 
         return jsonify({
-            "success":    True,
-            "samples":    n,
+            "success": True,
+            "samples": n,
             "model_type": model_type,
-            "trained":    pipeline is not None,
+            "trained": pipeline is not None,
         })
 
-    except Exception:
-        log.error("Error in /train:\n%s", traceback.format_exc())
-        return jsonify({"success": False, "error": "training_failed"}), 500
+    except Exception as e:
+        log.error("Error in /train: %s\n%s", str(e), traceback.format_exc())
+        return jsonify({
+            "success": False,
+            "error": "training_failed",
+        }), 500
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     port = int(os.environ.get("ML_PORT", 5001))
-    log.info("ML microservice starting on port %d", port)
-    app.run(host="0.0.0.0", port=port, debug=False)
+    log.info("ML microservice starting on port %d (development mode)", port)
+    log.warning("For production, use Gunicorn: gunicorn app:app")
+    app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
+
+# Production: Gunicorn reads this app object directly from Procfile
