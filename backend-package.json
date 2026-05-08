@@ -1,0 +1,25 @@
+{
+  "name": "jigyasa-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Backend server for Jigyasa quiz platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node quick-test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.3.1",
+    "firebase-admin": "^13.8.0",
+    "jsonwebtoken": "^9.0.3",
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
