@@ -120,6 +120,84 @@ router.post('/login', authLimiter, async (req, res) => {
   }
 });
 
+// Validate admin credentials (must be before /:id routes to avoid matching 'admin' as an ID)
+router.post('/admin/validate', adminLoginLimiter, async (req, res) => {
+  try {
+    const { email, password, adminCode } = req.body;
+    
+    // Admin credentials MUST come from environment variables
+    const ADMIN_CODE = process.env.ADMIN_CODE;
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+    if (!ADMIN_CODE || !ADMIN_EMAIL || !ADMIN_PASSWORD) {
+      console.error('FATAL: Admin credentials not configured in environment variables');
+      return res.status(500).json({ success: false, error: 'Admin login is not configured' });
+    }
+    
+    if (!email || !password || !adminCode) {
+      return res.status(400).json({ success: false, error: 'Missing required fields' });
+    }
+
+    // Validate admin code
+    if (adminCode !== ADMIN_CODE) {
+      return res.status(401).json({ success: false, error: 'Invalid admin code' });
+    }
+    
+    // Validate email and password
+    if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+      return res.status(401).json({ success: false, error: 'Invalid admin credentials' });
+    }
+    
+    // Try to ensure admin user exists in local storage
+    try {
+      let adminUser = await User.findOne({ email: ADMIN_EMAIL });
+      
+      if (!adminUser) {
+        const allowAutoCreate = process.env.NODE_ENV !== 'production' || process.env.ADMIN_AUTO_CREATE === 'true';
+        if (!allowAutoCreate) {
+          return res.status(403).json({
+            success: false,
+            error: 'Admin user is not initialized. Set ADMIN_AUTO_CREATE=true once, create the admin, then disable it.',
+          });
+        }
+
+        const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
+        adminUser = new User({
+          name: 'Admin',
+          email: ADMIN_EMAIL,
+          password: hashedPassword,
+          role: 'admin',
+          approved: true
+        });
+        await adminUser.save();
+      }
+      
+      // Generate JWT token
+      const token = jwt.sign({ userId: adminUser._id }, JWT_SECRET, { expiresIn: '24h' });
+      
+      // Return success with token
+      res.json({ 
+        success: true, 
+        message: 'Admin credentials validated',
+        token,
+        user: {
+          id: adminUser._id,
+          name: adminUser.name,
+          email: adminUser.email,
+          role: adminUser.role
+        }
+      });
+    } catch (dbErr) {
+      console.error('Database error:', dbErr.message);
+      return res.status(500).json({ success: false, error: 'Admin login failed' });
+    }
+  } catch (err) {
+    console.error('Admin validation error:', err);
+    res.status(500).json({ success: false, error: 'Admin validation failed' });
+  }
+});
+
 // Get current user
 router.get('/me', verifyToken, async (req, res) => {
   try {
@@ -273,84 +351,6 @@ router.delete('/:id', verifyToken, requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('Delete user error:', err);
     res.status(500).json({ success: false, error: 'Failed to delete user' });
-  }
-});
-
-// Validate admin credentials
-router.post('/admin/validate', adminLoginLimiter, async (req, res) => {
-  try {
-    const { email, password, adminCode } = req.body;
-    
-    // Admin credentials MUST come from environment variables
-    const ADMIN_CODE = process.env.ADMIN_CODE;
-    const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
-    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-
-    if (!ADMIN_CODE || !ADMIN_EMAIL || !ADMIN_PASSWORD) {
-      console.error('FATAL: Admin credentials not configured in environment variables');
-      return res.status(500).json({ success: false, error: 'Admin login is not configured' });
-    }
-    
-    if (!email || !password || !adminCode) {
-      return res.status(400).json({ success: false, error: 'Missing required fields' });
-    }
-
-    // Validate admin code
-    if (adminCode !== ADMIN_CODE) {
-      return res.status(401).json({ success: false, error: 'Invalid admin code' });
-    }
-    
-    // Validate email and password
-    if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
-      return res.status(401).json({ success: false, error: 'Invalid admin credentials' });
-    }
-    
-    // Try to ensure admin user exists in local storage
-    try {
-      let adminUser = await User.findOne({ email: ADMIN_EMAIL });
-      
-      if (!adminUser) {
-        const allowAutoCreate = process.env.NODE_ENV !== 'production' || process.env.ADMIN_AUTO_CREATE === 'true';
-        if (!allowAutoCreate) {
-          return res.status(403).json({
-            success: false,
-            error: 'Admin user is not initialized. Set ADMIN_AUTO_CREATE=true once, create the admin, then disable it.',
-          });
-        }
-
-        const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
-        adminUser = new User({
-          name: 'Admin',
-          email: ADMIN_EMAIL,
-          password: hashedPassword,
-          role: 'admin',
-          approved: true
-        });
-        await adminUser.save();
-      }
-      
-      // Generate JWT token
-      const token = jwt.sign({ userId: adminUser._id }, JWT_SECRET, { expiresIn: '24h' });
-      
-      // Return success with token
-      res.json({ 
-        success: true, 
-        message: 'Admin credentials validated',
-        token,
-        user: {
-          id: adminUser._id,
-          name: adminUser.name,
-          email: adminUser.email,
-          role: adminUser.role
-        }
-      });
-    } catch (dbErr) {
-      console.error('Database error:', dbErr.message);
-      return res.status(500).json({ success: false, error: 'Admin login failed' });
-    }
-  } catch (err) {
-    console.error('Admin validation error:', err);
-    res.status(500).json({ success: false, error: 'Admin validation failed' });
   }
 });
 
