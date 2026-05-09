@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const User = require('../models/User');
+const TeacherRequest = require('../models/TeacherRequest');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { JWT_SECRET, verifyToken, requireAdmin } = require('../middleware/auth');
@@ -53,19 +54,49 @@ router.post('/register', authLimiter, async (req, res) => {
       });
     }
 
-    // Prevent self-assigning admin role via registration
-    const safeRole = ALLOWED_ROLES.includes(role) ? role : 'student';
-
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ success: false, error: 'Email already exists' });
     }
 
-    const user = new User({ name: sanitizeString(name, 100), email, password, role: safeRole });
+    // If they request to be a teacher, create them as a student first
+    // and create a teacher request for admin approval
+    let userRole = 'student';
+    let teacherRequestCreated = false;
+
+    if (role === 'teacher') {
+      userRole = 'student';
+      // Will create teacher request after user is saved
+    }
+
+    const user = new User({ name: sanitizeString(name, 100), email, password, role: userRole });
     await user.save();
 
+    // If teacher role was requested, create a teacher request
+    if (role === 'teacher') {
+      const teacherRequest = new TeacherRequest({
+        userId: user._id,
+        email: user.email,
+        name: user.name,
+        status: 'pending'
+      });
+      await teacherRequest.save();
+      teacherRequestCreated = true;
+    }
+
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ success: true, message: 'User registered', token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+    res.json({ 
+      success: true, 
+      message: 'User registered', 
+      token, 
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role 
+      },
+      teacherRequestCreated: teacherRequestCreated
+    });
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ success: false, error: 'Registration failed' });
@@ -351,6 +382,115 @@ router.delete('/:id', verifyToken, requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('Delete user error:', err);
     res.status(500).json({ success: false, error: 'Failed to delete user' });
+  }
+});
+
+// ========== TEACHER REQUEST ENDPOINTS ==========
+
+// Get all pending teacher requests (admin only)
+router.get('/teacher-requests/pending', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    const requests = await TeacherRequest.find({ status: 'pending' })
+      .sort({ requestedAt: -1 });
+    res.json({ success: true, requests });
+  } catch (err) {
+    console.error('Get teacher requests error:', err);
+    res.status(500).json({ success: false, error: 'Failed to get teacher requests' });
+  }
+});
+
+// Get all teacher requests (admin only)
+router.get('/teacher-requests/all', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    const requests = await TeacherRequest.find({})
+      .sort({ requestedAt: -1 });
+    res.json({ success: true, requests });
+  } catch (err) {
+    console.error('Get all teacher requests error:', err);
+    res.status(500).json({ success: false, error: 'Failed to get teacher requests' });
+  }
+});
+
+// Approve teacher request (admin only)
+router.post('/teacher-requests/:requestId/approve', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    const teacherRequest = await TeacherRequest.findById(req.params.requestId);
+    if (!teacherRequest) {
+      return res.status(404).json({ success: false, error: 'Teacher request not found' });
+    }
+
+    if (teacherRequest.status !== 'pending') {
+      return res.status(400).json({ success: false, error: 'Request is not pending' });
+    }
+
+    // Update teacher request
+    teacherRequest.status = 'approved';
+    teacherRequest.reviewedAt = new Date().toISOString();
+    teacherRequest.reviewedBy = req.userId;
+    await teacherRequest.save();
+
+    // Update user role to teacher
+    const user = await User.findById(teacherRequest.userId);
+    if (user) {
+      user.role = 'teacher';
+      user.approved = true;
+      await user.save();
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Teacher request approved', 
+      request: teacherRequest,
+      user: user
+    });
+  } catch (err) {
+    console.error('Approve teacher request error:', err);
+    res.status(500).json({ success: false, error: 'Failed to approve teacher request' });
+  }
+});
+
+// Reject teacher request (admin only)
+router.post('/teacher-requests/:requestId/reject', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    const { reason } = req.body;
+    const teacherRequest = await TeacherRequest.findById(req.params.requestId);
+    if (!teacherRequest) {
+      return res.status(404).json({ success: false, error: 'Teacher request not found' });
+    }
+
+    if (teacherRequest.status !== 'pending') {
+      return res.status(400).json({ success: false, error: 'Request is not pending' });
+    }
+
+    // Update teacher request
+    teacherRequest.status = 'rejected';
+    teacherRequest.reviewedAt = new Date().toISOString();
+    teacherRequest.reviewedBy = req.userId;
+    teacherRequest.rejectionReason = reason || 'No reason provided';
+    await teacherRequest.save();
+
+    res.json({ 
+      success: true, 
+      message: 'Teacher request rejected', 
+      request: teacherRequest
+    });
+  } catch (err) {
+    console.error('Reject teacher request error:', err);
+    res.status(500).json({ success: false, error: 'Failed to reject teacher request' });
+  }
+});
+
+// Check user's teacher request status
+router.get('/teacher-request/status', verifyToken, async (req, res) => {
+  try {
+    const teacherRequest = await TeacherRequest.findOne({ userId: req.userId });
+    if (!teacherRequest) {
+      return res.json({ success: true, status: null });
+    }
+    res.json({ success: true, status: teacherRequest.status, request: teacherRequest });
+  } catch (err) {
+    console.error('Get teacher request status error:', err);
+    res.status(500).json({ success: false, error: 'Failed to get teacher request status' });
   }
 });
 

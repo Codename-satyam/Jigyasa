@@ -3,6 +3,7 @@ import "./QuizPage.css";
 import { fetchQuiz, fetchCategories } from "../../../api/quizApi";
 import auth from "../../../api/auth";
 import { addScore } from "../../../api/scores";
+import quizAttempts from "../../../api/quizAttempts";
 import QuizBackground3D from "./QuizBackground3D";
 import { useSearchParams } from "react-router-dom";
 import { addDailyLearningMinutes, getUserSettings, subscribeSettingsChanges } from "../../../api/settings";
@@ -32,6 +33,7 @@ function QuizPage() {
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
+  const [userAnswers, setUserAnswers] = useState([]); // Track user's answers
   const [showScore, setShowScore] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState(null);
@@ -67,25 +69,42 @@ function QuizPage() {
     const categoryObj = categories.find((c) => String(c.id) === String(categoryId));
     const categoryName = categoryObj ? categoryObj.name : (categoryId ? String(categoryId) : 'Any');
     const quizTitle = `Category: ${categoryName} | Difficulty: ${difficulty} | Amount: ${amount}`;
+    const finalScore = userAnswers.filter(a => a.isCorrect).length;
+    const percentage = Math.round((finalScore / questions.length) * 100);
+    
     try {
+      // Save score summary
       addScore({
         name: user?.name || 'Guest',
         email: user?.email || '',
         quizTitle: quizTitle,
         quiz: quizTitle,
-        score: score,
+        score: finalScore,
         total: questions.length,
         totalQuestions: questions.length,
-        correctAnswers: score,
-        percentage: Math.round((score / questions.length) * 100),
+        correctAnswers: finalScore,
+        percentage: percentage,
         timeSpent: 0,
         date: new Date().toISOString(),
       });
+
+      // Save detailed attempt with all questions and answers
+      quizAttempts.saveQuizAttempt({
+        quizTitle: quizTitle,
+        category: categoryName,
+        difficulty: difficulty,
+        score: finalScore,
+        totalQuestions: questions.length,
+        percentage: percentage,
+        timeSpent: 0,
+        questions: userAnswers
+      }).catch(err => console.error('Failed to save detailed attempt:', err));
+
       setSaved(true);
     } catch (e) {
       console.error('Failed to save score:', e);
     }
-  }, [showScore, saved, categories, categoryId, difficulty, amount, score, questions.length]);
+  }, [showScore, saved, categories, categoryId, difficulty, amount, questions.length, userAnswers]);
 
   const startQuiz = async () => {
     setLoading(true);
@@ -93,6 +112,7 @@ function QuizPage() {
     setShowScore(false);
     setCurrentQuestion(0);
     setScore(0);
+    setUserAnswers([]); // Reset user answers
     setSaved(false);
     try {
       const qs = await fetchQuiz({ amount, category: categoryId, difficulty });
@@ -107,7 +127,19 @@ function QuizPage() {
 
   const handleAnswer = (option) => {
     if (!questions[currentQuestion]) return;
-    if (option === questions[currentQuestion].correct_answer) {
+    
+    // Track the user's answer
+    const isCorrect = option === questions[currentQuestion].correct_answer;
+    setUserAnswers(prev => [...prev, {
+      questionIndex: currentQuestion,
+      question: questions[currentQuestion].question,
+      options: questions[currentQuestion].options || [],
+      userAnswer: option,
+      correctAnswer: questions[currentQuestion].correct_answer,
+      isCorrect: isCorrect
+    }]);
+    
+    if (isCorrect) {
       setScore((s) => s + 1);
     }
     const next = currentQuestion + 1;

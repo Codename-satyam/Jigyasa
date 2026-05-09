@@ -183,6 +183,9 @@ function Dashboard() {
               <Link to="/leaderboard/games">
                 <button className='ViewGamesLeaderboard'>🎮 Games</button>
               </Link>
+              <Link to="/quiz-history">
+                <button className='ViewQuizHistory'>📚 Quiz History</button>
+              </Link>
               <Link to="/achievements">
                 <button className='ViewAchievements'>View Achievements</button>
               </Link>

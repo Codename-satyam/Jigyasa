@@ -3,6 +3,8 @@ import "./g6.css";
 import {riddles} from "./riddles";
 import {enemyPool} from "./enemyPool";
 
+import attack from "../../../../Assets/g6/attack.mp3";
+
 // ═══════════════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════
@@ -211,8 +213,22 @@ function BattleScreen({ enemy, riddle, onCorrect, onWrong, onHintUsed, screenSha
   const [logs, setLogs]             = useState([
     { text: 'The dungeon stirs. A challenger emerges…', cls: 'log-gold' }
   ]);
-  const inputRef = useRef(null);
-  const dmgIdRef = useRef(0);
+  // ── NEW: enemy hit state ──
+  const [enemyHit, setEnemyHit]     = useState(false);
+  const [slashVisible, setSlashVisible] = useState(false);
+  const [bloodSplats, setBloodSplats]   = useState([]);
+
+  const inputRef     = useRef(null);
+  const dmgIdRef     = useRef(0);
+  const bloodIdRef   = useRef(0);
+  // ── NEW: audio ref ──
+  const attackAudioRef = useRef(null);
+
+  // Initialise audio once
+  useEffect(() => {
+    attackAudioRef.current = new Audio(attack);
+    attackAudioRef.current.volume = 0.75;
+  }, []);
 
   useEffect(() => {
     setInputVal('');
@@ -234,12 +250,47 @@ function BattleScreen({ enemy, riddle, onCorrect, onWrong, onHintUsed, screenSha
     setTimeout(() => setDamages(prev => prev.filter(d => d.id !== id)), 1100);
   }, []);
 
+  // ── NEW: trigger the full hit sequence ──
+  const triggerEnemyHit = useCallback((dmg) => {
+    // Play sound — restart if already playing
+    if (attackAudioRef.current) {
+      attackAudioRef.current.pause();
+      attackAudioRef.current.currentTime = 0;
+      attackAudioRef.current.play().catch(() => {});
+    }
+
+    // Flash + shake the enemy
+    setEnemyHit(true);
+    setTimeout(() => setEnemyHit(false), 420);
+
+    // Slash streak
+    setSlashVisible(true);
+    setTimeout(() => setSlashVisible(false), 320);
+
+    // Blood splats
+    const splats = Array.from({ length: 5 }, () => {
+      const id = ++bloodIdRef.current;
+      return {
+        id,
+        x: 30 + Math.random() * 40,
+        y: 20 + Math.random() * 50,
+        size: 6 + Math.random() * 14,
+        angle: Math.random() * 360,
+      };
+    });
+    setBloodSplats(splats);
+    setTimeout(() => setBloodSplats([]), 700);
+
+    // Damage number
+    spawnDamage(`-${dmg}`, '#ff3a3a');
+  }, [spawnDamage]);
+
   const handleSubmit = useCallback(() => {
     if (!inputVal.trim() || !riddle) return;
     if (checkAnswer(inputVal, riddle.answer)) {
       setInputState('correct');
       const dmg = enemy.playerDamage + Math.floor(Math.random() * 12);
-      spawnDamage(`-${dmg}`, '#e74c3c');
+      triggerEnemyHit(dmg);                                        // ← replaces old spawnDamage
       setFeedback({ text: `✓ Correct! The answer was "${riddle.answer}"`, type: 'correct' });
       addLog(`Correct! You strike the ${enemy.name} for ${dmg} damage!`, 'log-green');
       setTimeout(() => { setInputState('idle'); setFeedback(null); }, 1200);
@@ -252,7 +303,7 @@ function BattleScreen({ enemy, riddle, onCorrect, onWrong, onHintUsed, screenSha
       setTimeout(() => { setInputState('idle'); setFeedback(null); }, 1000);
       onWrong(dmg);
     }
-  }, [inputVal, riddle, enemy, hintShown, onCorrect, onWrong, addLog, spawnDamage]);
+  }, [inputVal, riddle, enemy, hintShown, onCorrect, onWrong, addLog, triggerEnemyHit]);
 
   const handleKey = useCallback((e) => {
     if (e.key === 'Enter') handleSubmit();
@@ -268,25 +319,63 @@ function BattleScreen({ enemy, riddle, onCorrect, onWrong, onHintUsed, screenSha
     ? riddle.answer[0].toUpperCase() + '_ '.repeat(riddle.answer.length - 1).trim() + `  (${riddle.answer.length} letters)`
     : null;
 
-  const bgStyle = enemy?.Image ? { backgroundImage: `url(${enemy.Image})` } : {};
-  const glowColor = enemy?.glowColor || 'rgba(139,26,26,0.4)';
+  const bgStyle    = enemy?.Image ? { backgroundImage: `url(${enemy.Image})` } : {};
+  const glowColor  = enemy?.glowColor || 'rgba(139,26,26,0.4)';
+
+  // Hit-state styling: red tint + translate punch
+  const enemyHitStyle = enemyHit
+    ? { filter: `drop-shadow(0 0 60px #ff0000) brightness(2.2) saturate(0.3) sepia(1)`, transform: 'translateX(10px) scale(0.95)', transition: 'all 0.05s' }
+    : { filter: `drop-shadow(0 0 40px ${glowColor})`, transition: 'all 0.25s ease' };
 
   return (
     <div className={`battle-screen ${screenShake ? 'screen-shake' : ''}`}>
       <div className="enemy-bg" style={bgStyle} data-hasbg={!!enemy?.Image}>
+
+        {/* Enemy emoji / sprite with hit reaction */}
         {!enemy?.Image && (
           <div
-            className={`enemy-emoji-display ${enemy?.isBoss ? 'enemy-emoji-boss' : ''}`}
-            style={{ filter: `drop-shadow(0 0 40px ${glowColor})` }}
+            className={`enemy-emoji-display ${enemy?.isBoss ? 'enemy-emoji-boss' : ''} ${enemyHit ? 'enemy-hit-shake' : ''}`}
+            style={enemyHitStyle}
           >
             {enemy?.emoji || '👾'}
           </div>
         )}
+
+        {/* If the enemy has a background image, overlay a hit flash */}
+        {enemy?.Image && enemyHit && (
+          <div className="enemy-img-hit-overlay" />
+        )}
+
+        {/* Slash streak overlay */}
+        {slashVisible && (
+          <div className="slash-container" aria-hidden="true">
+            <div className="slash slash-1" />
+            <div className="slash slash-2" />
+          </div>
+        )}
+
+        {/* Blood splat particles */}
+        {bloodSplats.map(s => (
+          <div
+            key={s.id}
+            className="blood-splat"
+            style={{
+              left: s.x + '%',
+              top:  s.y + '%',
+              width:  s.size + 'px',
+              height: s.size + 'px',
+              transform: `rotate(${s.angle}deg)`,
+            }}
+          />
+        ))}
+
         <div
           className="enemy-glow"
           style={{ background: `radial-gradient(ellipse at 50% 60%, ${glowColor} 0%, transparent 65%)` }}
         />
         <div className="battle-vignette" />
+
+        {/* Damage numbers */}
         {damages.map(d => (
           <div
             key={d.id}
@@ -565,11 +654,10 @@ export default function Game() {
     setRiddle(pickRiddle(usedRiddlesRef.current, riddles.length));
   }, []);
 
-  // ── Spawn boss (ADMIN detected from enemyPool) ──
+  // ── Spawn boss ──
   const spawnBoss = useCallback((currentPlayer) => {
     const bossTemplate = enemyPool.find(e => e.isBoss || e.name === 'ADMIN');
     if (!bossTemplate) return;
-    // Boss is dramatically amplified
     const amplifiedBoss = {
       ...bossTemplate,
       baseHp:      bossTemplate.baseHp      * 2,

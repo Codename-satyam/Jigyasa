@@ -13,8 +13,8 @@ const WRONG_SOUND = new Audio(wrongSound);
 const TIMEOUT_SOUND = new Audio(timeoutSound);
 
 const shuffleArray = (array) => {
-  const shuffled =[...array];
-  for(let i= shuffled.length -1;i>0;i--){
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
@@ -33,13 +33,13 @@ function scoreToG2Config(score) {
   return { questionCount: 8, secondsPerQuestion: 14 };
 }
 
-
 function QuizGame() {
   const {
     difficulty_score: mlScore,
     loading: mlLoading,
   } = useDifficulty("guess");
 
+  const [showSplash, setShowSplash] = useState(true);
   const [difficultyApplied, setDifficultyApplied] = useState(false);
   const [questionCount, setQuestionCount] = useState(10);
   const [secondsPerQuestion, setSecondsPerQuestion] = useState(10);
@@ -47,6 +47,7 @@ function QuizGame() {
   const sessionStartRef = useRef(Date.now());
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0); // Added streak state
   const [selected, setSelected] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [timeLeft, setTimeLeft] = useState(10);
@@ -54,6 +55,14 @@ function QuizGame() {
 
   const question = randomizedQuestions[current];
   const progressPercent = Math.round(((current + 1) / randomizedQuestions.length) * 100);
+
+  // Initial Loading Splash Screen Effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2500); // 2.5 second retro loading screen
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (mlLoading || difficultyApplied) return;
@@ -85,7 +94,7 @@ function QuizGame() {
       gamesTracker.recordGamePlay({
         email: user.email,
         gameType: 'guess',
-        gameName: 'Guess the Guy',
+        gameName: 'GUESS EVERYTHING',
         score: finalScore,
         level: 1,
         timePlayed: elapsedSeconds,
@@ -96,7 +105,8 @@ function QuizGame() {
 
   useEffect(() => {
     if (timeLeft === 0 && !selected) {
-      TIMEOUT_SOUND.play().catch(() => {});
+      TIMEOUT_SOUND.play().catch(() => { });
+      setStreak(0); // Break streak on timeout
       moveNext(score);
       return;
     }
@@ -123,10 +133,12 @@ function QuizGame() {
     const nextScore = isCorrect ? score + 1 : score;
 
     if (isCorrect) {
-      CORRECT_SOUND.play().catch(() => {});
+      CORRECT_SOUND.play().catch(() => { });
       setScore(prev => prev + 1);
+      setStreak(prev => prev + 1); // Increase streak
     } else {
-      WRONG_SOUND.play().catch(() => {});
+      WRONG_SOUND.play().catch(() => { });
+      setStreak(0); // Break streak on wrong answer
     }
 
     setTimeout(() => moveNext(nextScore), 1500);
@@ -137,35 +149,69 @@ function QuizGame() {
     setRandomizedQuestions(getRandomQuestions(questionCount));
     setCurrent(0);
     setScore(0);
+    setStreak(0); // Reset streak on restart
     setSelected(null);
     setReveal(false);
     setShowResult(false);
     setTimeLeft(secondsPerQuestion);
   };
 
-  if (showResult) {
+  // 1. SPLASH SCREEN
+  if (showSplash || mlLoading) {
     return (
       <div className="g2-game-page">
-        <div className="g2-container g2-result-container">
-          <h2>🎉 Quiz Completed!</h2>
-          <p className="g2-result-label">Final Score</p>
-          <h1 className="g2-final-score">{score} / {randomizedQuestions.length}</h1>
-          <button className="g2-restart-btn" onClick={restartGame}>Play Again</button>
+        <div className="g2-container g2-splash-container">
+          <div className="g2-splash-content">
+            <h1 className="g2-splash-title">ARE YOU<br />SURE <br/> ABOUT THAT ?</h1>
+            <p className="g2-loading-text">LOADING...</p>
+          </div>
         </div>
       </div>
     );
   }
 
+  // 2. RESULTS SCREEN
+  if (showResult) {
+    return (
+      <div className="g2-game-page">
+        <div className="g2-container g2-result-container">
+          <h2>🎉 LEVEL CLEARED!</h2>
+          <p className="g2-result-label">Final Score</p>
+          <h1 className="g2-final-score">{score} / {randomizedQuestions.length}</h1>
+          <button className="g2-restart-btn" onClick={restartGame}>INSERT COIN (Play Again)</button>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. MAIN GAMEPLAY
   return (
     <div className="g2-game-page">
-      <div className="g2-container">
+      <div className="g2-container g2-wide-container">
+        {/* Top Info Bar */}
         <div className="g2-top">
           <span>Q {current + 1}/{randomizedQuestions.length}</span>
+
+          {/* The key={streak} forces the animation to replay on every increase! */}
+          <div className="g2-streak-container">
+            {streak > 0 && (
+              <span
+                key={streak}
+                className={`g2-streak 
+          ${streak >= 12 ? "arcade-crazy" :
+                    streak >= 7 ? "superheat-shake" :
+                      streak >= 3 ? "fire-shake" : "base-shake"}`}
+              >
+                STREAK x{streak}
+              </span>
+            )}
+          </div>
+
           <span className={`g2-timer ${timeLeft <= 3 ? "danger" : ""}`}>
             ⏱ {timeLeft}s
           </span>
         </div>
-
+        {/* Progress Bar */}
         <div className="g2-progress-wrap" aria-label="quiz progress">
           <div className="g2-progress-track">
             <div className="g2-progress-fill" style={{ width: `${progressPercent}%` }}></div>
@@ -173,37 +219,48 @@ function QuizGame() {
           <span>{progressPercent}%</span>
         </div>
 
-        <div className="g2-image-frame">
-          <img
-            src={question.image}
-            alt="quiz"
-            className={`g2-image ${reveal ? "reveal" : ""}`}
-            loading="eager"
-          />
+        {/* Split Layout Container */}
+        <div className="g2-split-layout">
+
+          {/* Left Side - Image */}
+          <div className="g2-left-pane">
+            <div className="g2-image-frame">
+              <img
+                src={question.image}
+                alt="quiz"
+                className={`g2-image ${reveal ? "reveal" : ""}`}
+                loading="eager"
+              />
+            </div>
+          </div>
+
+          {/* Right Side - Question & Options */}
+          <div className="g2-right-pane">
+            <h3 className="g2-question">{question.question}</h3>
+
+            <div className="g2-options">
+              {question.options.map(option => (
+                <button
+                  key={option}
+                  className={`g2-option-btn
+                    ${selected &&
+                    (option === question.answer
+                      ? "correct"
+                      : option === selected
+                        ? "wrong"
+                        : "")}`}
+                  onClick={() => handleOptionClick(option)}
+                  disabled={selected !== null}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+
+            <p className="g2-score">SCORE: {score}</p>
+          </div>
+
         </div>
-
-        <h3 className="g2-question">{question.question}</h3>
-
-        <div className="g2-options">
-          {question.options.map(option => (
-            <button
-              key={option}
-              className={`g2-option-btn
-                ${selected &&
-                  (option === question.answer
-                    ? "correct"
-                    : option === selected
-                    ? "wrong"
-                    : "")}`}
-              onClick={() => handleOptionClick(option)}
-              disabled={selected !== null}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
-
-        <p className="g2-score">Score: {score}</p>
       </div>
     </div>
   );

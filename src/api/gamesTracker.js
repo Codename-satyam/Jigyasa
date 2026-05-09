@@ -109,6 +109,16 @@ export async function getPublicGamesLeaderboard() {
   }
 }
 
+export async function getGameSpecificLeaderboard(gameName) {
+  try {
+    const response = await apiCall(`/api/games/leaderboard/${encodeURIComponent(gameName)}`, 'GET');
+    return response.success ? response.leaderboard : [];
+  } catch (error) {
+    console.error(`Error fetching leaderboard for ${gameName}:`, error);
+    return [];
+  }
+}
+
 export function clearGamesData() {
   saveGames([]);
 }
@@ -118,6 +128,8 @@ const gamesTracker = {
   getGamePlays, 
   getGamePlaysByType, 
   getGamePlaysByEmail,
+  getPublicGamesLeaderboard,
+  getGameSpecificLeaderboard,
   clearGamesData 
 };
 export default gamesTracker;

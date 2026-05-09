@@ -1,510 +1,622 @@
-@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
+/* Base Page Styling - Arcade Cabinet Feel */
 .g2-game-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  background-color: #0a0a0c;
+  background-image:
+    linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 30px 30px;
+  font-family: 'Press Start 2P', monospace;
+  color: #ffffff;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Main Game Container */
+.g2-container {
+  background-color: #000000;
+  width: 100%;
+  max-width: 500px;
+  padding: 30px 20px;
+  border: 4px solid #ff00ff;
+  box-shadow: 10px 10px 0px rgba(0, 255, 255, 0.7);
   position: relative;
   overflow: hidden;
 }
 
-.g2-game-page::before {
-  content: '';
+/* Wide Container for Split Layout */
+.g2-wide-container {
+  max-width: 800px;
+  /* Expanded for side-by-side */
+  padding: 30px 30px;
+}
+
+/* CRT Scanlines effect overlay */
+.g2-container::before {
+  content: " ";
+  display: block;
   position: absolute;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
-  border-radius: 50%;
-  animation: float 6s ease-in-out infinite;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 2;
+  background-size: 100% 4px, 6px 100%;
   pointer-events: none;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px) translateX(0px); }
-  50% { transform: translateY(-30px) translateX(30px); }
-}
-
-.g2-container {
-  max-width: 700px;
-  width: 100%;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(59, 130, 246, 0.6);
-  border-radius: 20px;
-  padding: 35px;
-  box-shadow: 
-    0 0 40px rgba(59, 130, 246, 0.25),
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  font-family: "Press Start 2P", monospace;
-  position: relative;
-  z-index: 1;
-  animation: slideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.g2-progress-wrap {
+/* ------------------------
+   SPLASH SCREEN
+------------------------ */
+.g2-splash-container {
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-  color: #c9d9ea;
-  font-size: 10px;
+  min-height: 400px;
+  text-align: center;
 }
 
-.g2-progress-track {
-  flex: 1;
-  height: 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(59, 130, 246, 0.45);
-  background: rgba(255, 255, 255, 0.08);
-  overflow: hidden;
+.g2-splash-content {
+  position: relative;
+  z-index: 3;
 }
 
-.g2-progress-fill {
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #38bdf8, #22d3ee, #8b5cf6);
-  transition: width 260ms ease;
-  box-shadow: 0 0 16px rgba(56, 189, 248, 0.45);
+.g2-splash-title {
+  color: #ff00ff;
+  font-size: 32px;
+  line-height: 1.5;
+  text-shadow: 4px 4px 0px #00ffff;
+  margin-bottom: 40px;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.g2-loading-text {
+  color: #ffff00;
+  font-size: 14px;
+  animation: blink 1s infinite step-end;
 }
 
+/* ------------------------
+   TOP BAR & STATS
+------------------------ */
 .g2-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #cbd5e1;
-  font-size: 11px;
-  margin-bottom: 25px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+  font-size: 12px;
+  margin-bottom: 20px;
+  color: #00ffff;
+  text-shadow: 2px 2px 0px #000;
+  position: relative;
+  z-index: 3;
 }
 
-.g2-top span:first-child {
-  background: rgba(59, 130, 246, 0.15);
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(59, 130, 246, 0.4);
+.g2-streak {
+  color: #ff8c00;
+  transition: all 0.2s;
+}
+
+.g2-streak.on-fire {
+  color: #ff0000;
+  text-shadow: 0px 0px 8px #ff0000, 2px 2px 0px #ffff00;
+  animation: pulse 0.5s infinite alternate;
 }
 
 .g2-timer {
-  color: #38bdf8;
-  font-weight: bold;
-  background: rgba(56, 189, 248, 0.1);
+  background: #222;
   padding: 8px 12px;
-  border-radius: 8px;
-  border: 2px solid rgba(56, 189, 248, 0.5);
-  display: inline-block;
-  transition: all 0.3s ease;
+  border: 2px solid #00ffff;
 }
 
 .g2-timer.danger {
-  color: #ff4757;
-  border-color: #ff4757;
-  background: rgba(255, 71, 87, 0.1);
-  animation: pulseIntense 0.6s infinite;
+  color: #ff0000;
+  border-color: #ff0000;
+  animation: blink 0.5s infinite step-end;
 }
 
-@keyframes pulseIntense {
-  0%, 100% { 
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0% {
     transform: scale(1);
-    box-shadow: 0 0 10px rgba(255, 71, 87, 0.3);
   }
-  50% { 
+
+  100% {
     transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
   }
 }
 
+/* Progress Bar */
+.g2-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 10px;
+  margin-bottom: 30px;
+  color: #fff;
+  position: relative;
+  z-index: 3;
+}
+
+.g2-progress-track {
+  flex-grow: 1;
+  height: 16px;
+  background-color: #111;
+  border: 2px solid #444;
+  box-shadow: inset 3px 3px 0px #000;
+}
+
+.g2-progress-fill {
+  height: 100%;
+  background-color: #00ff00;
+  box-shadow: inset 0px -4px 0px rgba(0, 0, 0, 0.3);
+  transition: width 0.3s ease;
+}
+
+/* ------------------------
+   SPLIT LAYOUT (Desktop)
+------------------------ */
+.g2-split-layout {
+  display: flex;
+  gap: 30px;
+  align-items: stretch;
+  position: relative;
+  z-index: 3;
+}
+
+.g2-left-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.g2-right-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Image Frame */
 .g2-image-frame {
   width: 100%;
-  aspect-ratio: 16 / 10;
-  margin: 18px 0;
-  border-radius: 14px;
+  height: 250px;
+  border: 4px solid #fff;
+  background: #111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   overflow: hidden;
-  border: 3px solid rgba(59, 130, 246, 0.35);
-  background:
-    linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 27, 75, 0.95)),
-    repeating-linear-gradient(
-      45deg,
-      rgba(59, 130, 246, 0.08),
-      rgba(59, 130, 246, 0.08) 10px,
-      transparent 10px,
-      transparent 20px
-    );
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 4px 4px 0px #ff00ff;
 }
 
 .g2-image {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: center;
-  padding: 8px;
-  border-radius: 14px;
-  filter: blur(15px) brightness(0.8);
-  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  object-fit: cover;
+  image-rendering: pixelated;
+  filter: blur(15px) grayscale(100%) contrast(200%);
+  transition: filter 1.5s steps(8);
 }
 
 .g2-image.reveal {
-  filter: blur(0) brightness(1);
-  box-shadow: 
-    0 8px 32px rgba(59, 130, 246, 0.15),
-    inset 0 0 20px rgba(59, 130, 246, 0.05);
+  filter: blur(0px) grayscale(0%) contrast(100%);
 }
 
+/* Question Text */
 .g2-question {
-  color: #e2e8f0;
   font-size: 14px;
-  margin: 25px 0 20px;
-  line-height: 1.8;
-  text-align: center;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  animation: fadeInDown 0.5s ease-out;
-}
-
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.g2-options {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin: 25px 0;
-  animation: fadeIn 0.5s ease-out 0.2s backwards;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.g2-option-btn {
-  padding: 16px 18px;
-  border-radius: 12px;
-  border: 2px solid rgba(59, 130, 246, 0.5);
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
-  color: #e2e8f0;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  font-family: "Press Start 2P", monospace;
-  font-size: 11px;
+  line-height: 1.6;
   text-align: left;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: #ffff00;
+  margin-bottom: 25px;
+  margin-top: 0;
+  text-shadow: 2px 2px 0px #ff0000;
 }
 
-.g2-option-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.5s ease;
-  pointer-events: none;
+/* Options Grid */
+.g2-options {
+  display: grid;
+  grid-template-columns: 1fr;
+  /* Stack options vertically on the right */
+  gap: 15px;
 }
 
-.g2-option-btn:hover::before {
-  left: 100%;
+/* Option Buttons */
+.g2-option-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  line-height: 1.4;
+  padding: 15px 10px;
+  background-color: #222;
+  color: #fff;
+  border: 2px solid #fff;
+  box-shadow: 4px 4px 0px #555;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.1s ease;
+  text-align: left;
 }
 
 .g2-option-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.1));
-  border-color: rgba(59, 130, 246, 0.8);
-  transform: translateX(8px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2);
+  background-color: #333;
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #555;
+}
+
+.g2-option-btn:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px #555;
 }
 
 .g2-option-btn:disabled {
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.9;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .g2-game-page {
-    padding: 30px 15px;
+.g2-option-btn.correct {
+  background-color: #00aa00;
+  border-color: #00ff00;
+  color: #fff;
+  box-shadow: 4px 4px 0px #005500;
+  animation: successFlash 0.3s alternate 3;
+}
+
+.g2-option-btn.wrong {
+  background-color: #aa0000;
+  border-color: #ff0000;
+  color: #fff;
+  box-shadow: 4px 4px 0px #550000;
+}
+
+@keyframes successFlash {
+  0% {
+    background-color: #00aa00;
   }
 
-  .g2-container {
-    padding: 28px;
-    border-radius: 16px;
+  100% {
+    background-color: #00ff00;
+    color: #000;
+  }
+}
+
+/* Score Display */
+.g2-score {
+  margin-top: 25px;
+  text-align: right;
+  font-size: 14px;
+  color: #00ffff;
+}
+
+/* ------------------------
+   RESULT SCREEN 
+------------------------ */
+.g2-result-container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 50px 20px;
+}
+
+.g2-result-container h2 {
+  color: #00ff00;
+  font-size: 20px;
+  margin-bottom: 30px;
+  text-shadow: 3px 3px 0px #005500;
+  position: relative;
+  z-index: 3;
+}
+
+.g2-result-label {
+  font-size: 12px;
+  color: #fff;
+  margin-bottom: 15px;
+  position: relative;
+  z-index: 3;
+}
+
+.g2-final-score {
+  font-size: 36px;
+  color: #ffff00;
+  margin-bottom: 40px;
+  text-shadow: 4px 4px 0px #ff0000;
+  position: relative;
+  z-index: 3;
+}
+
+.g2-restart-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  padding: 15px 20px;
+  background-color: #ff00ff;
+  color: #fff;
+  border: 4px solid #fff;
+  box-shadow: 6px 6px 0px #0000ff;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.1s ease;
+  position: relative;
+  z-index: 3;
+}
+
+.g2-restart-btn:hover {
+  background-color: #ff4dff;
+  transform: translate(3px, 3px);
+  box-shadow: 3px 3px 0px #0000ff;
+}
+
+.g2-restart-btn:active {
+  transform: translate(6px, 6px);
+  box-shadow: 0px 0px 0px #0000ff;
+}
+
+/* ------------------------
+   RESPONSIVE DESIGN
+------------------------ */
+@media (max-width: 768px) {
+  .g2-split-layout {
+    flex-direction: column;
+    /* Stack image on top of options on mobile */
+    gap: 20px;
   }
 
   .g2-image-frame {
-    aspect-ratio: 4 / 3;
+    margin-bottom: 10px;
   }
 
   .g2-question {
-    font-size: 13px;
-    margin: 20px 0 18px;
+    text-align: center;
   }
 
-  .g2-final-score {
-    font-size: 42px;
+  .g2-score {
+    text-align: center;
   }
 }
 
 @media (max-width: 480px) {
-  .g2-game-page {
-    padding: 20px 10px;
-  }
-
   .g2-container {
-    padding: 18px;
-    border-radius: 14px;
+    padding: 20px 15px;
   }
 
   .g2-top {
     font-size: 10px;
-    margin-bottom: 18px;
-    gap: 10px;
   }
 
-  .g2-top span:first-child {
-    padding: 5px 10px;
-    font-size: 9px;
-  }
-
-  .g2-timer {
-    padding: 6px 10px;
-    font-size: 10px;
-  }
-
-  .g2-progress-wrap {
-    font-size: 9px;
-    margin-bottom: 10px;
-  }
-
-  .g2-image-frame {
-    aspect-ratio: 1 / 1;
-    margin: 12px 0;
-    border-width: 2px;
-  }
-
-  .g2-image {
-    padding: 6px;
-  }
-
-  .g2-question {
-    font-size: 11px;
-    margin: 15px 0;
-  }
-
-  .g2-option-btn {
-    font-size: 10px;
-    padding: 12px 14px;
-  }
-
-  .g2-options {
-    gap: 10px;
-    margin: 18px 0;
-  }
-
-  .g2-score {
-    font-size: 11px;
-    margin-top: 18px;
-    padding: 10px;
-  }
-
-  .g2-restart-btn {
-    font-size: 11px;
-    padding: 12px 24px;
-    margin-top: 24px;
-  }
-
-  .g2-final-score {
-    font-size: 36px;
-    margin: 24px 0;
-  }
-
-  .g2-result-container h2 {
-    font-size: 16px;
-    margin-bottom: 20px;
+  .g2-splash-title {
+    font-size: 24px;
   }
 }
 
-.g2-option-btn.correct {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(16, 185, 129, 0.15));
-  border-color: rgba(34, 197, 94, 0.8);
-  color: #86efac;
-  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
-  animation: correctPulse 0.5s ease;
+/* Container to keep it from pushing other elements around when it shakes */
+.g2-streak-container {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 120px;
 }
 
-.g2-option-btn.wrong {
-  background: linear-gradient(135deg, rgba(255, 71, 87, 0.2), rgba(239, 68, 68, 0.15));
-  border-color: rgba(239, 68, 68, 0.8);
-  color: #fca5a5;
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-  animation: shake 0.5s ease;
+/* Base style for the streak text */
+.g2-streak {
+  display: inline-block;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  text-transform: uppercase;
+  padding: 5px;
 }
 
-@keyframes correctPulse {
-  0% { 
+/* LEVEL 1: Base Shake (1-2 streak) */
+.g2-streak.base-shake {
+  color: #ff8c00;
+  text-shadow: 2px 2px 0px #aa5500;
+  animation: shakeMild 0.4s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+/* LEVEL 2: Fire Shake (3-6 streak) */
+.g2-streak.fire-shake {
+  color: #ff3300;
+  text-shadow: 2px 2px 0px #ffff00, 0 0 10px #ff0000;
+  animation: shakeMedium 0.5s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+/* LEVEL 3: Superheat Shake (7-11 streak) */
+.g2-streak.superheat-shake {
+  color: #ff0000;
+  text-shadow: 3px 3px 0px #ffff00, -2px -2px 0px #ff00ff, 0 0 20px #ff0000;
+  animation: shakeViolent 0.6s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+/* LEVEL 4: ARCADE CRAZY (12+ streak) */
+.g2-streak.arcade-crazy {
+  color: #ffffff;
+  text-shadow:
+    4px 4px 0px #00ffff,
+    -4px -4px 0px #ff00ff,
+    0 0 30px #ffff00;
+  /* Runs the crazy shake once on render, then falls back to a continuous chaotic rumble */
+  animation:
+    shakeInsane 0.6s cubic-bezier(.36, .07, .19, .97) both,
+    rumble 0.1s infinite alternate 0.6s;
+}
+
+/* --- THE SHAKE KEYFRAMES --- */
+
+@keyframes shakeMild {
+
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-2px, -1px, 0) rotate(-2deg);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(2px, 1px, 0) rotate(2deg);
+  }
+}
+
+@keyframes shakeMedium {
+
+  10%,
+  90% {
+    transform: translate3d(-2px, -2px, 0) scale(1.1);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(4px, 2px, 0) scale(1.1);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 2px, 0) rotate(-4deg) scale(1.2);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, -2px, 0) rotate(4deg) scale(1.2);
+  }
+
+  100% {
     transform: scale(1);
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
-  }
-  50% { 
-    transform: scale(1.05);
-    box-shadow: 0 0 30px rgba(34, 197, 94, 0.5);
-  }
-  100% { 
-    transform: scale(1);
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
   }
 }
 
-@keyframes shake {
-  0%, 100% { 
-    transform: translateX(0);
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+@keyframes shakeViolent {
+  0% {
+    transform: translate(2px, 1px) rotate(0deg) scale(1.2);
   }
-  25% { 
-    transform: translateX(-8px);
-    box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+
+  10% {
+    transform: translate(-3px, -4px) rotate(-5deg) scale(1.3);
   }
-  75% { 
-    transform: translateX(8px);
-    box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+
+  20% {
+    transform: translate(4px, 0px) rotate(5deg) scale(1.4);
   }
-}
 
-.g2-score {
-  text-align: center;
-  color: #cbd5e1;
-  font-size: 12px;
-  margin-top: 25px;
-  padding: 12px;
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 10px;
-  border-left: 4px solid rgba(59, 130, 246, 0.6);
-  letter-spacing: 2px;
-}
-
-/* Result Container Styles */
-.g2-result-container {
-  text-align: center;
-  animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes popIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8) rotateX(-20deg);
+  30% {
+    transform: translate(-4px, 4px) rotate(-5deg) scale(1.3);
   }
-  to {
-    opacity: 1;
-    transform: scale(1) rotateX(0);
+
+  40% {
+    transform: translate(3px, -3px) rotate(6deg) scale(1.4);
   }
-}
 
-.g2-result-container h2 {
-  color: #38bdf8;
-  font-size: 18px;
-  margin-bottom: 25px;
-  text-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
-  animation: bounce 0.6s ease-out;
-}
-
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-.g2-result-label {
-  color: #cbd5e1;
-  font-size: 12px;
-  margin: 15px 0 10px;
-  letter-spacing: 1px;
-  opacity: 0.8;
-}
-
-.g2-final-score {
-  color: #4ade80;
-  font-size: 48px;
-  margin: 30px 0;
-  text-shadow: 
-    0 0 20px rgba(74, 222, 128, 0.6),
-    0 0 40px rgba(74, 222, 128, 0.3);
-  animation: scaleUpScore 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-  letter-spacing: 2px;
-}
-
-@keyframes scaleUpScore {
-  from {
-    opacity: 0;
-    transform: scale(0.5) rotateY(90deg);
+  50% {
+    transform: translate(-3px, 3px) rotate(-6deg) scale(1.3);
   }
-  to {
-    opacity: 1;
-    transform: scale(1) rotateY(0);
+
+  60% {
+    transform: translate(4px, 1px) rotate(5deg) scale(1.4);
+  }
+
+  70% {
+    transform: translate(-4px, -2px) rotate(-4deg) scale(1.3);
+  }
+
+  80% {
+    transform: translate(3px, 4px) rotate(4deg) scale(1.2);
+  }
+
+  90% {
+    transform: translate(-2px, -3px) rotate(-2deg) scale(1.1);
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
   }
 }
 
-.g2-restart-btn {
-  padding: 14px 32px;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  border: 2px solid rgba(59, 130, 246, 0.6);
-  border-radius: 12px;
-  color: #fff;
-  font-family: "Press Start 2P", monospace;
-  font-size: 12px;
-  cursor: pointer;
-  margin-top: 30px;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
-  letter-spacing: 1px;
+@keyframes shakeInsane {
+  0% {
+    transform: translate(4px, 4px) rotate(0deg) scale(1.5) skewX(10deg);
+    color: #00ffff;
+  }
+
+  10% {
+    transform: translate(-6px, -6px) rotate(-10deg) scale(1.8) skewX(-10deg);
+    color: #ff00ff;
+  }
+
+  20% {
+    transform: translate(8px, 0px) rotate(10deg) scale(2.0) skewY(10deg);
+    color: #ffff00;
+  }
+
+  30% {
+    transform: translate(-8px, 8px) rotate(-15deg) scale(1.8) skewY(-10deg);
+    color: #ff0000;
+  }
+
+  40% {
+    transform: translate(6px, -6px) rotate(15deg) scale(2.0);
+    color: #00ff00;
+  }
+
+  50% {
+    transform: translate(-6px, 6px) rotate(-10deg) scale(1.8);
+    color: #ff00ff;
+  }
+
+  60% {
+    transform: translate(8px, 2px) rotate(10deg) scale(1.6);
+    color: #ffff00;
+  }
+
+  70% {
+    transform: translate(-8px, -4px) rotate(-5deg) scale(1.4);
+    color: #00ffff;
+  }
+
+  80% {
+    transform: translate(6px, 8px) rotate(5deg) scale(1.2);
+    color: #ffffff;
+  }
+
+  90% {
+    transform: translate(-4px, -6px) rotate(-2deg) scale(1.1);
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(0deg) scale(1) skew(0);
+  }
 }
 
-.g2-restart-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s ease;
-}
+/* Continuous chaotic rumble for after the insane shake finishes */
+@keyframes rumble {
+  0% {
+    transform: translate(-1px, -1px) rotate(-1deg);
+  }
 
-.g2-restart-btn:hover {
-  transform: translateY(-4px) scale(1.05);
-  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.5);
-  border-color: rgba(59, 130, 246, 0.9);
+  100% {
+    transform: translate(1px, 1px) rotate(1deg);
+  }
 }
-
-.g2-restart-btn:hover::before {
-  left: 100%;
-}
-
-.g2-restart-btn:active {
-  transform: translateY(-2px) scale(1.02);
-}
-

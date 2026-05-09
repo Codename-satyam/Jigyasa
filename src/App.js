@@ -33,11 +33,13 @@ const Login = lazy(() => import("./Components/Login/Login.jsx"));
 const Register = lazy(() => import("./Components/Login/Register.jsx"));
 const AdminLogin = lazy(() => import("./Components/Login/AdminLogin.jsx"));
 const BlockedUser = lazy(() => import("./Components/Login/BlockedUser.jsx"));
+const PendingApproval = lazy(() => import("./Components/Auth/PendingApproval.jsx"));
 
 
 const QuizPage = lazy(() => import("./Components/Play/QuizPage/QuizPage.jsx"));
 const SelectQuiz = lazy(() => import("./Components/Play/QuizPage/SelectQuiz.jsx"));
 const TeacherQuizAttempt = lazy(() => import("./Components/Play/QuizPage/TeacherQuizAttempt.jsx"));
+const QuizHistory = lazy(() => import("./Components/Play/QuizHistory/QuizHistory.jsx"));
 
 const Games = lazy(() => import("./Components/Play/Games/Games.jsx"));
 const MemoryGame = lazy(() => import("./Components/Play/Games/g1/game1.jsx"));
@@ -91,6 +93,11 @@ function AnimatedRoutes() {
             <Route path="/play/quiz-select" element={<PageTransition><SelectQuiz /></PageTransition>} />
             <Route path="/play/quiz" element={<PageTransition><QuizPage /></PageTransition>} />
             <Route path="/play/teacher-quiz/:quizId" element={<PageTransition><TeacherQuizAttempt /></PageTransition>} />
+            <Route path="/quiz-history" element={
+              <ProtectedRoute>
+                <PageTransition><QuizHistory /></PageTransition>
+              </ProtectedRoute>
+            } />
 
             <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
             <Route path="/about" element={<PageTransition><About /></PageTransition>} />
@@ -137,6 +144,11 @@ function AnimatedRoutes() {
             <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
             <Route path="/admin/login" element={<PageTransition><AdminLogin /></PageTransition>} />
             <Route path="/blocked" element={<PageTransition><BlockedUser /></PageTransition>} />
+            <Route path="/pending-approval" element={
+              <ProtectedRoute>
+                <PageTransition><PendingApproval /></PageTransition>
+              </ProtectedRoute>
+            } />
 
             <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
           </Routes>

@@ -54,7 +54,10 @@ export async function register({ name, email, password, avatarId, role = 'studen
       localStorage.setItem(CURRENT_KEY, JSON.stringify(userData));
       
       console.log('✅ [auth.js] Data saved to localStorage');
-      return userData;
+      return { 
+        ...userData, 
+        teacherRequestCreated: response.teacherRequestCreated || false 
+      };
     } else {
       console.warn('⚠️ [auth.js] Registration failed - response.success is false');
       console.warn('⚠️ [auth.js] Error from server:', response.error);
@@ -157,5 +160,18 @@ export async function getAllUsers() {
   }
 }
 
-const auth = { register, login, logout, getCurrentUser, updateCurrentUser, isAuthenticated, isUserBlocked, getAllUsers, AVATAR_OPTIONS };
+export async function checkTeacherRequestStatus() {
+  try {
+    const response = await apiCall('/api/users/teacher-request/status', 'GET');
+    if (response.success) {
+      return response.status;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error checking teacher request status:', error);
+    return null;
+  }
+}
+
+const auth = { register, login, logout, getCurrentUser, updateCurrentUser, isAuthenticated, isUserBlocked, getAllUsers, checkTeacherRequestStatus, AVATAR_OPTIONS };
 export default auth;

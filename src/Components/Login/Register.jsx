@@ -95,8 +95,15 @@ function Register() {
       console.log('📤 [Register] Calling auth.register...');
       const result = await auth.register({ name, email, password, avatarId: selectedAvatar, role });
       console.log('✅ [Register] Registration successful!', result);
-      console.log('📍 [Register] Redirecting to dashboard...');
-      navigate('/dashboard');
+      
+      // If teacher request was created, redirect to pending approval screen
+      if (result.teacherRequestCreated) {
+        console.log('📍 [Register] Teacher request created, redirecting to pending approval...');
+        navigate('/pending-approval');
+      } else {
+        console.log('📍 [Register] Redirecting to dashboard...');
+        navigate('/dashboard');
+      }
     } catch (err) {
       console.error('❌ [Register] Registration failed:', err);
       const msg = err.message || 'Registration failed';

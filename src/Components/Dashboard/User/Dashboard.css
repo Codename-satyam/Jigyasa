@@ -102,7 +102,7 @@
   margin-bottom: 15px;
 }
 
-.ViewLeaderBoard, .ViewTeacherDashboard, .ViewAchievements, .ViewGamesLeaderboard {
+.ViewLeaderBoard, .ViewTeacherDashboard, .ViewAchievements, .ViewGamesLeaderboard, .ViewQuizHistory {
   font-family: 'Press Start 2P', cursive;
   font-size: 0.7rem;
   background-color: #b22222;
@@ -125,6 +125,11 @@
   border: 2px solid #39ff14;
 }
 
+.ViewQuizHistory {
+  background-color: #663d99;
+  border: 2px solid #b366ff;
+}
+
 .ViewLeaderBoard:hover, .ViewTeacherDashboard:hover {
   background-color: #d12a2a;
   color: var(--gold);
@@ -140,7 +145,12 @@
   color: var(--gold);
 }
 
-.ViewLeaderBoard:active, .ViewTeacherDashboard:active, .ViewAchievements:active, .ViewGamesLeaderboard:active {
+.ViewQuizHistory:hover {
+  background-color: #7a52b0;
+  color: var(--gold);
+}
+
+.ViewLeaderBoard:active, .ViewTeacherDashboard:active, .ViewAchievements:active, .ViewGamesLeaderboard:active, .ViewQuizHistory:active {
   transform: translate(4px, 4px);
   box-shadow: 0 0 0 #000;
 }
@@ -698,7 +708,7 @@
     font-size: 1.3rem;
   }
   
-  .ViewLeaderBoard, .ViewTeacherDashboard {
+  .ViewLeaderBoard, .ViewTeacherDashboard, .ViewQuizHistory {
     width: 100%;
     margin-right: 0;
   }

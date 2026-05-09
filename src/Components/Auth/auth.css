@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
+
+/* --- Main Layout & Background --- */
+.auth-root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0a0a0c;
+  /* High-tech radial gradient background */
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(255, 215, 0, 0.1), transparent 40%),
+    radial-gradient(circle at 50% 100%, rgba(0, 255, 255, 0.05), transparent 40%);
+  font-family: 'Rajdhani', sans-serif;
+  color: #ffffff;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* --- The Main Card --- */
+.auth-box {
+  background: rgba(20, 20, 25, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  width: 100%;
+  max-width: 480px;
+  padding: 40px 35px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 3px solid #ffd700; /* Gold accent on top */
+  border-radius: 12px;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.6), 
+    0 0 20px rgba(255, 215, 0, 0.05); /* Subtle gold ambient glow */
+}
+
+/* Make all headings inherit a neon glow based on their inline colors */
+.auth-box h1, 
+.auth-box h2 {
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-shadow: 0 0 15px currentColor; /* Takes your inline #4caf50, #f44336, etc. and makes them glow */
+  margin-top: 0;
+}
+
+.auth-box p {
+  color: #b3b3ba;
+  font-size: 16px !important; /* Overriding inline 14px for better readability with this font */
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.auth-box strong {
+  color: #ffffff;
+  font-weight: 700;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+/* --- Buttons --- */
+.auth-button {
+  background: linear-gradient(90deg, #ffd700, #ffaa00);
+  color: #0d0d12;
+  border: none;
+  padding: 14px 24px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Rajdhani', sans-serif;
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  transition: box-shadow 0.2s ease, filter 0.2s ease;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+}
+
+.auth-button:hover {
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+  filter: brightness(1.1);
+  /* Note: scale transforms are handled by your framer-motion props */
+}
+
+/* Specific styling for the logout/secondary button you defined with inline backgrounds */
+.auth-button[style*="background: rgba"] {
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.auth-button[style*="background: rgba"]:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.1);
+}
+
+/* --- Utility Classes --- */
+.text-center {
+  text-align: center;
+}
+
+/* High-tech pulsing text for the loading screen */
+.loading-screen {
+  font-size: 24px;
+  font-weight: 700;
+  color: #00ffff;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.8), 0 0 20px rgba(0, 255, 255, 0.4);
+  animation: dataPulse 1.5s infinite;
+}
+
+/* --- Keyframes --- */
+@keyframes dataPulse {
+  0% { opacity: 1; filter: drop-shadow(0 0 2px #00ffff); }
+  50% { opacity: 0.5; filter: drop-shadow(0 0 10px #00ffff); }
+  100% { opacity: 1; filter: drop-shadow(0 0 2px #00ffff); }
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 480px) {
+  .auth-box {
+    padding: 30px 20px;
+  }
+  
+  .auth-button {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  /* Force buttons to stack on very small screens instead of squishing side-by-side */
+  div[style*="display: flex"] {
+    flex-direction: column;
+  }
+}

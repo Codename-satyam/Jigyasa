@@ -193,6 +193,55 @@
   99% { transform: translate(2px, -2px); text-shadow: 3px 0 #ff003c, -3px 0 #00f0ff; }
 }
 
+/* =========================================
+   GAME TABS
+   ========================================= */
+.game-tabs-container {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.game-tab {
+  background-color: #1a1a24;
+  border: 3px solid #444;
+  color: #999;
+  padding: 12px 24px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+}
+
+.game-tab:hover {
+  background-color: #2a2a34;
+  border-color: #666;
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.5);
+}
+
+.game-tab.active {
+  background-color: #ffd700;
+  border-color: #ffff00;
+  color: #000;
+  box-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.6),
+    6px 6px 0 rgba(0, 0, 0, 0.8),
+    inset 0 0 10px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+  animation: tab-pulse 0.6s ease-in-out;
+}
+
+@keyframes tab-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 6px 6px 0 rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 0, 0, 0.2); }
+  50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 8px 8px 0 rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(0, 0, 0, 0.3); }
+}
+
 /* Mobile Adjustments */
 @media (max-width: 768px) {
   .arcade-leaderboard-container { padding: 20px; border-width: 2px; }
@@ -201,6 +250,7 @@
   .cyber-table { font-size: 8px; }
   .rank-1 { font-size: 10px; }
   .cyber-table td, .cyber-table th { padding: 15px 10px; }
+  .game-tab { padding: 8px 16px; font-size: 8px; border-width: 2px; }
 }
 /* =========================================
    GIANT ARCADE MEDALS

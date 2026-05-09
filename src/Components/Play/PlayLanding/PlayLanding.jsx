@@ -79,7 +79,7 @@ function PlayLanding() {
                 {/* Navigation Grid styled as Arcade Modules */}
                 <div className="arcade-grid mt-4">
                     
-                    <Link to="/courses" className="arcade-card border-blue" aria-label="Courses">
+                    <Link to="https://jigyasa-ai-learning-platform.streamlit.app/" className="arcade-card border-blue" aria-label="Courses">
                         <div className="arcade-icon blue-text"><FaBook /></div>
                         <div className="arcade-label">TRAINING MANUALS</div>
                         <div className="arcade-sub">[ Courses ]</div>
