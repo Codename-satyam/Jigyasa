@@ -320,6 +320,12 @@ body::after {
   z-index: 10;
   overflow: hidden;
 }
+.feedback-narrative {
+  font-size: 0.78rem;
+  margin-top: 4px;
+  opacity: 0.85;
+  font-style: italic;
+}
 
 .slash {
   position: absolute;

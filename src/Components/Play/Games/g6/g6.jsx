@@ -209,6 +209,7 @@ function BattleScreen({ enemy, riddle, onCorrect, onWrong, onHintUsed, screenSha
   const [inputState, setInputState] = useState('idle');
   const [hintShown, setHintShown]   = useState(false);
   const [feedback, setFeedback]     = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   const [damages, setDamages]       = useState([]);
   const [logs, setLogs]             = useState([
     { text: 'The dungeon stirs. A challenger emerges…', cls: 'log-gold' }
@@ -223,6 +224,28 @@ function BattleScreen({ enemy, riddle, onCorrect, onWrong, onHintUsed, screenSha
   const bloodIdRef   = useRef(0);
   // ── NEW: audio ref ──
   const attackAudioRef = useRef(null);
+
+  const CORRECT_NARRATIVES = [
+    (enemy, dmg) => `Your words cut true! The ${enemy} staggers — ${dmg} damage dealt!`,
+    (enemy, dmg) => `The riddle yields its secret. You strike the ${enemy} for ${dmg}!`,
+    (enemy, dmg) => `\"Correct!\" The dungeon roars. The ${enemy} reels from a ${dmg}-point wound!`,
+    (enemy, dmg) => `Wit triumphs over brawn. The ${enemy} shudders under ${dmg} damage!`,
+    (enemy, dmg) => `A flash of insight — your blade finds its mark! ${dmg} damage to the ${enemy}!`,
+    (enemy, dmg) => `The answer echoes through stone. The ${enemy} howls in ${dmg}-point agony!`,
+  ];
+
+  const WRONG_NARRATIVES = [
+    (enemy, dmg) => `\"Fool!\" The ${enemy} laughs and claws you for ${dmg} damage!`,
+    (enemy, dmg) => `Wrong — the dungeon punishes doubt. The ${enemy} strikes you for ${dmg}!`,
+    (enemy, dmg) => `The riddle mocks your guess. The ${enemy} seizes the opening — ${dmg} damage!`,
+    (enemy, dmg) => `Your tongue stumbles. The ${enemy} lunges and deals ${dmg} damage!`,
+    (enemy, dmg) => `Silence would have been wiser. The ${enemy} retaliates for ${dmg} damage!`,
+  ];
+
+  function randomNarrative(pool, ...args) {
+    return pool[Math.floor(Math.random() * pool.length)](...args);
+  }
+
 
   // Initialise audio once
   useEffect(() => {
@@ -285,25 +308,102 @@ function BattleScreen({ enemy, riddle, onCorrect, onWrong, onHintUsed, screenSha
     spawnDamage(`-${dmg}`, '#ff3a3a');
   }, [spawnDamage]);
 
+  const triggerPlayerHit = useCallback((dmg) => {
+    const id = ++dmgIdRef.current;
+
+    setDamages(prev => [
+      ...prev,
+      {
+        id,
+        text: `-${dmg}`,
+        color: '#ff8c00',
+        x: 5 + Math.random() * 15,
+        y: 55 + Math.random() * 20
+      }
+    ]);
+
+    setTimeout(() => {
+      setDamages(prev => prev.filter(d => d.id !== id));
+    }, 1100);
+  }, []);
+
+
   const handleSubmit = useCallback(() => {
-    if (!inputVal.trim() || !riddle) return;
+    if (!inputVal.trim() || !riddle || submitting) return;
+
+    setSubmitting(true);
+
     if (checkAnswer(inputVal, riddle.answer)) {
       setInputState('correct');
+
       const dmg = enemy.playerDamage + Math.floor(Math.random() * 12);
-      triggerEnemyHit(dmg);                                        // ← replaces old spawnDamage
-      setFeedback({ text: `✓ Correct! The answer was "${riddle.answer}"`, type: 'correct' });
-      addLog(`Correct! You strike the ${enemy.name} for ${dmg} damage!`, 'log-green');
-      setTimeout(() => { setInputState('idle'); setFeedback(null); }, 1200);
+
+      triggerEnemyHit(dmg);
+
+      const narrative = randomNarrative(
+        CORRECT_NARRATIVES,
+        enemy.name,
+        dmg
+      );
+
+      setFeedback({
+        text: `✓ The answer was "${riddle.answer}"`,
+        subtext: narrative,
+        type: 'correct'
+      });
+
+      addLog(narrative, 'log-green');
+
+      setTimeout(() => {
+        setInputState('idle');
+        setFeedback(null);
+        setSubmitting(false);
+      }, 1400);
+
       onCorrect(dmg, hintShown);
+
     } else {
+
       setInputState('wrong');
+
       const dmg = enemy.baseDamage + Math.floor(Math.random() * 10);
-      setFeedback({ text: `✗ Wrong! You take ${dmg} damage!`, type: 'wrong' });
-      addLog(`Wrong! The ${enemy.name} strikes you for ${dmg} damage.`, 'log-red');
-      setTimeout(() => { setInputState('idle'); setFeedback(null); }, 1000);
+
+      triggerPlayerHit(dmg);
+
+      const narrative = randomNarrative(
+        WRONG_NARRATIVES,
+        enemy.name,
+        dmg
+      );
+
+      setFeedback({
+        text: `✗ The answer was "${riddle.answer}"`,
+        subtext: narrative,
+        type: 'wrong'
+      });
+
+      addLog(narrative, 'log-red');
+
+      setTimeout(() => {
+        setInputState('idle');
+        setFeedback(null);
+        setSubmitting(false);
+      }, 1200);
+
       onWrong(dmg);
     }
-  }, [inputVal, riddle, enemy, hintShown, onCorrect, onWrong, addLog, triggerEnemyHit]);
+  }, [
+    inputVal,
+    riddle,
+    enemy,
+    hintShown,
+    submitting,
+    onCorrect,
+    onWrong,
+    addLog,
+    triggerEnemyHit,
+    triggerPlayerHit
+  ]);
 
   const handleKey = useCallback((e) => {
     if (e.key === 'Enter') handleSubmit();
@@ -416,15 +516,19 @@ function BattleScreen({ enemy, riddle, onCorrect, onWrong, onHintUsed, screenSha
               placeholder="Speak your answer…"
               autoComplete="off"
               spellCheck="false"
+              disabled={submitting}
             />
-            <button className="btn btn-sm strike-btn" onClick={handleSubmit}>
+            <button className="btn btn-sm strike-btn" onClick={handleSubmit} disabled={submitting}>
               Strike
             </button>
           </div>
 
           {feedback && (
             <div className={`feedback feedback-${feedback.type}`}>
-              {feedback.text}
+              <div className="feedback-main">{feedback.text}</div>
+              {feedback.subtext && (
+                <div className="feedback-narrative">{feedback.subtext}</div>
+              )}
             </div>
           )}
 
